@@ -19,5 +19,8 @@
 		"rollup-plugin-commonjs": "^9.1.4",
 		"rollup-plugin-node-resolve": "^3.3.0",
 		"rollup-plugin-uglify": "^4.0.0"
-	}
+	},
+	"repository": "git@github.com:Hkh12/ryo.git",
+	"author": "Hosein Khansari <hrk.x11@gmail.com>",
+	"license": "MIT"
 }
