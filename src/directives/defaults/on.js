@@ -1,31 +1,36 @@
 import { register } from "../core"
-import validEvent from '../../events/isValid'
 
-function parseAttribute(attr){
-	const R = /^([a-z0-9$_]+)((?: ?#[a-z0-9]+)+)?$/i
-	let [, value, m] = R.exec(attr.value),
-	modifiers = {}
+register('on*', function(el, attr, wcv) {
+	const R = /^([a-zA-Z0-9$_]+)(\+\+|--|['"`]|!)?(?:  \| ((?: [a-z]+)+))?$/
+	let [, prop, shortcut, m] = R.exec(attr.value),
+		modifiers = {},
+		isAction = typeof shortcut === 'undefined'
 
-	if (typeof m !== 'undefined') m.split('#').filter(e => !!e.trim()).map(e => e.trim()).forEach(m => {
+	if (typeof m === 'string') m.trimLeft().split(' ').forEach(mo => {
 		modifiers[m] = true
 	})
-	return {
-		name: attr.name,
-		value,
-		originalValue: attr.value,
-		modifiers
-	}
-}
 
-register('on*', function(el, attr, wcv){
-	attr = parseAttribute(attr)
-	console.log(attr);
 	el.addEventListener(wcv, e => {
-		attr.modifiers.prevent && e.preventDefault()
-		this.actions[attr.value]()
+		modifiers.prevent && e.preventDefault()
+		if (isAction) {
+			this.actions[prop]()
+		} else {
+			if (/'|"|`/.test(shortcut)) return this.state[prop] = ''
+			switch (shortcut) {
+				case '--':
+					this.state[prop]--
+					break
+				case '++':
+					this.state[prop]++
+					break
+				case '!':
+					this.state[prop] = !this.state[prop]
+					break
+			}
+		}
 	}, {
-		once: attr.modifiers.once,
-		passive: attr.modifiers.passive,
-		capture: attr.modifiers.capture,
+		once: modifiers.once,
+		passive: modifiers.passive,
+		capture: modifiers.capture,
 	})
-}, true)
+})
