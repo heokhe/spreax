@@ -7,7 +7,7 @@
 	<title>B demo</title>
 	<link rel="stylesheet" href="style.css">
 </head>
-<body r-id='main'>
+<body id='main'>
 	<button r-onclick='toggleDrawer' id="drawer-open">open drawer</button>
 	<div class="drawer" r-class-active='drawer'>
 		<div>
@@ -19,9 +19,9 @@
 		<div class="item">Contact us</div>
 	</div>
 </body>
-<script src="/build/ryo.js"></script>
+<script src="/dist/ryo.browser.js"></script>
 <script>
-var bi = new Ryo('main', {
+var bi = new Ryo('#main', {
 	state: {
 		drawer: false
 	},

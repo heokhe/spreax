@@ -6,6 +6,7 @@
 	"scripts": {
 		"build": "rollup -c",
 		"test:start-server": "http-server . -p 8383",
+		"pretest": "yarn build && yarn test:start-server",
 		"test": "cypress run",
 		"test:video": "cypress run --config '{\"video\":true}'",
 		"test:gui": "cypress open"

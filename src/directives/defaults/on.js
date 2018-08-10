@@ -2,7 +2,7 @@ import { register } from "../core"
 import validEvent from '../../events/isValid'
 
 function parseAttribute(attr){
-	const R = /^([a-z0-9$_"]+)((?: ?#[a-z0-9]+)+)?$/i
+	const R = /^([a-z0-9$_]+)((?: ?#[a-z0-9]+)+)?$/i
 	let [, value, m] = R.exec(attr.value),
 	modifiers = {}
 
@@ -22,7 +22,7 @@ register('on*', function(el, attr, wcv){
 	console.log(attr);
 	el.addEventListener(wcv, e => {
 		attr.modifiers.prevent && e.preventDefault()
-		// this.actions[attr.value]()
+		this.actions[attr.value]()
 	}, {
 		once: attr.modifiers.once,
 		passive: attr.modifiers.passive,

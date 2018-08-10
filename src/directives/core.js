@@ -24,9 +24,10 @@ export function register(name, fn){
  * @param {Element} el 
  */
 export function exec(name, ins, el){
+	console.log(name);
 	let d = null
-	for (let i = 0, l = alld.length; i < length; i++) {
-		if (alld[i].expression.test(name.toLowerCase())) {
+	for (let i = 0, l = alld.length; i < l; i++) {
+		if (alld[i].expression.test(name)) {
 			d = alld[i]
 			break
 		} 

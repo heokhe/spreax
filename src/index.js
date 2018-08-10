@@ -51,14 +51,12 @@ export default class Ryo {
 	}
 	$_init() {
 		this.$_initStateProxy()
-		const allDirectives = drctv.getAll()
 		this.el.querySelectorAll('*').forEach(el => {
 			Array.from(el.attributes)
 				.map(e => e.name)
 				.filter(e => /^r-/.test(e))
 				.forEach(dir => {
-					let name = dir.replace(/:.*$/, '').replace(/^r-/, '')
-					drctv.exec(name, this, el)
+					drctv.exec(dir.replace(/^r-/, ''), this, el)
 				})
 		})
 	}

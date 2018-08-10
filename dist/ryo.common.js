@@ -19,9 +19,10 @@ function register(name, fn){
 	alld.push(d);
 }
 function exec(name, ins, el){
+	console.log(name);
 	var d = null;
-	for (var i = 0; i < length; i++) {
-		if (alld[i].expression.test(name.toLowerCase())) {
+	for (var i = 0, l = alld.length; i < l; i++) {
+		if (alld[i].expression.test(name)) {
 			d = alld[i];
 			break
 		}
@@ -80,7 +81,7 @@ register('sync', function(el, attr) {
 });
 
 function parseAttribute(attr){
-	var R = /^([a-z0-9$_"]+)((?: ?#[a-z0-9]+)+)?$/i;
+	var R = /^([a-z0-9$_]+)((?: ?#[a-z0-9]+)+)?$/i;
 	var ref = R.exec(attr.value);
 	var value = ref[1];
 	var m = ref[2];
@@ -96,10 +97,12 @@ function parseAttribute(attr){
 	}
 }
 register('on*', function(el, attr, wcv){
+	var this$1 = this;
 	attr = parseAttribute(attr);
 	console.log(attr);
 	el.addEventListener(wcv, function (e) {
 		attr.modifiers.prevent && e.preventDefault();
+		this$1.actions[attr.value]();
 	}, {
 		once: attr.modifiers.once,
 		passive: attr.modifiers.passive,
@@ -170,8 +173,7 @@ Ryo.prototype.$_init = function $_init () {
 			.map(function (e) { return e.name; })
 			.filter(function (e) { return /^r-/.test(e); })
 			.forEach(function (dir) {
-				var name = dir.replace(/:.*$/, '').replace(/^r-/, '');
-				exec(name, this$1, el);
+				exec(dir.replace(/^r-/, ''), this$1, el);
 			});
 	});
 };

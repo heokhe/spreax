@@ -1,7 +1,7 @@
 /// <reference types="Cypress" />
 
 it('Works!', () => {
-	const getText = win => win.bi.state.text
+	const getText = win => win.bi.state.name
 	cy.visit('/basic-input')
 		.get('input')
 		.type('cypress')
@@ -11,5 +11,5 @@ it('Works!', () => {
 		.get('h1>b')
 		.should('not.be.empty')
 		.get('button').click()
-		.get('input').should('have.value', 'Hosein')
+		.get('input').should('be.empty')
 })

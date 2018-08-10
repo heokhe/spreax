@@ -14,15 +14,15 @@
 	</style>
 </head>
 <body>
-	<div r-id="main">
+	<div id="main">
 		<h1 r-class-active r-class-ud='upsideDown'>test it here...!</h1>
 		<button r-onclick='toggle'>Toggle</button>
 		<button r-onmouseover='rot'>Rotate it!</button>
 	</div>
 </body>
-<script src="../build/ryo.js"></script>
+<script src="/dist/ryo.browser.js"></script>
 <script>
-var bi = new Ryo('main', {
+var bi = new Ryo('#main', {
 	state: {
 		active: false,
 		upsideDown: false
