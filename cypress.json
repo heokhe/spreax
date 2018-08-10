@@ -1,0 +1,10 @@
+{
+	"integrationFolder": "test/integration",
+	"videosFolder": "test/videos",
+	"screenshotsFolder": "test/screenshots",
+	"fixturesFolder": "test/fixtures",
+	"video": false,
+	"pluginsFile": "test/plugins/index.js",
+	"supportFile": "test/support/index.js",
+	"baseUrl": "http://localhost:8383/examples"
+}

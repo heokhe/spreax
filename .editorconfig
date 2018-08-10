@@ -1,0 +1,10 @@
+root = true
+
+[*]
+indent_style = tab
+indent_size = 4
+charset = utf-8
+end_of_line = lf
+
+[*.js, *.md, *.html]
+indent_size = 2

@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<meta http-equiv="X-UA-Compatible" content="ie=edge">
+</head>
+<body>
+	<div>
+		<input type="text" r-sync='name'>
+		<button r-onclick='name" #passive'>Set</button>
+		<h1>
+			Hello <b r-text='name'></b>
+		</h1>
+	</div>
+</body>
+<script src="../build/ryo.js"></script>
+<script>
+var bi = new Ryo('body>div', {
+	state: {
+		name: ''
+	},
+	actions: {
+		clear(){
+			this.state.name = ''
+		}
+	},
+})
+</script>
+</html>

@@ -1,0 +1,37 @@
+:root{
+	--color: hsl(13, 92%, 44%)
+}
+
+.drawer{
+	position: fixed;
+	left: 0;
+	top: 0;
+	bottom: 0;
+	z-index: 1000;
+	background-color: var(--color);
+	width: 240px;
+	color: #fff;
+	transform: translateX(-100%);
+}
+
+.drawer.active{
+	transform: translateX(0)
+}
+
+.drawer>div:first-child>button{
+	background: 0;
+	border: 0;
+	color: inherit;
+	font-size: 40px;
+	curson: pointer;
+	margin-left: 20px;
+}
+
+.drawer>.item{
+	padding: 10px 16px;
+	cursor: pointer;
+}
+
+.drawer>.item:hover{
+	background-color: rgba(255,255,255,.2)
+}

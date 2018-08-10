@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<meta http-equiv="X-UA-Compatible" content="ie=edge">
+	<style>
+		.active{
+			color: red
+		}
+		.ud{
+			transform: scaleY(-1)
+		}
+	</style>
+</head>
+<body>
+	<div r-id="main">
+		<h1 r-class-active r-class-ud='upsideDown'>test it here...!</h1>
+		<button r-onclick='toggle'>Toggle</button>
+		<button r-onmouseover='rot'>Rotate it!</button>
+	</div>
+</body>
+<script src="../build/ryo.js"></script>
+<script>
+var bi = new Ryo('main', {
+	state: {
+		active: false,
+		upsideDown: false
+	},
+	actions: {
+		toggle(){
+			this.state.active = !this.state.active
+		},
+		rot(){
+			this.state.upsideDown = !this.state.upsideDown
+		}
+	}
+})
+</script>
+</html>
