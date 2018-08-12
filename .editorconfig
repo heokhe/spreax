@@ -6,5 +6,8 @@ indent_size = 4
 charset = utf-8
 end_of_line = lf
 
-[*.js, *.md, *.html]
+[*.js, *.md, *.html, *.yml]
 indent_size = 2
+
+[*.yml]
+indent_style = space
