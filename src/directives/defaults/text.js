@@ -2,13 +2,14 @@ import { register } from "../core"
 import sanitizeHTML from '../../utils/sanitizeHTML'
 
 register('text', function(el, attr) {
-	const val = attr.value
 	const setText = (el) => {
 		return t => {
-			if (typeof t === 'string') t = sanitizeHTML(t).replace(/  /g, '&nbsp;&nbsp;')
+			if (typeof t === 'string') t = sanitizeHTML(t).replace(/  /g, '&nbsp;&nbsp;').replace(/\n/g, '<br>')
 			el.innerHTML = t
 		}
 	}
+
+	const val = attr.value
 	if (!!val) {
 		this.$_onChange(val, setText(el), true)
 	} else {
@@ -18,7 +19,7 @@ register('text', function(el, attr) {
 		children.forEach(ch => {
 			ch.innerHTML.replace(pattern, ($$, $1) => {
 				this.$_onChange($1, t => {
-					setText(ch, t)
+					setText(ch	, t)
 				}, true)
 			})
 		}) */

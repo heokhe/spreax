@@ -1,6 +1,6 @@
 'use strict';
 
-function error$1(msg, isWarn) {
+function error(msg, isWarn) {
 	var fmsg = "[ryo" + (!isWarn ? ' error' : '') + "] " + msg;
 	if (isWarn) { console.warn(fmsg); }
 	else { throw new Error(fmsg) }
@@ -9,7 +9,7 @@ function error$1(msg, isWarn) {
 var alld = [];
 function register(name, fn){
 	name = name.toLowerCase();
-	if (!/^[a-z]+(?:-?\*)?$/.test(name)) { error$1(("invalid directive name \"" + name + "\"")); }
+	if (!/^[a-z]+(?:-?\*)?$/.test(name)) { error(("invalid directive name \"" + name + "\"")); }
 	var expression = new RegExp(name.replace(/\*$/, '([a-z]+)') + '$');
 	var d = {
 		name: name,
@@ -26,7 +26,7 @@ function exec(name, ins, el){
 			break
 		}
 	}
-	if (d === null) { error$1(("directive \"" + name + "\" not found")); }
+	if (d === null) { error(("directive \"" + name + "\" not found")); }
 	var match = name.match(d.expression),
 	hasWildcard = match.length > 1,
 	wildCardValue = match[1],
@@ -39,13 +39,13 @@ function sanitizeHTML(html){
 }
 
 register('text', function(el, attr) {
-	var val = attr.value;
 	var setText = function (el) {
 		return function (t) {
-			if (typeof t === 'string') { t = sanitizeHTML(t).replace(/  /g, '&nbsp;&nbsp;'); }
+			if (typeof t === 'string') { t = sanitizeHTML(t).replace(/  /g, '&nbsp;&nbsp;').replace(/\n/g, '<br>'); }
 			el.innerHTML = t;
 		}
 	};
+	var val = attr.value;
 	if (!!val) {
 		this.$_onChange(val, setText(el), true);
 	}
@@ -53,7 +53,7 @@ register('text', function(el, attr) {
 
 register('sync', function(el, attr) {
 	var this$1 = this;
-	if (!/^(?:INPUT|TAGNAME)$/.test(el.tagName)) { error('<input> or <textarea> required for "sync" directive'); }
+	if (!/^(?:INPUT|TEXTAREA)$/.test(el.tagName)) { error('<input> or <textarea> required for "sync" directive'); }
 	var propName = attr.value;
 	el.addEventListener('keydown', function () {
 		setTimeout(function () {
@@ -118,7 +118,7 @@ var Ryo = function Ryo(el, options) {
 	} else if (el instanceof HTMLElement) {
 		this.el = el;
 	} else {
-		error$1('wrong selector or element: expected element or string');
+		error('wrong selector or element: expected element or string');
 	}
 	this.state = options.state || {};
 	this.actions = options.actions || {};
@@ -133,10 +133,10 @@ Ryo.prototype.$_initStateProxy = function $_initStateProxy () {
 	this.state = new Proxy(this.state, {
 		get: function (obj, key) {
 			if (key in obj) { return obj[key] }
-			else { error$1(("property " + key + " does'nt exist in state.")); }
+			else { error(("property " + key + " does'nt exist in state.")); }
 		},
 		set: function (obj, key, value) {
-			if (!(key in obj)) { error$1(("property \"" + key + "\" does'nt exist in state.")); }
+			if (!(key in obj)) { error(("property \"" + key + "\" does'nt exist in state.")); }
 			obj[key] = value;
 			this$1.$_emit(key);
 			return true

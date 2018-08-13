@@ -2,7 +2,7 @@
 
 it('Works!', () => {
 	const getText = win => win.bi.state.name
-	cy.visit('/basic-input')
+	cy.visit('/input')
 		.get('input')
 		.type('cypress')
 		.window().then(win => {
