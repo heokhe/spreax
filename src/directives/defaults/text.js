@@ -3,16 +3,16 @@ import sanitizeHTML from '../../utils/sanitizeHTML'
 
 register('text', function(el, attr) {
 	const val = attr.value
-	const setText = (el, t) => {
-		if (typeof t === 'string') t = sanitizeHTML(t).replace(/ /g, '&nbsp;')
-		el.innerHTML = t
+	const setText = (el) => {
+		return t => {
+			if (typeof t === 'string') t = sanitizeHTML(t).replace(/  /g, '&nbsp;&nbsp;')
+			el.innerHTML = t
+		}
 	}
 	if (!!val) {
-		this.$_onChange(val, t => {
-			setText(el, t)
-		}, true)
+		this.$_onChange(val, setText(el), true)
 	} else {
-		const pattern = /\{\{([a-z0-9_$]+)\}\}/gi,
+		/* const pattern = /\{\{([a-z0-9_$]+)\}\}/gi,
 		toFormatElement = el => pattern.test(el.innerHTML)
 		let children = Array.from(el.querySelectorAll('*')).filter(toFormatElement)
 		children.forEach(ch => {
@@ -21,6 +21,6 @@ register('text', function(el, attr) {
 					setText(ch, t)
 				}, true)
 			})
-		})
+		}) */
 	}
 })
