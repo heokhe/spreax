@@ -7,14 +7,17 @@ jobs:
         steps:
               - checkout
               - restore_cache:
-                  key: c-{{checksum "yarn.lock"}}
-              - run: yarn install
+                  key: cache-{{ .Branch }}-{{ .Environment.CIRCLE_SHA1 }}
+              - run:
+                  name: Install dependencies
+                  command: yarn install --frozen-lockfile
               - save_cache:
-                  key: c-{{checksum "yarn.lock"}}
+                  key: cache-{{ .Branch }}-{{ .Environment.CIRCLE_SHA1 }}
                   paths:
-                      - node_modules/
-                      - ~/.cache/Cypress
-              - run: yarn build
+                      - ~/.cache
+              - run: 
+                  name: Build source code
+                  command: yarn build
               - run:
                   name: Start app in background
                   command: yarn test:start-server
