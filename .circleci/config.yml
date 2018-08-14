@@ -6,7 +6,13 @@ jobs:
         working_directory: ~/repo
         steps:
               - checkout
+              - restore_cache:
+                  key: {{ checksum "yarn.lock" }}
               - run: yarn install
+              - save_cache:
+                  key: {{ checksum "yarn.lock" }}
+                  paths:
+                      - node_modules/
               - run: yarn build
               - run:
                   name: Start app in background
