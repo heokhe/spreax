@@ -13,6 +13,7 @@ jobs:
                   key: c-{{checksum "yarn.lock"}}
                   paths:
                       - node_modules/
+                      - ~/.cache/Cypress
               - run: yarn build
               - run:
                   name: Start app in background
