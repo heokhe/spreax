@@ -2,7 +2,7 @@ import { register } from "../core"
 import error from "../../error"
 
 register('model', function(el, attr) {
-	if (!/^(?:INPUT|TEXTAREA)$/.test(el.tagName)) error('<input> or <textarea> required for "sync" directive')
+	if (!/^(?:INPUT|TEXTAREA)$/.test(el.tagName)) error('<input> or <textarea> required for "model" directive')
 	const propName = attr.value
 	el.addEventListener('keydown', () => {
 		setTimeout(() => {

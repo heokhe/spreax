@@ -35,7 +35,7 @@ var Ryo = (function () {
 		d.fn.bind(ins)(el, attrObject, wildCardValue);
 	}
 
-	function sanitizeHTML(html){
+	function sanitizeHTML(html) {
 		return html.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/"/g, '&quot;')
 	}
 
@@ -52,9 +52,9 @@ var Ryo = (function () {
 		}
 	});
 
-	register('sync', function(el, attr) {
+	register('model', function(el, attr) {
 		var this$1 = this;
-		if (!/^(?:INPUT|TEXTAREA)$/.test(el.tagName)) { error('<input> or <textarea> required for "sync" directive'); }
+		if (!/^(?:INPUT|TEXTAREA)$/.test(el.tagName)) { error('<input> or <textarea> required for "model" directive'); }
 		var propName = attr.value;
 		el.addEventListener('keydown', function () {
 			setTimeout(function () {
