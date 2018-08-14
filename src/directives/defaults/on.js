@@ -1,13 +1,13 @@
 import { register } from "../core"
 
 register('on*', function(el, attr, wcv) {
-	const R = /^([a-zA-Z0-9$_]+)(\+\+|--|['"`]|!)?(?:  \| ((?: [a-z]+)+))?$/
+	const R = /^([a-zA-Z0-9$_]+)(\+|-|['"`]|!)?((?: #[a-z]+)+)?$/
 	let [, prop, shortcut, m] = R.exec(attr.value),
 		modifiers = {},
 		isAction = typeof shortcut === 'undefined'
 
-	if (typeof m === 'string') m.trimLeft().split(' ').forEach(mo => {
-		modifiers[m] = true
+	if (typeof m === 'string') m.trimLeft().split('#').filter(Boolean).map(e => e.trim()).forEach(mo => {
+		modifiers[mo] = true
 	})
 
 	el.addEventListener(wcv, e => {
@@ -17,10 +17,10 @@ register('on*', function(el, attr, wcv) {
 		} else {
 			if (/'|"|`/.test(shortcut)) return this.state[prop] = ''
 			switch (shortcut) {
-				case '--':
+				case '-':
 					this.state[prop]--
 					break
-				case '++':
+				case '+':
 					this.state[prop]++
 					break
 				case '!':

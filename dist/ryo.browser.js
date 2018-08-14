@@ -70,15 +70,15 @@ var Ryo = (function () {
 
 	register('on*', function(el, attr, wcv) {
 		var this$1 = this;
-		var R = /^([a-zA-Z0-9$_]+)(\+\+|--|['"`]|!)?(?:  \| ((?: [a-z]+)+))?$/;
+		var R = /^([a-zA-Z0-9$_]+)(\+|-|['"`]|!)?((?: #[a-z]+)+)?$/;
 		var ref = R.exec(attr.value);
 		var prop = ref[1];
 		var shortcut = ref[2];
 		var m = ref[3];
 		var modifiers = {},
 			isAction = typeof shortcut === 'undefined';
-		if (typeof m === 'string') { m.trimLeft().split(' ').forEach(function (mo) {
-			modifiers[m] = true;
+		if (typeof m === 'string') { m.trimLeft().split('#').filter(Boolean).map(function (e) { return e.trim(); }).forEach(function (mo) {
+			modifiers[mo] = true;
 		}); }
 		el.addEventListener(wcv, function (e) {
 			modifiers.prevent && e.preventDefault();
@@ -87,10 +87,10 @@ var Ryo = (function () {
 			} else {
 				if (/'|"|`/.test(shortcut)) { return this$1.state[prop] = '' }
 				switch (shortcut) {
-					case '--':
+					case '-':
 						this$1.state[prop]--;
 						break
-					case '++':
+					case '+':
 						this$1.state[prop]++;
 						break
 					case '!':

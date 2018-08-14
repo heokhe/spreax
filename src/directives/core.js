@@ -3,7 +3,7 @@ const alld = []
 
 /**
  * @param {string} name 
- * @param {(el: Element, attr: Attr, wildCardValue?: string) => void} callback 
+ * @param {(el: Element, attr: Attr, wildCardValue?: string) => void} fn 
  */
 export function register(name, fn){
 	name = name.toLowerCase()
