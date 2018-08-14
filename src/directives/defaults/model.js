@@ -1,7 +1,7 @@
 import { register } from "../core"
 import error from "../../error"
 
-register('sync', function(el, attr) {
+register('model', function(el, attr) {
 	if (!/^(?:INPUT|TEXTAREA)$/.test(el.tagName)) error('<input> or <textarea> required for "sync" directive')
 	const propName = attr.value
 	el.addEventListener('keydown', () => {
