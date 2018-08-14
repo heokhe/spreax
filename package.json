@@ -5,7 +5,7 @@
 	"browser": "dist/ryo.browser.js",
 	"scripts": {
 		"build": "rollup -c",
-		"test:start-server": "http-server . -p 8383",
+		"test:start-server": "http-server . -p 8383 -s",
 		"test": "cypress run",
 		"test:video": "cypress run --config '{\"video\":true}'",
 		"test:gui": "cypress open"
