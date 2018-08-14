@@ -1,7 +1,7 @@
 {
 	"name": "ryo",
 	"version": "0.0.0",
-	"main": "dist/ryo.common.js",
+	"main": "dist/ryo.cjs.js",
 	"browser": "dist/ryo.browser.js",
 	"scripts": {
 		"build": "rollup -c",
