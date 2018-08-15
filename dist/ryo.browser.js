@@ -139,7 +139,7 @@ var Ryo = (function () {
 		} else if (el instanceof HTMLElement) {
 			this.el = el;
 		} else {
-			error('wrong selector or element: expected element or string');
+			error(("wrong selector or element: expected element or string, got " + (String(el))));
 		}
 		this.state = options.state || {};
 		this.actions = options.actions || {};
@@ -154,10 +154,10 @@ var Ryo = (function () {
 		this.state = new Proxy(this.state, {
 			get: function (obj, key) {
 				if (key in obj) { return obj[key] }
-				else { error(("property " + key + " does'nt exist in state.")); }
+				else { error(("unknown state property \"" + key + "\"")); }
 			},
 			set: function (obj, key, value) {
-				if (!(key in obj)) { error(("property \"" + key + "\" does'nt exist in state.")); }
+				if (!(key in obj)) { error(("unknown state property \"" + key + "\"")); }
 				obj[key] = value;
 				this$1.$_emit(key);
 				return true
