@@ -1,6 +1,9 @@
 import { register } from "../core"
+import isValidEvent from '../../events/isValid'
+import error from "../../error"
 
 register('on*', function(el, binding) {
+	if (!isValidEvent(binding.value)) error(`event "${binding.value}" is not a valid DOM event`)
 	el.addEventListener(binding.wildcard, e => {
 		binding.modifiers.prevent && e.preventDefault()
 
