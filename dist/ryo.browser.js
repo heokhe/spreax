@@ -15,16 +15,23 @@ var Ryo = (function () {
 		return o
 	}
 
+	function camel(str){
+		return str.replace(/-(.)/g, function ($, next) {
+			return /[a-z]/.test(next) ? next.toUpperCase() : next
+		})
+	}
+
 	function parse(attr) {
-		var reg = /((?: --[a-z]+)+)$/,
+		var reg = /((?: --(?:(?:[a-z]+-)*[a-z]+)+)+)$/,
 		value = attr.replace(reg, ''),
 		modString = reg.exec(attr),
 		modObject = {};
 		modString = modString === null ? null : modString[0];
 		if (modString !== null) {
-			var modKeys = modString.split(' --').filter(function (e) { return !!e; });
+			var modKeys = modString.split(' --').filter(function (e) { return !!e; }).map(camel);
 			modObject = record(modKeys, true);
 		}
+		console.log(modObject);
 		return {
 			value: value,
 			modifiers: modObject
@@ -93,8 +100,15 @@ var Ryo = (function () {
 		}, true);
 	});
 
+	var list = [];
+	function isValidEvent(event){
+		if (list.length === 0) { list = Object.keys(window).filter(function (e) { return /^on/.test(e); }).map(function (e) { return e.replace(/^on/, ''); }); }
+		return list.includes(event)
+	}
+
 	register('on*', function(el, binding) {
 		var this$1 = this;
+		if (!isValidEvent(binding.wildcard)) { error(("event \"" + (binding.value) + "\" is not a valid DOM event")); }
 		el.addEventListener(binding.wildcard, function (e) {
 			binding.modifiers.prevent && e.preventDefault();
 			var SHORTCUT_REGEXP = /(?:--|\+\+|[`"']|!)$/;
