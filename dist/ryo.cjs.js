@@ -73,28 +73,29 @@ register('text', function(el, ref) {
 	}
 });
 
-register('model', function(el, attr) {
+register('model', function(el, binding) {
 	var this$1 = this;
 	if (!/^(?:INPUT|TEXTAREA)$/.test(el.tagName)) { error('<input> or <textarea> required for "model" directive'); }
-	var propName = attr.value;
-	el.addEventListener('keydown', function () {
+	var prop = binding.value;
+	var eventName = binding.modifiers.lazy ? 'change' : 'keydown';
+	el.addEventListener(eventName, function () {
 		setTimeout(function () {
 			var isNumberInput = el.type === 'number',
 			v = isNumberInput ? Number(el.value) : el.value;
-			if (v !== this$1.state[propName]) { this$1.state[propName] = v; }
+			if (v !== this$1.state[prop]) { this$1.state[prop] = v; }
 		}, 0);
 	});
-	this.$_onChange(propName, function (v) {
+	this.$_onChange(prop, function (v) {
 		el.value = v;
 	}, true);
 });
 
-register('on*', function(el, bindings) {
+register('on*', function(el, binding) {
 	var this$1 = this;
-	el.addEventListener(bindings.wildcard, function (e) {
-		bindings.modifiers.prevent && e.preventDefault();
+	el.addEventListener(binding.wildcard, function (e) {
+		binding.modifiers.prevent && e.preventDefault();
 		var SHORTCUT_REGEXP = /(?:--|\+\+|[`"']|!)$/;
-		var prop = bindings.value,
+		var prop = binding.value,
 		shortcut = prop.match(SHORTCUT_REGEXP),
 		isAction = shortcut === null;
 		shortcut = shortcut === null ? null : shortcut[0];
@@ -116,9 +117,9 @@ register('on*', function(el, bindings) {
 			}
 		}
 	}, {
-		once: bindings.modifiers.once,
-		passive: bindings.modifiers.passive,
-		capture: bindings.modifiers.capture,
+		once: binding.modifiers.once,
+		passive: binding.modifiers.passive,
+		capture: binding.modifiers.capture,
 	});
 });
 

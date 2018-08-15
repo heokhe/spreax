@@ -1,12 +1,12 @@
 import { register } from "../core"
 
-register('on*', function(el, bindings) {
-	el.addEventListener(bindings.wildcard, e => {
-		bindings.modifiers.prevent && e.preventDefault()
+register('on*', function(el, binding) {
+	el.addEventListener(binding.wildcard, e => {
+		binding.modifiers.prevent && e.preventDefault()
 
 		const SHORTCUT_REGEXP = /(?:--|\+\+|[`"']|!)$/
 
-		let prop = bindings.value,
+		let prop = binding.value,
 		shortcut = prop.match(SHORTCUT_REGEXP),
 		isAction = shortcut === null
 
@@ -30,8 +30,8 @@ register('on*', function(el, bindings) {
 			}
 		}
 	}, {
-		once: bindings.modifiers.once,
-		passive: bindings.modifiers.passive,
-		capture: bindings.modifiers.capture,
+		once: binding.modifiers.once,
+		passive: binding.modifiers.passive,
+		capture: binding.modifiers.capture,
 	})
 })
