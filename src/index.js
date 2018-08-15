@@ -1,5 +1,4 @@
 import error from './error'
-import isValidEvent from './events/isValid'
 import * as drctv from './directives/index'
 
 export default class Ryo {

@@ -34,8 +34,8 @@ var Ryo = (function () {
 	var alld = [];
 	function register(name, fn){
 		name = name.toLowerCase();
-		if (!/^[a-z]+(?:-?\*)?$/.test(name)) { error(("invalid directive name \"" + name + "\"")); }
-		var expression = new RegExp(name.replace(/\*$/, '([a-z]+)') + '$');
+		if (!/^[a-z]+(?:-?\*)?$/.test(name)) { error(("invalid directive name \"" + name + "\"; only a-z and numbers, wildcard at end (could be seperated with a hyphen)")); }
+		var expression = new RegExp('^' + name.replace(/\*$/, '([a-z]+)') + '$');
 		var d = {
 			name: name,
 			expression: expression,

@@ -13,8 +13,8 @@ const alld = []
  */
 export function register(name, fn){
 	name = name.toLowerCase()
-	if (!/^[a-z]+(?:-?\*)?$/.test(name)) error(`invalid directive name "${name}"`)
-	const expression = new RegExp(name.replace(/\*$/, '([a-z]+)') + '$')
+	if (!/^[a-z]+(?:-?\*)?$/.test(name)) error(`invalid directive name "${name}"; only a-z and numbers, wildcard at end (could be seperated with a hyphen)`)
+	const expression = new RegExp('^' + name.replace(/\*$/, '([a-z]+)') + '$')
 
 	const d = {
 		name,
