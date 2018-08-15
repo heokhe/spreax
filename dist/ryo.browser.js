@@ -81,8 +81,10 @@ var Ryo = (function () {
 		var eventName = binding.modifiers.lazy ? 'change' : 'keydown';
 		el.addEventListener(eventName, function () {
 			setTimeout(function () {
-				var isNumberInput = el.type === 'number',
-				v = isNumberInput ? Number(el.value) : el.value;
+				var v = el.value,
+				isNumberInput = el.type === 'number';
+				if (isNumberInput) { v = Number(v); }
+				if (binding.modifiers.trim && !isNumberInput) { v = v.trim(); }
 				if (v !== this$1.state[prop]) { this$1.state[prop] = v; }
 			}, 0);
 		});

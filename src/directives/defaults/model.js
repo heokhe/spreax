@@ -9,8 +9,12 @@ register('model', function(el, binding) {
 
 	el.addEventListener(eventName, () => {
 		setTimeout(() => {
-			let isNumberInput = el.type === 'number',
-			v = isNumberInput ? Number(el.value) : el.value
+			let v = el.value,
+			isNumberInput = el.type === 'number';
+
+			if (isNumberInput) v = Number(v)
+			if (binding.modifiers.trim && !isNumberInput) v = v.trim()
+			
 			if (v !== this.state[prop]) this.state[prop] = v
 		}, 0)
 	})
