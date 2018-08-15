@@ -122,12 +122,13 @@ register('on*', function(el, bindings) {
 	});
 });
 
-register('class-*', function(el, attr, className){
-	var prop = attr.value || className;
-	this.$_onChange(prop, function (b) {
-		el.classList[!b ? 'remove' : 'add'](className);
+register('class-*', function(el, ref){
+	var value = ref.value;
+	var wildcard = ref.wildcard;
+	this.$_onChange(value || wildcard, function (b) {
+		el.classList[!b ? 'remove' : 'add'](wildcard);
 	}, true);
-}, true);
+});
 
 var Ryo = function Ryo(el, options) {
 	var this$1 = this;
