@@ -15,9 +15,6 @@ jobs:
                   key: cache-{{ .Branch }}-{{ checksum "package.json" }}
                   paths:
                       - ~/.cache
-              - run: 
-                  name: Build source code
-                  command: yarn build
               - run:
                   name: Start app in background
                   command: yarn test:start-server
