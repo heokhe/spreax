@@ -12,9 +12,7 @@ export default class Ryo {
 		}
 		this.state = options.state || {}
 		this.actions = options.actions || {}
-		Object.keys(this.actions).forEach(k => {
-			this.actions[k] = this.actions[k].bind(this)
-		})
+		this.watchers = options.watchers || {}
 		this.$_events = {}
 		this.$_init()
 	}
@@ -42,13 +40,19 @@ export default class Ryo {
 		let evs = this.$_events[name]
 		if (typeof evs === 'undefined') evs = []
 		evs.push(fn)
-
+		
 		this.$_events[name] = evs
 		if (immediate) {
 			this.$_emit(name)
 		}
 	}
 	$_init() {
+		Object.keys(this.actions).forEach(k => {
+			this.actions[k] = this.actions[k].bind(this)
+		})
+		Object.keys(this.watchers).forEach(k => {
+			this.$_onChange(k, this.watchers[k].bind(this))
+		})
 		this.$_initStateProxy()
 		this.el.querySelectorAll('*').forEach(el => {
 			Array.from(el.attributes)

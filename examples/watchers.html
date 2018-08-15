@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<meta http-equiv="X-UA-Compatible" content="ie=edge">
+	<style>
+		.active{
+			color: red
+		}
+		.ud{
+			transform: scaleY(-1)
+		}
+	</style>
+</head>
+<body>
+	<div id="main">
+		<button r-onclick='bool!'>toggle boolean</button>
+		<h1>it has changed <span id='t' r-text='t'></span> times</h1>
+	</div>
+</body>
+<script src="/dist/ryo.browser.js"></script>
+<script>
+var bi = new Ryo('#main', {
+	state: {
+		t: 0,
+		bool: false
+	},
+	watchers: {
+		bool(){
+			this.state.t++
+		}
+	}
+})
+</script>
+</html>

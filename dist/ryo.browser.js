@@ -133,7 +133,6 @@ var Ryo = (function () {
 	});
 
 	var Ryo = function Ryo(el, options) {
-		var this$1 = this;
 		if (typeof el === 'string') {
 			this.el = document.querySelector(el);
 		} else if (el instanceof HTMLElement) {
@@ -143,9 +142,7 @@ var Ryo = (function () {
 		}
 		this.state = options.state || {};
 		this.actions = options.actions || {};
-		Object.keys(this.actions).forEach(function (k) {
-			this$1.actions[k] = this$1.actions[k].bind(this$1);
-		});
+		this.watchers = options.watchers || {};
 		this.$_events = {};
 		this.$_init();
 	};
@@ -182,6 +179,12 @@ var Ryo = (function () {
 	};
 	Ryo.prototype.$_init = function $_init () {
 			var this$1 = this;
+		Object.keys(this.actions).forEach(function (k) {
+			this$1.actions[k] = this$1.actions[k].bind(this$1);
+		});
+		Object.keys(this.watchers).forEach(function (k) {
+			this$1.$_onChange(k, this$1.watchers[k].bind(this$1));
+		});
 		this.$_initStateProxy();
 		this.el.querySelectorAll('*').forEach(function (el) {
 			Array.from(el.attributes)
