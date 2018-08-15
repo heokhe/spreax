@@ -1,17 +1,16 @@
 import { register } from "../core"
 import sanitizeHTML from '../../utils/sanitizeHTML'
 
-register('text', function(el, attr) {
+register('text', function(el, {value}) {
 	const setText = (el) => {
 		return t => {
 			if (typeof t === 'string') t = sanitizeHTML(t).replace(/  /g, '&nbsp;&nbsp;').replace(/\n/g, '<br>')
-			el.innerHTML = t
+			el.innerHTML = t	
 		}
 	}
 
-	const val = attr.value
-	if (!!val) {
-		this.$_onChange(val, setText(el), true)
+	if (!!value) {
+		this.$_onChange(value, setText(el), true)
 	} else {
 		/* const pattern = /\{\{([a-z0-9_$]+)\}\}/gi,
 		toFormatElement = el => pattern.test(el.innerHTML)

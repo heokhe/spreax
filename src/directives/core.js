@@ -1,9 +1,15 @@
 import error from '../error'
+import parse from './parse'
+
 const alld = []
 
 /**
+ * @typedef {Object} Bindings
+ * @property {string} value
+ * @property {string} [wildcard]
+ * @property {{[x: string]: true}} [modifiers]
  * @param {string} name 
- * @param {(el: Element, attr: Attr, wildCardValue?: string) => void} fn 
+ * @param {(el: Element, bindings: Bindings) => void} fn 
  */
 export function register(name, fn){
 	name = name.toLowerCase()
@@ -33,12 +39,12 @@ export function exec(name, ins, el){
 	}
 	if (d === null) error(`directive "${name}" not found`)
 
-	const match = name.match(d.expression),
-	hasWildcard = match.length > 1,
-	wildCardValue = match[1],
-	attrObject = el.attributes.getNamedItem('r-' + name)
-	
-	d.fn.bind(ins)(el, attrObject, wildCardValue)
+	let parsed = parse(el.getAttribute('r-' + name))
+
+	d.fn.bind(ins)(el, {
+		...parsed,
+		wildcard: name.match(d.expression)[1],
+	})
 }
 
 export function getAll(){

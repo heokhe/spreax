@@ -1,20 +1,21 @@
 import { register } from "../core"
 
-register('on*', function(el, attr, wcv) {
-	const R = /^([a-zA-Z0-9$_]+)(\+|-|['"`]|!)?((?: #[a-z]+)+)?$/
-	let [, prop, shortcut, m] = R.exec(attr.value),
-		modifiers = {},
-		isAction = typeof shortcut === 'undefined'
+register('on*', function(el, bindings) {
+	el.addEventListener(bindings.wildcard, e => {
+		bindings.modifiers.prevent && e.preventDefault()
 
-	if (typeof m === 'string') m.trimLeft().split('#').filter(Boolean).map(e => e.trim()).forEach(mo => {
-		modifiers[mo] = true
-	})
+		const SHORTCUT_REGEXP = /(?:--|\+\+|[`"']|!)$/
 
-	el.addEventListener(wcv, e => {
-		modifiers.prevent && e.preventDefault()
+		let prop = bindings.value,
+		shortcut = prop.match(SHORTCUT_REGEXP),
+		isAction = shortcut === null
+
+		shortcut = shortcut === null ? null : shortcut[0]
+		
 		if (isAction) {
 			this.actions[prop]()
 		} else {
+			prop = prop.replace(SHORTCUT_REGEXP, '')
 			if (/'|"|`/.test(shortcut)) return this.state[prop] = ''
 			switch (shortcut) {
 				case '-':
@@ -29,8 +30,8 @@ register('on*', function(el, attr, wcv) {
 			}
 		}
 	}, {
-		once: modifiers.once,
-		passive: modifiers.passive,
-		capture: modifiers.capture,
+		once: bindings.modifiers.once,
+		passive: bindings.modifiers.passive,
+		capture: bindings.modifiers.capture,
 	})
 })

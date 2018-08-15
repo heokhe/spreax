@@ -1,4 +1,6 @@
-const buble = require('rollup-plugin-buble')
+const buble = require('rollup-plugin-buble')({
+	objectAssign: 'Object.assign'
+})
 const {uglify} = require('rollup-plugin-uglify')
 const commonjs = require('rollup-plugin-commonjs')
 const node = require('rollup-plugin-node-resolve')
@@ -19,7 +21,7 @@ module.exports = [
 		plugins: [
 			node(),
 			commonjs(),
-			buble(),
+			buble,
 			cleanup
 		]
 	},
@@ -32,7 +34,7 @@ module.exports = [
 		plugins: [
 			node(),
 			commonjs(),
-			buble(),
+			buble,
 			uglify()
 		]
 	},
@@ -46,7 +48,7 @@ module.exports = [
 		plugins: [
 			node(),
 			commonjs(),
-			buble(),
+			buble,
 			cleanup
 		]
 	},
@@ -60,7 +62,7 @@ module.exports = [
 		plugins: [
 			node(),
 			commonjs(),
-			buble(),
+			buble,
 			uglify()
 		]
 	},

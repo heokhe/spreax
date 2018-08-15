@@ -6,6 +6,30 @@ function error(msg, isWarn) {
 	else { throw new Error(fmsg) }
 }
 
+function record(keys, value){
+	var o = {};
+	keys.forEach(function (k) {
+		o[k] = value;
+	});
+	return o
+}
+
+function parse(attr) {
+	var reg = /((?: --[a-z]+)+)$/,
+	value = attr.replace(reg, ''),
+	modString = reg.exec(attr),
+	modObject = {};
+	modString = modString === null ? null : modString[0];
+	if (modString !== null) {
+		var modKeys = modString.split(' --').filter(function (e) { return !!e; });
+		modObject = record(modKeys, true);
+	}
+	return {
+		value: value,
+		modifiers: modObject
+	}
+}
+
 var alld = [];
 function register(name, fn){
 	name = name.toLowerCase();
@@ -27,27 +51,25 @@ function exec(name, ins, el){
 		}
 	}
 	if (d === null) { error(("directive \"" + name + "\" not found")); }
-	var match = name.match(d.expression),
-	hasWildcard = match.length > 1,
-	wildCardValue = match[1],
-	attrObject = el.attributes.getNamedItem('r-' + name);
-	d.fn.bind(ins)(el, attrObject, wildCardValue);
+	var parsed = parse(el.getAttribute('r-' + name));
+	d.fn.bind(ins)(el, Object.assign({}, parsed,
+		{wildcard: name.match(d.expression)[1]}));
 }
 
 function sanitizeHTML(html) {
 	return html.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/"/g, '&quot;')
 }
 
-register('text', function(el, attr) {
+register('text', function(el, ref) {
+	var value = ref.value;
 	var setText = function (el) {
 		return function (t) {
 			if (typeof t === 'string') { t = sanitizeHTML(t).replace(/  /g, '&nbsp;&nbsp;').replace(/\n/g, '<br>'); }
 			el.innerHTML = t;
 		}
 	};
-	var val = attr.value;
-	if (!!val) {
-		this.$_onChange(val, setText(el), true);
+	if (!!value) {
+		this.$_onChange(value, setText(el), true);
 	}
 });
 
@@ -67,23 +89,19 @@ register('model', function(el, attr) {
 	}, true);
 });
 
-register('on*', function(el, attr, wcv) {
+register('on*', function(el, bindings) {
 	var this$1 = this;
-	var R = /^([a-zA-Z0-9$_]+)(\+|-|['"`]|!)?((?: #[a-z]+)+)?$/;
-	var ref = R.exec(attr.value);
-	var prop = ref[1];
-	var shortcut = ref[2];
-	var m = ref[3];
-	var modifiers = {},
-		isAction = typeof shortcut === 'undefined';
-	if (typeof m === 'string') { m.trimLeft().split('#').filter(Boolean).map(function (e) { return e.trim(); }).forEach(function (mo) {
-		modifiers[mo] = true;
-	}); }
-	el.addEventListener(wcv, function (e) {
-		modifiers.prevent && e.preventDefault();
+	el.addEventListener(bindings.wildcard, function (e) {
+		bindings.modifiers.prevent && e.preventDefault();
+		var SHORTCUT_REGEXP = /(?:--|\+\+|[`"']|!)$/;
+		var prop = bindings.value,
+		shortcut = prop.match(SHORTCUT_REGEXP),
+		isAction = shortcut === null;
+		shortcut = shortcut === null ? null : shortcut[0];
 		if (isAction) {
 			this$1.actions[prop]();
 		} else {
+			prop = prop.replace(SHORTCUT_REGEXP, '');
 			if (/'|"|`/.test(shortcut)) { return this$1.state[prop] = '' }
 			switch (shortcut) {
 				case '-':
@@ -98,9 +116,9 @@ register('on*', function(el, attr, wcv) {
 			}
 		}
 	}, {
-		once: modifiers.once,
-		passive: modifiers.passive,
-		capture: modifiers.capture,
+		once: bindings.modifiers.once,
+		passive: bindings.modifiers.passive,
+		capture: bindings.modifiers.capture,
 	});
 });
 
