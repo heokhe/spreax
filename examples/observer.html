@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<meta http-equiv="X-UA-Compatible" content="ie=edge">
+</head>
+<body>
+	<div id='main'></div>
+</body>
+<script src="/dist/ryo.browser.js"></script>
+<script>
+var bi = new Ryo('#main', {
+	state: {
+		name: ''
+	}
+})
+setTimeout(function() {
+	var c = document.querySelector('#main'),
+	input = document.createElement('input'),
+	h1 = document.createElement('h1'),
+	button = document.createElement('button');
+	
+	input.setAttribute('r-model', 'name')
+	h1.setAttribute('r-text', 'name')
+	button.setAttribute('r-onclick', 'name"')
+	button.innerText = 'clear'
+	
+	c.appendChild(input)
+	c.appendChild(button)
+	c.appendChild(h1)	
+}, 2500);
+</script>
+</html>

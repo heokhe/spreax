@@ -162,7 +162,7 @@ var Ryo = (function () {
 		this.$_events = {};
 		this.$_init();
 	};
-	Ryo.prototype.$_initStateProxy = function $_initStateProxy () {
+	Ryo.prototype.$_initProxy = function $_initProxy () {
 			var this$1 = this;
 		this.state = new Proxy(this.state, {
 			get: function (obj, key) {
@@ -201,14 +201,29 @@ var Ryo = (function () {
 		Object.keys(this.watchers).forEach(function (k) {
 			this$1.$_onChange(k, this$1.watchers[k].bind(this$1));
 		});
-		this.$_initStateProxy();
-		this.el.querySelectorAll('*').forEach(function (el) {
-			Array.from(el.attributes)
-				.map(function (e) { return e.name; })
-				.filter(function (e) { return /^r-/.test(e); })
-				.forEach(function (dir) {
-					exec(dir.replace(/^r-/, ''), this$1, el);
-				});
+		this.$_initProxy();
+		this.el.querySelectorAll('*').forEach(this.$_execDirectives.bind(this));
+		this.$_observe();
+	};
+	Ryo.prototype.$_execDirectives = function $_execDirectives (el){
+			var this$1 = this;
+		Array.from(el.attributes)
+			.map(function (e) { return e.name; })
+			.filter(function (e) { return /^r-/.test(e); })
+			.forEach(function (dir) {
+				exec(dir.replace(/^r-/, ''), this$1, el);
+			});
+	};
+	Ryo.prototype.$_observe = function $_observe (){
+			var this$1 = this;
+		var m = new MutationObserver(function (muts) {
+			muts.forEach(function (mut) {
+				var added = Array.from(mut.addedNodes).filter(function (e) { return e.nodeName !== '#text'; });
+				added.forEach(this$1.$_execDirectives.bind(this$1));
+			});
+		});
+		m.observe(this.el, {
+			childList: true
 		});
 	};
 

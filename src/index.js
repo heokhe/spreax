@@ -16,7 +16,7 @@ export default class Ryo {
 		this.$_events = {}
 		this.$_init()
 	}
-	$_initStateProxy() {
+	$_initProxy() {
 		this.state = new Proxy(this.state, {
 			get: (obj, key) => {
 				if (key in obj) return obj[key]
@@ -53,14 +53,31 @@ export default class Ryo {
 		Object.keys(this.watchers).forEach(k => {
 			this.$_onChange(k, this.watchers[k].bind(this))
 		})
-		this.$_initStateProxy()
-		this.el.querySelectorAll('*').forEach(el => {
-			Array.from(el.attributes)
-				.map(e => e.name)
-				.filter(e => /^r-/.test(e))
-				.forEach(dir => {
-					drctv.exec(dir.replace(/^r-/, ''), this, el)
-				})
+		this.$_initProxy()
+		this.el.querySelectorAll('*').forEach(this.$_execDirectives.bind(this))
+		this.$_observe()
+	}
+	/**
+	 * @param {Element} el 
+	 */
+	$_execDirectives(el){
+		Array.from(el.attributes)
+			.map(e => e.name)
+			.filter(e => /^r-/.test(e))
+			.forEach(dir => {
+				drctv.exec(dir.replace(/^r-/, ''), this, el)
+			})
+	}
+	$_observe(){
+		const m = new MutationObserver(muts => {
+			muts.forEach(mut => {
+				const added = Array.from(mut.addedNodes).filter(e => e.nodeName !== '#text')
+				added.forEach(this.$_execDirectives.bind(this))
+			})
+		})
+
+		m.observe(this.el, {
+			childList: true
 		})
 	}
 }
