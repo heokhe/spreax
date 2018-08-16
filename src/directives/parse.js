@@ -5,7 +5,7 @@ import camel from '../utils/camel'
  * @param {string} attr 
  */
 export default function parse(attr) {
-	let reg = /((?: --(?:(?:[a-z]+-)*[a-z]+)+)+)$/,
+	let reg = /((?: --(?:(?:[a-z]+-)*[a-z0-9]+)+)+)$/,
 	value = attr.replace(reg, ''),
 	modString = reg.exec(attr),
 	modObject = {}
@@ -17,7 +17,6 @@ export default function parse(attr) {
 		modObject = record(modKeys, true)
 	}
 
-	console.log(modObject);
 	return {
 		value,
 		modifiers: modObject

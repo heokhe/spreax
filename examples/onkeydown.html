@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<meta http-equiv="X-UA-Compatible" content="ie=edge">
+</head>
+<body>
+	<div id='main'>
+		<div tabindex="1" id='btn' r-onkeydown="setKey --key-enter" autofocus>Do something dude.</div>
+		<h1 r-text='x'></h1>
+	</div>
+</body>
+<script src="/dist/ryo.browser.js"></script>
+<script>
+var bi = new Ryo('#main', {
+	state: {
+		x: 'no'
+	},
+	actions: {
+		setKey(ev){
+			this.state.x = 'yes'
+		}
+	}
+})
+</script>
+</html>

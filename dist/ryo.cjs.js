@@ -21,7 +21,7 @@ function camel(str){
 }
 
 function parse(attr) {
-	var reg = /((?: --(?:(?:[a-z]+-)*[a-z]+)+)+)$/,
+	var reg = /((?: --(?:(?:[a-z]+-)*[a-z0-9]+)+)+)$/,
 	value = attr.replace(reg, ''),
 	modString = reg.exec(attr),
 	modObject = {};
@@ -30,7 +30,6 @@ function parse(attr) {
 		var modKeys = modString.split(' --').filter(function (e) { return !!e; }).map(camel);
 		modObject = record(modKeys, true);
 	}
-	console.log(modObject);
 	return {
 		value: value,
 		modifiers: modObject
@@ -105,18 +104,68 @@ function isValidEvent(event){
 	return list.includes(event)
 }
 
+function keyboardEvent(ev){
+	var alt = ev.altKey,
+		shift = ev.shiftKey,
+		ctrl = ev.ctrlKey,
+		meta = ev.metaKey,
+		key = ev.which;
+	return {
+		alt: alt,
+		shift: shift,
+		ctrl: ctrl,
+		meta: meta,
+		key: key
+	}
+}
+
 register('on*', function(el, binding) {
 	var this$1 = this;
-	if (!isValidEvent(binding.wildcard)) { error(("event \"" + (binding.value) + "\" is not a valid DOM event")); }
-	el.addEventListener(binding.wildcard, function (e) {
+	var eventName = binding.wildcard;
+	if (!isValidEvent(eventName)) { error(("event \"" + (binding.value) + "\" is not a valid DOM event")); }
+	var isKeyboardEvent = /^key(?:down|up|press)$/.test(eventName);
+	el.addEventListener(eventName, function (e) {
 		binding.modifiers.prevent && e.preventDefault();
 		var SHORTCUT_REGEXP = /(?:--|\+\+|[`"']|!)$/;
 		var prop = binding.value,
 		shortcut = prop.match(SHORTCUT_REGEXP),
 		isAction = shortcut === null;
 		shortcut = shortcut === null ? null : shortcut[0];
+		if (isKeyboardEvent) {
+			var kb = keyboardEvent(e);
+			var RESERVED_KEYS = {
+				backspace: 8,
+				tab: 9,
+				enter: 13,
+				shift: 16,
+				ctrl: 17,
+				alt: 18,
+				capslock: 20,
+				esc: 27,
+				pageup: 33,
+				pagedown: 34,
+				end: 35,
+				home: 36,
+				left: 37,
+				up: 38,
+				right: 39,
+				down: 40,
+				insert: 45,
+				delete: 46
+			};
+			var key = Object.keys(binding.modifiers).filter(function (e) { return /^key/.test(e); }).map(function (e) { return e.replace(/^key/, '').toLowerCase(); })[0];
+			if (/^[a-z]$/.test(key)) { key = key.charCodeAt(0) - 32; }
+			if (key in RESERVED_KEYS) { key = RESERVED_KEYS[key]; }
+			if (
+				key != kb.key ||
+				'shift' in binding.modifiers !== kb.shift ||
+				'alt' in binding.modifiers !== kb.alt ||
+				'meta' in binding.modifiers !== kb.meta ||
+				'ctrl' in binding.modifiers !== kb.ctrl
+			) { return }
+		}
 		if (isAction) {
-			this$1.actions[prop]();
+			this$1.actions[prop](e);
 		} else {
 			prop = prop.replace(SHORTCUT_REGEXP, '');
 			if (/'|"|`/.test(shortcut)) { return this$1.state[prop] = '' }
