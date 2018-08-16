@@ -63,20 +63,76 @@ var Ryo = (function () {
 			{wildcard: name.match(d.expression)[1]}));
 	}
 
+	function createCommonjsModule(fn, module) {
+		return module = { exports: {} }, fn(module, module.exports), module.exports;
+	}
+
+	var arrayUnique = createCommonjsModule(function (module) {
+	module.exports = function unique(arr) {
+	  if (!Array.isArray(arr)) {
+	    throw new TypeError('array-unique expects an array.');
+	  }
+	  var len = arr.length;
+	  var i = -1;
+	  while (i++ < len) {
+	    var j = i + 1;
+	    for (; j < arr.length; ++j) {
+	      if (arr[i] === arr[j]) {
+	        arr.splice(j--, 1);
+	      }
+	    }
+	  }
+	  return arr;
+	};
+	module.exports.immutable = function uniqueImmutable(arr) {
+	  if (!Array.isArray(arr)) {
+	    throw new TypeError('array-unique expects an array.');
+	  }
+	  var arrLen = arr.length;
+	  var newArr = new Array(arrLen);
+	  for (var i = 0; i < arrLen; i++) {
+	    newArr[i] = arr[i];
+	  }
+	  return module.exports(newArr);
+	};
+	});
+	var arrayUnique_1 = arrayUnique.immutable;
+
 	function sanitizeHTML(html) {
-		return html.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/"/g, '&quot;')
+		return html.replace(/&/g, '&amp;')
+			.replace(/</g, '&lt;')
+			.replace(/"/g, '&quot;')
 	}
 
 	register('text', function(el, ref) {
+		var this$1 = this;
 		var value = ref.value;
-		var setText = function (el) {
-			return function (t) {
-				if (typeof t === 'string') { t = sanitizeHTML(t).replace(/  /g, '&nbsp;&nbsp;').replace(/\n/g, '<br>'); }
-				el.innerHTML = t;
-			}
-		};
 		if (!!value) {
-			this.$_onChange(value, setText(el), true);
+			this.$_onChange(value, function (text) {
+				text = String(text);
+				text = sanitizeHTML(text).replace(/  /g, '&nbsp;&nbsp;').replace(/\n/g, '<br>');
+				el.innerHTML = text;
+			}, true);
+		} else {
+			var REG = /\{\{\w+\}\}/gi,
+			removeBraces = function (p) { return p.replace(/^\{\{/, '').replace(/\}\}$/, ''); };
+			var els = Array.from(el.children);
+			els.unshift(el);
+			els.forEach(function (el) {
+				Array.from(el.childNodes)
+					.filter(function (n) { return n.nodeType === 3; })
+					.filter(function (n) { return !!n.textContent.trim(); })
+					.filter(function (n) { return REG.test(n.textContent); })
+					.forEach(function (node) {
+						var text = node.textContent,
+						usedProps = arrayUnique(text.match(REG).map(removeBraces));
+						usedProps.forEach(function (prop) {
+							this$1.$_onChange(prop, function (v) {
+								node.textContent = text.replace(new RegExp('\\{\\{' + prop + '\\}\\}', 'g'), v);
+							}, true);
+						});
+					});
+			});
 		}
 	});
 

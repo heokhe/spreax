@@ -23,5 +23,8 @@
 	"repository": "git@github.com:Hkh12/ryo.git",
 	"author": "Hosein Khansari <hrk.x11@gmail.com>",
 	"license": "MIT",
-	"typings": "types/index.d.ts"
+	"typings": "types/index.d.ts",
+	"dependencies": {
+		"array-unique": "^0.3.2"
+	}
 }

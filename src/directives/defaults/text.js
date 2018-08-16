@@ -1,26 +1,36 @@
 import { register } from "../core"
+import unique from 'array-unique'
 import sanitizeHTML from '../../utils/sanitizeHTML'
 
 register('text', function(el, {value}) {
-	const setText = (el) => {
-		return t => {
-			if (typeof t === 'string') t = sanitizeHTML(t).replace(/  /g, '&nbsp;&nbsp;').replace(/\n/g, '<br>')
-			el.innerHTML = t	
-		}
-	}
-
 	if (!!value) {
-		this.$_onChange(value, setText(el), true)
+		this.$_onChange(value, text => {
+			text = String(text)
+			text = sanitizeHTML(text).replace(/  /g, '&nbsp;&nbsp;').replace(/\n/g, '<br>')
+			el.innerHTML = text
+		}, true)
 	} else {
-		/* const pattern = /\{\{([a-z0-9_$]+)\}\}/gi,
-		toFormatElement = el => pattern.test(el.innerHTML)
-		let children = Array.from(el.querySelectorAll('*')).filter(toFormatElement)
-		children.forEach(ch => {
-			ch.innerHTML.replace(pattern, ($$, $1) => {
-				this.$_onChange($1, t => {
-					setText(ch	, t)
-				}, true)
-			})
-		}) */
+		const REG = /\{\{\w+\}\}/gi,
+		removeBraces = p => p.replace(/^\{\{/, '').replace(/\}\}$/, '')
+		
+		let els = Array.from(el.children)
+		els.unshift(el)
+
+		els.forEach(el => {
+			Array.from(el.childNodes)
+				.filter(n => n.nodeType === 3)
+				.filter(n => !!n.textContent.trim())
+				.filter(n => REG.test(n.textContent))
+				.forEach(node => {
+					const text = node.textContent,
+					usedProps = unique(text.match(REG).map(removeBraces))
+	
+					usedProps.forEach(prop => {
+						this.$_onChange(prop, v => {
+							node.textContent = text.replace(new RegExp('\\{\\{' + prop + '\\}\\}', 'g'), v)
+						}, true)
+					})
+				})
+		})
 	}
 })
