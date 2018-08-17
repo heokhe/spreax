@@ -11,7 +11,7 @@ register('on*', function(el, binding) {
 	el.addEventListener(eventName, e => {
 		binding.modifiers.prevent && e.preventDefault()
 
-		const SHORTCUT_REGEXP = /(?:--|\+\+|[`"']|!|:nil)$/
+		const SHORTCUT_REGEXP = /(?:--|\+\+|[`"']|!|:null)$/
 		let prop = binding.value,
 		shortcut = prop.match(SHORTCUT_REGEXP),
 		isAction = shortcut === null;
@@ -43,7 +43,7 @@ register('on*', function(el, binding) {
 			let key = Object.keys(binding.modifiers).filter(e => /^key/.test(e)).map(e => e.replace(/^key/, '').toLowerCase())
 			if (!!key.length) key = kb.key
 			else key = key[0]
-			if (key.length > 1) error('more than one keys are declared for on event.', true)
+			if (key.length > 1) error(`more than one keys are declared for ${eventName}`, true)
 
 			if (/^[a-z]$/.test(key)) key = key.charCodeAt(0) - 32
 			if (key in RESERVED_KEYS) key = RESERVED_KEYS[key]
@@ -72,7 +72,7 @@ register('on*', function(el, binding) {
 				case '!':
 					this.state[prop] = !this.state[prop]
 					break
-				case ':nil':
+				case ':null':
 					this.state[prop] = null
 					break
 			}

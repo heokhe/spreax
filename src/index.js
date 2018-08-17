@@ -1,5 +1,5 @@
 import error from './error'
-import * as drctv from './directives/index'
+import { exec as execDirective } from './directives/'
 
 export default class Ryo {
 	constructor(el, options) {
@@ -65,7 +65,7 @@ export default class Ryo {
 			.map(e => e.name)
 			.filter(e => /^r-/.test(e))
 			.forEach(dir => {
-				drctv.exec(dir.replace(/^r-/, ''), this, el)
+				execDirective(dir.replace(/^r-/, ''), this, el)
 			})
 	}
 	$_observe(){

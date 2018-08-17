@@ -1,10 +1,10 @@
 /**
  * @typedef {Object} KBevent
  * @property {number} key
- * @property {boolear} alt
- * @property {boolear} shift
- * @property {boolear} ctrl
- * @property {boolear} meta
+ * @property {boolean} alt
+ * @property {boolean} shift
+ * @property {boolean} ctrl
+ * @property {boolean} meta
  * @param {KeyboardEvent} ev 
  */
 export default function keyboardEvent(ev){

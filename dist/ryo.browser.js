@@ -183,7 +183,7 @@ var Ryo = (function () {
 		var isKeyboardEvent = /^key(?:down|up|press)$/.test(eventName);
 		el.addEventListener(eventName, function (e) {
 			binding.modifiers.prevent && e.preventDefault();
-			var SHORTCUT_REGEXP = /(?:--|\+\+|[`"']|!|:nil)$/;
+			var SHORTCUT_REGEXP = /(?:--|\+\+|[`"']|!|:null)$/;
 			var prop = binding.value,
 			shortcut = prop.match(SHORTCUT_REGEXP),
 			isAction = shortcut === null;
@@ -213,7 +213,7 @@ var Ryo = (function () {
 				var key = Object.keys(binding.modifiers).filter(function (e) { return /^key/.test(e); }).map(function (e) { return e.replace(/^key/, '').toLowerCase(); });
 				if (!!key.length) { key = kb.key; }
 				else { key = key[0]; }
-				if (key.length > 1) { error('more than one keys are declared for on event.', true); }
+				if (key.length > 1) { error(("more than one keys are declared for " + eventName), true); }
 				if (/^[a-z]$/.test(key)) { key = key.charCodeAt(0) - 32; }
 				if (key in RESERVED_KEYS) { key = RESERVED_KEYS[key]; }
 				if (
@@ -239,7 +239,7 @@ var Ryo = (function () {
 					case '!':
 						this$1.state[prop] = !this$1.state[prop];
 						break
-					case ':nil':
+					case ':null':
 						this$1.state[prop] = null;
 						break
 				}
