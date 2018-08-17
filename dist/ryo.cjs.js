@@ -209,7 +209,10 @@ register('on*', function(el, binding) {
 				insert: 45,
 				delete: 46
 			};
-			var key = Object.keys(binding.modifiers).filter(function (e) { return /^key/.test(e); }).map(function (e) { return e.replace(/^key/, '').toLowerCase(); })[0];
+			var key = Object.keys(binding.modifiers).filter(function (e) { return /^key/.test(e); }).map(function (e) { return e.replace(/^key/, '').toLowerCase(); });
+			if (!!key.length) { key = kb.key; }
+			else { key = key[0]; }
+			if (key.length > 1) { error('more than one keys are declared for on event.', true); }
 			if (/^[a-z]$/.test(key)) { key = key.charCodeAt(0) - 32; }
 			if (key in RESERVED_KEYS) { key = RESERVED_KEYS[key]; }
 			if (

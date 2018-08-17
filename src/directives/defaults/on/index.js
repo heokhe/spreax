@@ -40,7 +40,11 @@ register('on*', function(el, binding) {
 				delete: 46	
 			}
 			
-			let key = Object.keys(binding.modifiers).filter(e => /^key/.test(e)).map(e => e.replace(/^key/, '').toLowerCase())[0]
+			let key = Object.keys(binding.modifiers).filter(e => /^key/.test(e)).map(e => e.replace(/^key/, '').toLowerCase())
+			if (!!key.length) key = kb.key
+			else key = key[0]
+			if (key.length > 1) error('more than one keys are declared for on event.', true)
+
 			if (/^[a-z]$/.test(key)) key = key.charCodeAt(0) - 32
 			if (key in RESERVED_KEYS) key = RESERVED_KEYS[key]
 
