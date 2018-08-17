@@ -9,9 +9,7 @@
 	<div id='main'>
 		<input type="text" r-model='name --trim'>
 		<button r-onclick='name" --once --key-a'>Set</button>
-		<h1>
-			Hello <b r-text='name'></b>
-		</h1>
+		<h1 r-text>{{name}}</h1>
 	</div>
 </body>
 <script src="/dist/ryo.browser.js"></script>

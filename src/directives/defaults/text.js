@@ -1,6 +1,6 @@
 import { register } from "../core"
-import unique from 'array-unique'
 import sanitizeHTML from '../../utils/sanitizeHTML'
+import arrayUnique from '../../utils/arrayUnique'
 
 register('text', function(el, {value}) {
 	if (!!value) {
@@ -23,7 +23,7 @@ register('text', function(el, {value}) {
 				.filter(n => REG.test(n.textContent))
 				.forEach(node => {
 					const text = node.textContent,
-					usedProps = unique(text.match(REG).map(removeBraces))
+					usedProps = arrayUnique(text.match(REG).map(removeBraces))
 	
 					usedProps.forEach(prop => {
 						this.$_onChange(prop, v => {

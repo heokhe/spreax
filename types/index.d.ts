@@ -1,8 +1,12 @@
+import { Bindings } from "../src/directives/core"
+
 type action = (this: Ryo, event?: Event) => void
 type watcher = (this: Ryo, v?: any) => void
 type obj<T = any> = Record<string, T>
 
-class Ryo {
+declare module 'ryo'
+
+export = class Ryo {
 	constructor(el: Element | string, options: {
 		state?: obj
 		actions?: obj<action>
@@ -13,9 +17,6 @@ class Ryo {
 	readonly watchers: obj<watcher>
 	private $_emit(name: string): void
 	private $_onChange(name: string, fn: (v: any) => void, immediate?: boolean): void
-}
-
-declare module 'ryo' {
-	export = Ryo
-}
+}	
+export function directive(name: string, fn: (el: Element, bindings: Bindings) => void): void
 export as namespace Ryo

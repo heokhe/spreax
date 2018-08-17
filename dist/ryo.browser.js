@@ -63,45 +63,14 @@ var Ryo = (function () {
 			{wildcard: name.match(d.expression)[1]}));
 	}
 
-	function createCommonjsModule(fn, module) {
-		return module = { exports: {} }, fn(module, module.exports), module.exports;
-	}
-
-	var arrayUnique = createCommonjsModule(function (module) {
-	module.exports = function unique(arr) {
-	  if (!Array.isArray(arr)) {
-	    throw new TypeError('array-unique expects an array.');
-	  }
-	  var len = arr.length;
-	  var i = -1;
-	  while (i++ < len) {
-	    var j = i + 1;
-	    for (; j < arr.length; ++j) {
-	      if (arr[i] === arr[j]) {
-	        arr.splice(j--, 1);
-	      }
-	    }
-	  }
-	  return arr;
-	};
-	module.exports.immutable = function uniqueImmutable(arr) {
-	  if (!Array.isArray(arr)) {
-	    throw new TypeError('array-unique expects an array.');
-	  }
-	  var arrLen = arr.length;
-	  var newArr = new Array(arrLen);
-	  for (var i = 0; i < arrLen; i++) {
-	    newArr[i] = arr[i];
-	  }
-	  return module.exports(newArr);
-	};
-	});
-	var arrayUnique_1 = arrayUnique.immutable;
-
 	function sanitizeHTML(html) {
 		return html.replace(/&/g, '&amp;')
 			.replace(/</g, '&lt;')
 			.replace(/"/g, '&quot;')
+	}
+
+	function arrayUnique(arr){
+		return arr.filter(function (elem, pos, _arr) { return arr.indexOf(elem) === pos; })
 	}
 
 	register('text', function(el, ref) {
@@ -337,6 +306,8 @@ var Ryo = (function () {
 			childList: true
 		});
 	};
+
+	Ryo.directive = register;
 
 	return Ryo;
 
