@@ -1,29 +1,37 @@
-# Ryo ✨➡️
-A new front-end library for building views.
-## Why so?
-Nowadays, making a website with a great UX requires using one of the big frameworks, such as Vue, Angular, React, etc.
-These are all concerned with rendering things, and integrating them with servers requires hard work.
-And, You can't render them on the server, if you're not using Node.js as back-end core. (you can use Vue in your HTML, but that's not so SEO-friendly.)
-However, not using them is unavoidable as a modern front-end developer, jQuery is obsolete nowadays, And you may not need components, those additional files (.jsx, .vue, etc.) and other shiny things in your project. In fact, the most important work of a modern front-end framework or library is **keeping the interface synchronized with the state**.
+# Ryo
+[![CircleCI](https://circleci.com/gh/Hkh12/ryo.svg?style=svg)](https://circleci.com/gh/Hkh12/ryo)
+![Dependencies](https://david-dm.org/Hkh12/ryo.svg)
 
-Ryo is the solution for these cases. It doesn't need any dependencies, files and loaders, compilers, etc. Just load it with a `script` tag, create an instance, and boom!
+A new front-end tool, to bring interactivity to web elements.
+## Explanation
+Ryo is not a framework or even a big library. and, it's not so concerned with rendering. Ryo's main duty is **to keep the interface synchronized with the state**. 
+
+there is no any special elements; everything is marked and controlled using special attributes called **directives** that start with `r-`. There are some default ones, and, of course, you can make and register yours.
+
+Using Ryo, there's no need to focus on front-end stuff (specially if you are a back-end dev). But Ryo would not be so useful in modern front-end projects (like a SPA).
 ## Get started
-### Installation
-> It's not still published, and there's already a package named Ryo in NPM registry. (to be decided)
-### Usage
-Imagine this is your HTML document:
+First, get Ryo's source code. intall it via npm (or yarn), or use a `<script>` tag:
 ```html
-<body>
-	<div id="app"></div>
-</body>
-<script src='/path/to/ryo.js'></script>
-<script src='/path/to/app.js'></script>
+<srcipt src="https://unpkg.com/ryo/dist/ryo.browser.js"></srcipt>
 ```
-And, `app.js`:
+now you should have a global variable called `Ryo`.
+### Hello world
+then, in your `app.js` (or any other name):
 ```js
 var app = new Ryo('#app', {
-	// state: ...
-	// actions: ...
+	state: {
+		text: 'Hello world!'
+	}
 })
 ```
-**Now you have a Ryo instance! 🎉**
+and, your HTML document:
+```html
+<div id="app">
+	<h1 r-text='text'></h1>
+</div>
+```
+That's it, a "hello world" 🎉
+
+This was just a simple demo, we used default `text` directive to tell Ryo: "hey, put the property 'text' of state into this h1 tag"
+
+> There is no complete documentation for Ryo. after alpha (or beta) release, I'll start working on the official site.
