@@ -12,7 +12,7 @@ Using Ryo, there's no need to focus on front-end stuff (specially if you are a b
 ## Get started
 First, get Ryo's source code. intall it via npm (or yarn), or use a `<script>` tag:
 ```html
-<srcipt src="https://unpkg.com/ryo/dist/ryo.browser.js"></srcipt>
+<script src="https://unpkg.com/ryo/dist/ryo.browser.js"></script>
 ```
 now you should have a global variable called `Ryo`.
 ### Hello world
