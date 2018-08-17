@@ -11,7 +11,7 @@ register('on*', function(el, binding) {
 	el.addEventListener(eventName, e => {
 		binding.modifiers.prevent && e.preventDefault()
 
-		const SHORTCUT_REGEXP = /(?:--|\+\+|[`"']|!)$/
+		const SHORTCUT_REGEXP = /(?:--|\+\+|[`"']|!|:nil)$/
 		let prop = binding.value,
 		shortcut = prop.match(SHORTCUT_REGEXP),
 		isAction = shortcut === null;
@@ -71,6 +71,9 @@ register('on*', function(el, binding) {
 					break
 				case '!':
 					this.state[prop] = !this.state[prop]
+					break
+				case ':nil':
+					this.state[prop] = null
 					break
 			}
 		}

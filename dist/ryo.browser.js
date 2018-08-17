@@ -183,7 +183,7 @@ var Ryo = (function () {
 		var isKeyboardEvent = /^key(?:down|up|press)$/.test(eventName);
 		el.addEventListener(eventName, function (e) {
 			binding.modifiers.prevent && e.preventDefault();
-			var SHORTCUT_REGEXP = /(?:--|\+\+|[`"']|!)$/;
+			var SHORTCUT_REGEXP = /(?:--|\+\+|[`"']|!|:nil)$/;
 			var prop = binding.value,
 			shortcut = prop.match(SHORTCUT_REGEXP),
 			isAction = shortcut === null;
@@ -238,6 +238,9 @@ var Ryo = (function () {
 						break
 					case '!':
 						this$1.state[prop] = !this$1.state[prop];
+						break
+					case ':nil':
+						this$1.state[prop] = null;
 						break
 				}
 			}
