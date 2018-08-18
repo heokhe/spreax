@@ -7,6 +7,6 @@ describe('observer', () => {
 			.get('h1').should('have.text', 'hello')
 			.get('button').click()
 			.get('input').should('have.value', '')
-			.get('h1').should('not.be.visible')
+			.get('h1').should('have.text', 'null')
 	})
 })

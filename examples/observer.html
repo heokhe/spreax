@@ -15,20 +15,19 @@ var bi = new Ryo('#main', {
 		name: ''
 	}
 })
-setTimeout(function() {
-	var c = document.querySelector('#main'),
-	input = document.createElement('input'),
-	h1 = document.createElement('h1'),
-	button = document.createElement('button');
-	
-	input.setAttribute('r-model', 'name')
-	h1.setAttribute('r-text', 'name')
-	button.setAttribute('r-onclick', 'name"')
-	button.innerText = 'clear'
-	
-	c.appendChild(input)
-	c.appendChild(button)
-	c.appendChild(h1)	
-}, 2500);
+
+var c = document.querySelector('#main'),
+input = document.createElement('input'),
+h1 = document.createElement('h1'),
+button = document.createElement('button');
+
+input.setAttribute('r-model', 'name')
+h1.setAttribute('r-text', 'name')
+button.setAttribute('r-onclick', 'name:null')
+button.innerText = 'clear'
+
+c.appendChild(input)
+c.appendChild(button)
+c.appendChild(h1)
 </script>
 </html>

@@ -1,6 +1,6 @@
 import { Bindings } from "../src/directives/core"
 
-type action = (this: Ryo, event?: Event) => void
+type action = (this: Ryo, arg?: any) => void
 type watcher = (this: Ryo, v?: any) => void
 type obj<T = any> = Record<string, T>
 
