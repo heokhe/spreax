@@ -1,12 +1,12 @@
 import { Bindings } from "../src/directives/core"
 
-type action = (this: Ryo, arg?: any) => void
-type watcher = (this: Ryo, v?: any) => void
+type action = (this: Hdash, arg?: any) => void
+type watcher = (this: Hdash, v?: any) => void
 type obj<T = any> = Record<string, T>
 
-declare module 'ryo'
+declare module 'hdash'
 
-export = class Ryo {
+export = class Hdash {
 	constructor(el: Element | string, options: {
 		state?: obj
 		actions?: obj<action>
@@ -18,5 +18,5 @@ export = class Ryo {
 	private $_emit(name: string): void
 	private $_onChange(name: string, fn: (v: any) => void, immediate?: boolean): void
 }	
-export function directive(name: string, fn: (this: Ryo, el: Element, bindings: Bindings) => void): void
-export as namespace Ryo
+export function directive(name: string, fn: (this: Hdash, el: Element, bindings: Bindings) => void): void
+export as namespace Hdash

@@ -43,7 +43,7 @@ module.exports = [
 		output: {
 			file: pkg.browser,
 			format: 'iife',
-			name: 'Ryo'
+			name: 'Hdash'
 		},
 		plugins: [
 			node(),
@@ -57,7 +57,7 @@ module.exports = [
 		output: {
 			file: pkg.browser.replace(/\.js/, '.min.js'),
 			format: 'iife',
-			name: 'Ryo'
+			name: 'Hdash'
 		},
 		plugins: [
 			node(),

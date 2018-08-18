@@ -1,7 +1,7 @@
 'use strict';
 
 function error(msg, isWarn) {
-	var fmsg = "[ryo" + (!isWarn ? ' error' : '') + "] " + msg;
+	var fmsg = "[hdash" + (!isWarn ? ' error' : '') + "] " + msg;
 	if (isWarn) { console.warn(fmsg); }
 	else { throw new Error(fmsg) }
 }
@@ -57,7 +57,7 @@ function exec(name, ins, el){
 		}
 	}
 	if (d === null) { error(("directive \"" + name + "\" not found")); }
-	var parsed = parse(el.getAttribute('r-' + name));
+	var parsed = parse(el.getAttribute('h-' + name));
 	d.fn.bind(ins)(el, Object.assign({}, parsed,
 		{wildcard: name.match(d.expression)[1]}));
 }
@@ -227,7 +227,7 @@ register('class-*', function(el, ref){
 	}, true);
 });
 
-var Ryo = function Ryo(el, options) {
+var Hdash = function Hdash(el, options) {
 	if (typeof el === 'string') {
 		this.el = document.querySelector(el);
 	} else if (el instanceof HTMLElement) {
@@ -241,7 +241,7 @@ var Ryo = function Ryo(el, options) {
 	this.$_events = {};
 	this.$_init();
 };
-Ryo.prototype.$_initProxy = function $_initProxy () {
+Hdash.prototype.$_initProxy = function $_initProxy () {
 		var this$1 = this;
 	this.state = new Proxy(this.state, {
 		get: function (obj, key) {
@@ -256,14 +256,14 @@ Ryo.prototype.$_initProxy = function $_initProxy () {
 		}
 	});
 };
-Ryo.prototype.$_emit = function $_emit (name) {
+Hdash.prototype.$_emit = function $_emit (name) {
 		var this$1 = this;
 	if (!(name in this.$_events)) { this.$_events[name] = []; }
 	this.$_events[name].forEach(function (e) {
 		e(this$1.state[name]);
 	});
 };
-Ryo.prototype.$_onChange = function $_onChange (name, fn, immediate) {
+Hdash.prototype.$_onChange = function $_onChange (name, fn, immediate) {
 	var evs = this.$_events[name];
 	if (typeof evs === 'undefined') { evs = []; }
 	evs.push(fn);
@@ -272,7 +272,7 @@ Ryo.prototype.$_onChange = function $_onChange (name, fn, immediate) {
 		this.$_emit(name);
 	}
 };
-Ryo.prototype.$_init = function $_init () {
+Hdash.prototype.$_init = function $_init () {
 		var this$1 = this;
 	Object.keys(this.actions).forEach(function (k) {
 		this$1.actions[k] = this$1.actions[k].bind(this$1);
@@ -284,16 +284,16 @@ Ryo.prototype.$_init = function $_init () {
 	this.el.querySelectorAll('*').forEach(this.$_execDirectives.bind(this));
 	this.$_observe();
 };
-Ryo.prototype.$_execDirectives = function $_execDirectives (el){
+Hdash.prototype.$_execDirectives = function $_execDirectives (el){
 		var this$1 = this;
 	Array.from(el.attributes)
 		.map(function (e) { return e.name; })
-		.filter(function (e) { return /^r-/.test(e); })
+		.filter(function (e) { return /^h-/.test(e); })
 		.forEach(function (dir) {
-			exec(dir.replace(/^r-/, ''), this$1, el);
+			exec(dir.replace(/^h-/, ''), this$1, el);
 		});
 };
-Ryo.prototype.$_observe = function $_observe (){
+Hdash.prototype.$_observe = function $_observe (){
 		var this$1 = this;
 	var m = new MutationObserver(function (muts) {
 		muts.forEach(function (mut) {
@@ -306,6 +306,6 @@ Ryo.prototype.$_observe = function $_observe (){
 	});
 };
 
-Ryo.directive = register;
+Hdash.directive = register;
 
-module.exports = Ryo;
+module.exports = Hdash;

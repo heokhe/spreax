@@ -7,14 +7,14 @@
 </head>
 <body>
 	<div id='main'>
-		<input type="text" r-model='name --trim'>
-		<button r-onclick='name" --once --key-a'>Set</button>
-		<h1 r-text>{{name}}</h1>
+		<input type="text" h-model='name --trim'>
+		<button h-onclick='name" --once --key-a'>Set</button>
+		<h1 h-text>{{name}}</h1>
 	</div>
 </body>
-<script src="/dist/ryo.browser.js"></script>
+<script src="/dist/hdash.browser.js"></script>
 <script>
-var bi = new Ryo('#main', {
+var bi = new Hdash('#main', {
 	state: {
 		name: ''
 	},

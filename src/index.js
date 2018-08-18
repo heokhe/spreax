@@ -1,6 +1,6 @@
-import Ryo from './ryo'
+import Hdash from './hdash'
 import { register } from './directives/'
 
-Ryo.directive = register
+Hdash.directive = register
 
-export default Ryo
+export default Hdash

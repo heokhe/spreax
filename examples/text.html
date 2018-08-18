@@ -7,16 +7,16 @@
 </head>
 <body>
 	<div id='main'>
-		<div id="hasv" r-text='longText'></div>
+		<div id="hasv" h-text='longText'></div>
 		<hr>
-		<div id="nov" r-text>
-			my name is {{name}}, <b>my favorite coding language is {{favLang}}</b> and my favorite editor is <i r-text='editor'></i>... does this {{verb}}?
+		<div id="nov" h-text>
+			my name is {{name}}, <b>my favorite coding language is {{favLang}}</b> and my favorite editor is <i h-text='editor'></i>... does this {{verb}}?
 		</div>
 	</div>
 </body>
-<script src="/dist/ryo.browser.js"></script>
+<script src="/dist/hdash.browser.js"></script>
 <script>
-var bi = new Ryo('#main', {
+var bi = new Hdash('#main', {
 	state: {
 		longText: 'This one uses an attribute value',
 		favLang: 'JavaScript',

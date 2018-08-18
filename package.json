@@ -1,8 +1,8 @@
 {
-	"name": "ryo",
+	"name": "hdash",
 	"version": "0.0.0",
-	"main": "dist/ryo.cjs.js",
-	"browser": "dist/ryo.browser.js",
+	"main": "dist/hdash.cjs.js",
+	"browser": "dist/hdash.browser.js",
 	"scripts": {
 		"build": "rollup -c",
 		"test:start-server": "http-server . -p 8383 -s",
@@ -20,7 +20,7 @@
 		"rollup-plugin-node-resolve": "^3.3.0",
 		"rollup-plugin-uglify": "^4.0.0"
 	},
-	"repository": "git@github.com:Hkh12/ryo.git",
+	"repository": "git@github.com:Hkh12/hdash.git",
 	"author": "Hosein Khansari <hrk.x11@gmail.com>",
 	"license": "MIT",
 	"typings": "types/index.d.ts"

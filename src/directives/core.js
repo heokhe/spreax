@@ -39,7 +39,7 @@ export function exec(name, ins, el){
 	}
 	if (d === null) error(`directive "${name}" not found`)
 
-	let parsed = parse(el.getAttribute('r-' + name))
+	let parsed = parse(el.getAttribute('h-' + name))
 
 	d.fn.bind(ins)(el, {
 		...parsed,

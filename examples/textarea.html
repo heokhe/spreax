@@ -7,14 +7,14 @@
 </head>
 <body>
 	<div id='main'>
-		<textarea r-model='text' cols="30" rows="10"></textarea>
+		<textarea h-model='text' cols="30" rows="10"></textarea>
 		<hr>
-		<div r-text='text'></div>
+		<div h-text='text'></div>
 	</div>
 </body>
-<script src="/dist/ryo.browser.js"></script>
+<script src="/dist/hdash.browser.js"></script>
 <script>
-var bi = new Ryo('#main', {
+var bi = new Hdash('#main', {
 	state: {
 		text: ''
 	},

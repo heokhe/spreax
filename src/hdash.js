@@ -1,7 +1,7 @@
 import error from './error'
 import { exec as execDirective } from './directives/'
 
-export default class Ryo {
+export default class Hdash {
 	constructor(el, options) {
 		if (typeof el === 'string') {
 			this.el = document.querySelector(el)
@@ -63,9 +63,9 @@ export default class Ryo {
 	$_execDirectives(el){
 		Array.from(el.attributes)
 			.map(e => e.name)
-			.filter(e => /^r-/.test(e))
+			.filter(e => /^h-/.test(e))
 			.forEach(dir => {
-				execDirective(dir.replace(/^r-/, ''), this, el)
+				execDirective(dir.replace(/^h-/, ''), this, el)
 			})
 	}
 	$_observe(){
