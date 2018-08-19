@@ -40,7 +40,7 @@ var alld = [];
 function register(name, fn){
 	name = name.toLowerCase();
 	if (!/^[a-z]+(?:-?\*)?$/.test(name)) { error(("invalid directive name \"" + name + "\"; only a-z and numbers, wildcard at end (could be seperated with a hyphen)")); }
-	var expression = new RegExp('^' + name.replace(/\*$/, '([a-z]+)') + '$');
+	var expression = new RegExp('^' + name.replace(/\*$/, '([a-z]+(?:-[a-z]+)*)') + '$');
 	var d = {
 		name: name,
 		expression: expression,
@@ -58,7 +58,7 @@ function exec(name, ins, el){
 	}
 	if (d === null) { error(("directive \"" + name + "\" not found")); }
 	var parsed = parse(el.getAttribute('h-' + name));
-	d.fn.bind(ins)(el, Object.assign({}, parsed,
+	d.fn.call(ins, el, Object.assign({}, parsed,
 		{wildcard: name.match(d.expression)[1]}));
 }
 
@@ -224,6 +224,14 @@ register('class-*', function(el, ref){
 	var wildcard = ref.wildcard;
 	this.$_onChange(value || wildcard, function (b) {
 		el.classList[!b ? 'remove' : 'add'](wildcard);
+	}, true);
+});
+
+register('bind-*', function(el, ref){
+	var value = ref.value;
+	var attr = ref.wildcard;
+	this.$_onChange(value, function (v) {
+		el.setAttribute(attr, v);
 	}, true);
 });
 

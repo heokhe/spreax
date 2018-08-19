@@ -14,7 +14,7 @@ const alld = []
 export function register(name, fn){
 	name = name.toLowerCase()
 	if (!/^[a-z]+(?:-?\*)?$/.test(name)) error(`invalid directive name "${name}"; only a-z and numbers, wildcard at end (could be seperated with a hyphen)`)
-	const expression = new RegExp('^' + name.replace(/\*$/, '([a-z]+)') + '$')
+	const expression = new RegExp('^' + name.replace(/\*$/, '([a-z]+(?:-[a-z]+)*)') + '$')
 
 	const d = {
 		name,
@@ -41,9 +41,9 @@ export function exec(name, ins, el){
 
 	let parsed = parse(el.getAttribute('h-' + name))
 
-	d.fn.bind(ins)(el, {
+	d.fn.call(ins, el, {
 		...parsed,
-		wildcard: name.match(d.expression)[1],
+		wildcard: name.match(d.expression)[1]		
 	})
 }
 
