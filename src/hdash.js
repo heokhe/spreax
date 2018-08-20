@@ -65,7 +65,11 @@ export default class Hdash {
 			.map(e => e.name)
 			.filter(e => /^h-/.test(e))
 			.forEach(dir => {
-				execDirective(dir.replace(/^h-/, ''), this, el)
+				let [, name, arg] = /^([a-z]+(?:-[a-z]+)*)(:(?:[a-z]+))?$/.exec(dir)
+				if (!!arg) arg = arg.replace(/^:/, '')
+				name = name.replace(/^h-/, '')
+			
+				execDirective(name, arg, this, el)
 			})
 	}
 	$_observe(){

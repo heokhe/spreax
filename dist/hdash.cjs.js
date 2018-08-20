@@ -37,29 +37,25 @@ function parse(attr) {
 }
 
 var alld = [];
-function register(name, fn){
-	name = name.toLowerCase();
-	if (!/^[a-z]+(?:-?\*)?$/.test(name)) { error(("invalid directive name \"" + name + "\"; only a-z and numbers, wildcard at end (could be seperated with a hyphen)")); }
-	var expression = new RegExp('^' + name.replace(/\*$/, '([a-z]+(?:-[a-z]+)*)') + '$');
-	var d = {
-		name: name,
-		expression: expression,
-		fn: fn,
-	};
-	alld.push(d);
+function register(name, fn, arg){
+	if ( arg === void 0 ) arg = 1;
+	if (!/^[a-z]+$/.test(name)) { error(("invalid directive name \"" + name + "\"; only a-z and numbers, wildcard at end (could be seperated with a hyphen)")); }
+	alld.push({
+		name: name, fn: fn, arg: arg
+	});
 }
-function exec(name, ins, el){
+function exec(name, arg, ins, el){
 	var d = null;
 	for (var i = 0, l = alld.length; i < l; i++) {
-		if (alld[i].expression.test(name)) {
+		if (alld[i].name === name) {
 			d = alld[i];
 			break
 		}
 	}
 	if (d === null) { error(("directive \"" + name + "\" not found")); }
-	var parsed = parse(el.getAttribute('h-' + name));
+	var parsed = parse(el.getAttribute('h-' + !arg ? name + ':' + arg : name));
 	d.fn.call(ins, el, Object.assign({}, parsed,
-		{wildcard: name.match(d.expression)[1]}));
+		{arg: arg}));
 }
 
 function sanitizeHTML(html) {
@@ -104,30 +100,25 @@ register('text', function(el, ref) {
 	}
 });
 
-register('model', function(el, binding) {
+register('model', function(el, ref) {
 	var this$1 = this;
+	var value = ref.value;
+	var modifiers = ref.modifiers;
 	if (!/^(?:INPUT|TEXTAREA)$/.test(el.tagName)) { error('<input> or <textarea> required for "model" directive'); }
-	var prop = binding.value;
-	var eventName = binding.modifiers.lazy ? 'change' : 'keydown';
+	var eventName = modifiers.lazy ? 'change' : 'keydown';
 	el.addEventListener(eventName, function () {
 		setTimeout(function () {
 			var v = el.value,
 			isNumberInput = el.type === 'number';
 			if (isNumberInput) { v = Number(v); }
-			if (binding.modifiers.trim && !isNumberInput) { v = v.trim(); }
-			if (v !== this$1.state[prop]) { this$1.state[prop] = v; }
+			if (modifiers.trim && !isNumberInput) { v = v.trim(); }
+			if (v !== this$1.state[value]) { this$1.state[value] = v; }
 		}, 0);
 	});
-	this.$_onChange(prop, function (v) {
+	this.$_onChange(value, function (v) {
 		el.value = v;
 	}, true);
 });
-
-var list = [];
-function isValidEvent(event){
-	if (list.length === 0) { list = Object.keys(window).filter(function (e) { return /^on/.test(e); }).map(function (e) { return e.replace(/^on/, ''); }); }
-	return list.includes(event)
-}
 
 function keyboardEvent(ev){
 	var alt = ev.altKey,
@@ -144,12 +135,10 @@ function keyboardEvent(ev){
 	}
 }
 
-register('on*', function(el, binding) {
+register('on', function(el, binding) {
 	var this$1 = this;
-	var eventName = binding.wildcard;
-	if (!isValidEvent(eventName)) { error(("event \"" + (binding.value) + "\" is not a valid DOM event")); }
-	var isKeyboardEvent = /^key(?:down|up|press)$/.test(eventName);
-	el.addEventListener(eventName, function (e) {
+	var isKeyboardEvent = /^key(?:down|up|press)$/.test(binding.arg);
+	el.addEventListener(binding.arg, function (e) {
 		binding.modifiers.prevent && e.preventDefault();
 		var SHORTCUT_REGEXP = /(?:--|\+\+|[`"']|!|:null)$/;
 		var prop = binding.value,
@@ -219,19 +208,11 @@ register('on*', function(el, binding) {
 	});
 });
 
-register('class-*', function(el, ref){
+register('class', function(el, ref){
 	var value = ref.value;
-	var wildcard = ref.wildcard;
-	this.$_onChange(value || wildcard, function (b) {
-		el.classList[!b ? 'remove' : 'add'](wildcard);
-	}, true);
-});
-
-register('bind-*', function(el, ref){
-	var value = ref.value;
-	var attr = ref.wildcard;
-	this.$_onChange(value, function (v) {
-		el.setAttribute(attr, v);
+	var arg = ref.arg;
+	this.$_onChange(value || arg, function (b) {
+		el.classList[!b ? 'remove' : 'add'](arg);
 	}, true);
 });
 
@@ -298,7 +279,12 @@ Hdash.prototype.$_execDirectives = function $_execDirectives (el){
 		.map(function (e) { return e.name; })
 		.filter(function (e) { return /^h-/.test(e); })
 		.forEach(function (dir) {
-			exec(dir.replace(/^h-/, ''), this$1, el);
+			var ref = /^([a-z]+(?:-[a-z]+)*)(:(?:[a-z]+))?$/.exec(dir);
+				var name = ref[1];
+				var arg = ref[2];
+			if (!!arg) { arg = arg.replace(/^:/, ''); }
+			name = name.replace(/^h-/, '');
+			exec(name, arg, this$1, el);
 		});
 };
 Hdash.prototype.$_observe = function $_observe (){

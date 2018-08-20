@@ -3,12 +3,9 @@ import isValidEvent from '../../../events/isValid'
 import error from "../../../error"
 import keyboardEvent from "./keyboardEvent"
 
-register('on*', function(el, binding) {
-	const eventName = binding.wildcard
-	if (!isValidEvent(eventName)) error(`event "${binding.value}" is not a valid DOM event`)
-
-	const isKeyboardEvent = /^key(?:down|up|press)$/.test(eventName)
-	el.addEventListener(eventName, e => {
+register('on', function(el, binding) {
+	const isKeyboardEvent = /^key(?:down|up|press)$/.test(binding.arg)
+	el.addEventListener(binding.arg, e => {
 		binding.modifiers.prevent && e.preventDefault()
 
 		const SHORTCUT_REGEXP = /(?:--|\+\+|[`"']|!|:null)$/
@@ -56,7 +53,6 @@ register('on*', function(el, binding) {
 				'ctrl' in binding.modifiers !== kb.ctrl
 			) return 
 		}
-
 		if (isAction) {
 			this.actions[prop](e)
 		} else {

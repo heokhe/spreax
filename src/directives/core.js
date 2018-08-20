@@ -6,44 +6,40 @@ const alld = []
 /**
  * @typedef {Object} Bindings
  * @property {string} value
- * @property {string} [wildcard]
+ * @property {string} [arg]
  * @property {{[x: string]: true}} [modifiers]
  * @param {string} name 
  * @param {(el: Element, bindings: Bindings) => void} fn 
+ * @param {(0|1|2)} [arg]
  */
-export function register(name, fn){
-	name = name.toLowerCase()
-	if (!/^[a-z]+(?:-?\*)?$/.test(name)) error(`invalid directive name "${name}"; only a-z and numbers, wildcard at end (could be seperated with a hyphen)`)
-	const expression = new RegExp('^' + name.replace(/\*$/, '([a-z]+(?:-[a-z]+)*)') + '$')
+export function register(name, fn, arg = 1){
+	if (!/^[a-z]+$/.test(name)) error(`invalid directive name "${name}"; only a-z and numbers, wildcard at end (could be seperated with a hyphen)`)
 
-	const d = {
-		name,
-		expression,
-		fn,
-	}
-	alld.push(d)
+	alld.push({
+		name, fn, arg
+	})
 }
 
 /**
  * @param {string} name 
+ * @param {string} arg 
  * @param ins 
  * @param {Element} el 
  */
-export function exec(name, ins, el){
+export function exec(name, arg, ins, el){
 	let d = null
 	for (let i = 0, l = alld.length; i < l; i++) {
-		if (alld[i].expression.test(name)) {
+		if (alld[i].name === name) {
 			d = alld[i]
 			break
-		} 
+		}
 	}
 	if (d === null) error(`directive "${name}" not found`)
 
-	let parsed = parse(el.getAttribute('h-' + name))
-
+	let parsed = parse(el.getAttribute('h-' + !arg ? name + ':' + arg : name))
 	d.fn.call(ins, el, {
 		...parsed,
-		wildcard: name.match(d.expression)[1]		
+		arg
 	})
 }
 
