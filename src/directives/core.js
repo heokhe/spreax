@@ -13,7 +13,7 @@ const alld = []
  * @param {(0|1|2)} [arg]
  */
 export function register(name, fn, arg = 1){
-	if (!/^[a-z]+$/.test(name)) error(`invalid directive name "${name}"; only a-z and numbers, wildcard at end (could be seperated with a hyphen)`)
+	if (!/^[a-z]+$/.test(name)) error(`invalid directive name "${name}"; only a-z and numbers are accepted`)
 
 	alld.push({
 		name, fn, arg
@@ -36,7 +36,17 @@ export function exec(name, arg, ins, el){
 	}
 	if (d === null) error(`directive "${name}" not found`)
 
-	let parsed = parse(el.getAttribute('h-' + !arg ? name + ':' + arg : name))
+	switch (d.arg){
+		case 0:
+			if (!!arg) error(`no argument is accepted for directive "${name}" (got "${arg}")`)
+			break
+		case 2:
+			if (!arg) error(`argument is required for directive "${name}"`)
+			break
+	}
+
+	let attrName = 'h-' + (!!arg ? `${name}:${arg}` : name),
+	parsed = parse(el.getAttribute(attrName))
 	d.fn.call(ins, el, {
 		...parsed,
 		arg

@@ -39,7 +39,7 @@ function parse(attr) {
 var alld = [];
 function register(name, fn, arg){
 	if ( arg === void 0 ) arg = 1;
-	if (!/^[a-z]+$/.test(name)) { error(("invalid directive name \"" + name + "\"; only a-z and numbers, wildcard at end (could be seperated with a hyphen)")); }
+	if (!/^[a-z]+$/.test(name)) { error(("invalid directive name \"" + name + "\"; only a-z and numbers are accepted")); }
 	alld.push({
 		name: name, fn: fn, arg: arg
 	});
@@ -53,7 +53,16 @@ function exec(name, arg, ins, el){
 		}
 	}
 	if (d === null) { error(("directive \"" + name + "\" not found")); }
-	var parsed = parse(el.getAttribute('h-' + !arg ? name + ':' + arg : name));
+	switch (d.arg){
+		case 0:
+			if (!!arg) { error(("no argument is accepted for directive \"" + name + "\" (got \"" + arg + "\")")); }
+			break
+		case 2:
+			if (!arg) { error(("argument is required for directive \"" + name + "\"")); }
+			break
+	}
+	var attrName = 'h-' + (!!arg ? (name + ":" + arg) : name),
+	parsed = parse(el.getAttribute(attrName));
 	d.fn.call(ins, el, Object.assign({}, parsed,
 		{arg: arg}));
 }
@@ -98,7 +107,7 @@ register('text', function(el, ref) {
 				});
 		});
 	}
-});
+}, 0);
 
 register('model', function(el, ref) {
 	var this$1 = this;
@@ -118,7 +127,7 @@ register('model', function(el, ref) {
 	this.$_onChange(value, function (v) {
 		el.value = v;
 	}, true);
-});
+}, 0);
 
 function keyboardEvent(ev){
 	var alt = ev.altKey,
@@ -206,7 +215,7 @@ register('on', function(el, binding) {
 		passive: binding.modifiers.passive,
 		capture: binding.modifiers.capture,
 	});
-});
+}, 2);
 
 register('class', function(el, ref){
 	var value = ref.value;

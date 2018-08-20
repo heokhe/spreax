@@ -33,4 +33,4 @@ register('text', function(el, {value}) {
 				})
 		})
 	}
-})
+}, 0)

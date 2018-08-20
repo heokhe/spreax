@@ -18,5 +18,5 @@ export = class Hdash {
 	private $_emit(name: string): void
 	private $_onChange(name: string, fn: (v: any) => void, immediate?: boolean): void
 }	
-export function directive(name: string, fn: (this: Hdash, el: Element, bindings: Bindings) => void): void
+export function directive(name: string, fn: (this: Hdash, el: Element, bindings: Bindings) => void, arg: 0 | 1 | 2 = 1): void
 export as namespace Hdash

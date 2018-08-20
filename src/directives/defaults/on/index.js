@@ -78,4 +78,4 @@ register('on', function(el, binding) {
 		passive: binding.modifiers.passive,
 		capture: binding.modifiers.capture,
 	})
-})
+}, 2)

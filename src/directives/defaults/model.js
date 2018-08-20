@@ -19,4 +19,4 @@ register('model', function(el, {value, modifiers}) {
 	this.$_onChange(value, v => {
 		el.value = v
 	}, true)
-})
+}, 0)
