@@ -1,10 +1,32 @@
 var Hdash = (function () {
 	'use strict';
 
+	function generateSelectorString(el, root) {
+		if ( root === void 0 ) root = 'body';
+		if (typeof root === 'string') { root = document.querySelector(root); }
+		var pathSections = [];
+		while (el !== root) {
+			pathSections.unshift(el);
+			el = el.parentElement;
+		}
+		pathSections.unshift(root);
+		pathSections = pathSections.map(function (ps) {
+			var selector = ps.tagName.toLowerCase();
+			if (ps.className) { selector += '.' + ps.className.trim().split(' ').join('.'); }
+			if (ps.id) { selector += '#' + ps.id; }
+			selector = selector.replace(/^div([^$]+)/, '$1');
+			return selector
+		});
+		return pathSections.join(' > ')
+	}
+
 	function error(msg, isWarn) {
 		var fmsg = "[hdash" + (!isWarn ? ' error' : '') + "] " + msg;
 		if (isWarn) { console.warn(fmsg); }
 		else { throw new Error(fmsg) }
+	}
+	function domError(msg, el){
+		error(msg + "\n -------\n(at " + (generateSelectorString(el)) + ")");
 	}
 
 	function record(keys, value){
@@ -114,7 +136,7 @@ var Hdash = (function () {
 		var this$1 = this;
 		var value = ref.value;
 		var modifiers = ref.modifiers;
-		if (!/^(?:INPUT|TEXTAREA)$/.test(el.tagName)) { error('<input> or <textarea> required for "model" directive'); }
+		if (!/^(?:INPUT|TEXTAREA)$/.test(el.tagName)) { domError('<input> or <textarea> required for "model" directive', el); }
 		var eventName = modifiers.lazy ? 'change' : 'keydown';
 		el.addEventListener(eventName, function () {
 			setTimeout(function () {
@@ -227,12 +249,13 @@ var Hdash = (function () {
 	});
 
 	var Hdash = function Hdash(el, options) {
+		if (!this instanceof Hdash) { error('Hdash must be called with new operator'); }
 		if (typeof el === 'string') {
 			this.el = document.querySelector(el);
 		} else if (el instanceof HTMLElement) {
 			this.el = el;
 		} else {
-			error(("wrong selector or element: expected element or string, got " + (String(el))));
+			error(("wrong selector or element: expected element or string, got \"" + (String(el)) + "\""));
 		}
 		this.state = options.state || {};
 		this.actions = options.actions || {};

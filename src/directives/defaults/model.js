@@ -1,8 +1,8 @@
 import { register } from "../core"
-import error from "../../error"
+import { domError } from "../../error"
 
 register('model', function(el, {value, modifiers}) {
-	if (!/^(?:INPUT|TEXTAREA)$/.test(el.tagName)) error('<input> or <textarea> required for "model" directive')
+	if (!/^(?:INPUT|TEXTAREA)$/.test(el.tagName)) domError('<input> or <textarea> required for "model" directive', el)
 	let eventName = modifiers.lazy ? 'change' : 'keydown'
 
 	el.addEventListener(eventName, () => {

@@ -1,5 +1,3 @@
-'use strict';
-
 function generateSelectorString(el, root) {
 	if ( root === void 0 ) root = 'body';
 	if (typeof root === 'string') { root = document.querySelector(root); }
@@ -334,4 +332,4 @@ Hdash.prototype.$_observe = function $_observe (){
 
 Hdash.directive = register;
 
-module.exports = Hdash;
+export default Hdash;

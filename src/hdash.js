@@ -3,12 +3,13 @@ import { exec as execDirective } from './directives/'
 
 export default class Hdash {
 	constructor(el, options) {
+		if (!this instanceof Hdash) error('Hdash must be called with new operator')
 		if (typeof el === 'string') {
 			this.el = document.querySelector(el)
 		} else if (el instanceof HTMLElement) {
 			this.el = el
 		} else {
-			error(`wrong selector or element: expected element or string, got ${String(el)}`)
+			error(`wrong selector or element: expected element or string, got "${String(el)}"`)
 		}
 		this.state = options.state || {}
 		this.actions = options.actions || {}

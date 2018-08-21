@@ -28,14 +28,14 @@ module.exports = [
 	{
 		input: 'src/index.js',
 		output: {
-			file: pkg.main.replace(/\.js/, '.min.js'),
-			format: 'cjs',
+			file: pkg.module,
+			format: 'es',
 		},
 		plugins: [
 			node(),
 			commonjs(),
 			buble,
-			uglify()
+			cleanup
 		]
 	},
 	{
