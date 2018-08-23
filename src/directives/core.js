@@ -8,15 +8,21 @@ const alld = []
  * @property {string} value
  * @property {string} [arg]
  * @property {{[x: string]: true}} [modifiers]
+ * @typedef {(el: Element, bindings: Bindings) => void} fn
+*/
+
+/**
  * @param {string} name 
- * @param {(el: Element, bindings: Bindings) => void} fn 
+ * @param {Object} hooks
+ * @param {fn} [hooks.ready]
+ * @param {fn} [hooks.updated]
  * @param {(0|1|2)} [arg]
  */
-export function register(name, fn, arg = 1){
+export function register(name, hooks, arg = 1){
 	if (!/^[a-z]+$/.test(name)) error(`invalid directive name "${name}"; only a-z and numbers are accepted`)
 
 	alld.push({
-		name, fn, arg
+		name, hooks, arg
 	})
 }
 

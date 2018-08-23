@@ -19,13 +19,13 @@ function generateSelectorString(el, root) {
 	return pathSections.join(' > ')
 }
 
-function error(msg, isWarn) {
+function error$1(msg, isWarn) {
 	var fmsg = "[hdash" + (!isWarn ? ' error' : '') + "] " + msg;
 	if (isWarn) { console.warn(fmsg); }
 	else { throw new Error(fmsg) }
 }
 function domError(msg, el){
-	error(msg + "\n -------\n(at " + (generateSelectorString(el)) + ")");
+	error$1(msg + "\n -------\n(at " + (generateSelectorString(el)) + ")");
 }
 
 function record(keys, value){
@@ -61,7 +61,7 @@ function parse(attr) {
 var alld = [];
 function register(name, fn, arg){
 	if ( arg === void 0 ) arg = 1;
-	if (!/^[a-z]+$/.test(name)) { error(("invalid directive name \"" + name + "\"; only a-z and numbers are accepted")); }
+	if (!/^[a-z]+$/.test(name)) { error$1(("invalid directive name \"" + name + "\"; only a-z and numbers are accepted")); }
 	alld.push({
 		name: name, fn: fn, arg: arg
 	});
@@ -74,13 +74,13 @@ function exec(name, arg, ins, el){
 			break
 		}
 	}
-	if (d === null) { error(("directive \"" + name + "\" not found")); }
+	if (d === null) { error$1(("directive \"" + name + "\" not found")); }
 	switch (d.arg){
 		case 0:
-			if (!!arg) { error(("no argument is accepted for directive \"" + name + "\" (got \"" + arg + "\")")); }
+			if (!!arg) { error$1(("no argument is accepted for directive \"" + name + "\" (got \"" + arg + "\")")); }
 			break
 		case 2:
-			if (!arg) { error(("argument is required for directive \"" + name + "\"")); }
+			if (!arg) { error$1(("argument is required for directive \"" + name + "\"")); }
 			break
 	}
 	var attrName = 'h-' + (!!arg ? (name + ":" + arg) : name),
@@ -151,6 +151,12 @@ register('model', function(el, ref) {
 	}, true);
 }, 0);
 
+var list = [];
+function isValidEvent(event){
+	if (list.length === 0) { list = Object.keys(window).filter(function (e) { return /^on/.test(e); }).map(function (e) { return e.replace(/^on/, ''); }); }
+	return list.includes(event)
+}
+
 function keyboardEvent(ev){
 	var alt = ev.altKey,
 		shift = ev.shiftKey,
@@ -168,6 +174,7 @@ function keyboardEvent(ev){
 
 register('on', function(el, binding) {
 	var this$1 = this;
+	if (!isValidEvent(binding.arg)) { domError(("event " + (binding.arg) + " is not a valid DOM event."), el); }
 	var isKeyboardEvent = /^key(?:down|up|press)$/.test(binding.arg);
 	el.addEventListener(binding.arg, function (e) {
 		binding.modifiers.prevent && e.preventDefault();
@@ -248,17 +255,17 @@ register('class', function(el, ref){
 });
 
 var Hdash = function Hdash(el, options) {
-	if (!this instanceof Hdash) { error('Hdash must be called with new operator'); }
+	if (!this instanceof Hdash) { error$1('Hdash must be called with new operator'); }
 	if (typeof el === 'string') {
 		this.el = document.querySelector(el);
 	} else if (el instanceof HTMLElement) {
 		this.el = el;
 	} else {
-		error(("wrong selector or element: expected element or string, got \"" + (String(el)) + "\""));
+		error$1(("wrong selector or element: expected element or string, got \"" + (String(el)) + "\""));
 	}
 	this.state = options.state || {};
 	this.actions = options.actions || {};
-	this.watchers = options.watchers || {};
+	this.$_watchers = options.watchers || {};
 	this.$_events = {};
 	this.$_init();
 };
@@ -267,10 +274,10 @@ Hdash.prototype.$_initProxy = function $_initProxy () {
 	this.state = new Proxy(this.state, {
 		get: function (obj, key) {
 			if (key in obj) { return obj[key] }
-			else { error(("unknown state property \"" + key + "\"")); }
+			else { error$1(("unknown state property \"" + key + "\"")); }
 		},
 		set: function (obj, key, value) {
-			if (!(key in obj)) { error(("unknown state property \"" + key + "\"")); }
+			if (!(key in obj)) { error$1(("unknown state property \"" + key + "\"")); }
 			obj[key] = value;
 			this$1.$_emit(key);
 			return true
@@ -298,8 +305,8 @@ Hdash.prototype.$_init = function $_init () {
 	Object.keys(this.actions).forEach(function (k) {
 		this$1.actions[k] = this$1.actions[k].bind(this$1);
 	});
-	Object.keys(this.watchers).forEach(function (k) {
-		this$1.$_onChange(k, this$1.watchers[k].bind(this$1));
+	Object.keys(this.$_watchers).forEach(function (k) {
+		this$1.$_onChange(k, this$1.$_watchers[k].bind(this$1));
 	});
 	this.$_initProxy();
 	this.el.querySelectorAll('*').forEach(this.$_execDirectives.bind(this));

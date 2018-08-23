@@ -1,9 +1,11 @@
 import { register } from "../../core"
 import isValidEvent from '../../../events/isValid'
-import error from "../../../error"
+import { domError } from "../../../error"
 import keyboardEvent from "./keyboardEvent"
 
 register('on', function(el, binding) {
+	if (!isValidEvent(binding.arg)) domError(`event ${binding.arg} is not a valid DOM event.`, el)
+	
 	const isKeyboardEvent = /^key(?:down|up|press)$/.test(binding.arg)
 	el.addEventListener(binding.arg, e => {
 		binding.modifiers.prevent && e.preventDefault()

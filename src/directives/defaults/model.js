@@ -12,7 +12,7 @@ register('model', function(el, {value, modifiers}) {
 
 			if (isNumberInput) v = Number(v)
 			if (modifiers.trim && !isNumberInput) v = v.trim()
-			
+
 			if (v !== this.state[value]) this.state[value] = v
 		}, 0)
 	})
