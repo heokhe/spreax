@@ -1,69 +1,57 @@
-const buble = require('rollup-plugin-buble')({
-	objectAssign: 'Object.assign'
-})
-const {uglify} = require('rollup-plugin-uglify')
-const commonjs = require('rollup-plugin-commonjs')
-const node = require('rollup-plugin-node-resolve')
-const cleanupPlugin = require('rollup-plugin-cleanup')
-const pkg = require('./package.json')
-const cleanup = cleanupPlugin({
-	comments: 'none',
-	normalizeEols: 'unix'
-})
+import buble from 'rollup-plugin-buble'
+import commonjs from 'rollup-plugin-commonjs'
+import resolve from 'rollup-plugin-node-resolve'
+import cleanup from 'rollup-plugin-cleanup'
+import { terser } from 'rollup-plugin-terser'
+import { main, module as _module, browser } from './package.json';
+const plugins = [
+	resolve(),
+	commonjs(),
+	buble({
+		objectAssign: 'Object.assign',
+		transforms: {
+			dangerousForOf: true
+		}
+	}),
+	cleanup({
+		comments: 'none',
+		normalizeEols: 'unix'
+	})
+]
 
-module.exports = [
+export default [
 	{
 		input: 'src/index.js',
 		output: {
-			file: pkg.main,
+			file: main,
 			format: 'cjs',
 		},
-		plugins: [
-			node(),
-			commonjs(),
-			buble,
-			cleanup
-		]
+		plugins
 	},
 	{
 		input: 'src/index.js',
 		output: {
-			file: pkg.module,
+			file: _module,
 			format: 'es',
 		},
-		plugins: [
-			node(),
-			commonjs(),
-			buble,
-			cleanup
-		]
+		plugins
 	},
 	{
 		input: 'src/index.js',
 		output: {
-			file: pkg.browser,
+			file: browser,
 			format: 'iife',
 			name: 'Hdash'
 		},
-		plugins: [
-			node(),
-			commonjs(),
-			buble,
-			cleanup
-		]
+		plugins
 	},
 	{
 		input: 'src/index.js',
 		output: {
-			file: pkg.browser.replace(/\.js/, '.min.js'),
+			file: browser.replace(/\.js/, '.min.js'),
 			format: 'iife',
 			name: 'Hdash'
 		},
-		plugins: [
-			node(),
-			commonjs(),
-			buble,
-			uglify()
-		]
+		plugins: [...plugins.slice(0, -1), terser()]
 	},
 ]

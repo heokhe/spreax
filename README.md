@@ -27,11 +27,9 @@ var app = new Hdash('#app', {
 and, your HTML document:
 ```html
 <div id="app">
-	<h1 h-text='text'></h1>
+	{ text }
 </div>
 ```
 That's it, a "hello world" 🎉
-
-This was just a simple demo, we used default `text` directive to tell Hdash: "hey, put the property 'text' of state into this h1 tag"
 
 > There is no complete documentation for Hdash. after alpha (or beta) release, I'll start working on the official site.

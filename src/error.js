@@ -1,4 +1,4 @@
-import generateSelector from './utils/generateSelector'
+import generateSelector from './dom/generateSelector'
 
 /**
  * @param {string} msg 
@@ -13,7 +13,8 @@ export default function error(msg, isWarn) {
 /**
  * @param {string} msg 
  * @param {Element} el 
+ * @param {boolean} [isWarn]
  */
-export function domError(msg, el){
-	error(msg + `\n -------\n(at ${generateSelector(el)})`)
+export function domError(msg, el, isWarn){
+	error(msg + `\n -------\n(at ${generateSelector(el)})`, isWarn)
 }

@@ -1,27 +1,12 @@
-import { Bindings } from "../src/directives/core"
+export interface HdashInstance<State> {
+	state: State,
 
-type HdashAction = (this: Hdash, arg?: any) => void
-type HdashWatcher = (this: Hdash, v?: any) => void
-type obj<T = any> = {
-	[x: string]: T
 }
-
-declare module 'hdash'
-
-export = class Hdash {
-	constructor(el: Element | string, options: {
-		state?: obj
-		actions?: obj<HdashAction>
-		watchers?: obj<HdashWatcher>
+export interface HdashConstructor {
+	new <State = object>(el: string | Element, options: {
+		state?: State
 	})
-	state: obj
-	readonly actions: obj<action>
-	readonly watchers: obj<HdashWatcher>
-	private $_emit(name: string): void
-	private $_onChange(name: string, fn: (v: any) => void, immediate?: boolean): void
 }
-export function directive(name: string, hooks: {
-	ready(el: Element, binding: Bindings, this: Hdash): void
-	updated(el: Element, binding: Bindings, this: Hdash): void
-}, arg: 0 | 1 | 2 = 1): void
+const Hdash: HdashConstructor
+export default Hdash
 export as namespace Hdash

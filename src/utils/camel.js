@@ -3,7 +3,5 @@
  * @returns {string}
  */
 export default function camel(str){
-	return str.replace(/-(.)/g, ($, next) => {
-		return /[a-z]/.test(next) ? next.toUpperCase() : next
-	})
+	return str.replace(/-([a-z])/g, ($, next) => next.toUpperCase())
 }

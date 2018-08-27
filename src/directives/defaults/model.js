@@ -1,22 +1,15 @@
-import { register } from "../core"
-import { domError } from "../../error"
+import { register } from '../register'
 
-register('model', function(el, {value, modifiers}) {
-	if (!/^(?:INPUT|TEXTAREA)$/.test(el.tagName)) domError('<input> or <textarea> required for "model" directive', el)
-	let eventName = modifiers.lazy ? 'change' : 'keydown'
-
-	el.addEventListener(eventName, () => {
-		setTimeout(() => {
-			let v = el.value,
-			isNumberInput = el.type === 'number';
-
-			if (isNumberInput) v = Number(v)
-			if (modifiers.trim && !isNumberInput) v = v.trim()
-
-			if (v !== this.state[value]) this.state[value] = v
-		}, 0)
-	})
-	this.$_onChange(value, v => {
-		el.value = v
-	}, true)
-}, 0)
+register('model', {
+	ready(el, value) {
+		el.value = this.state[value]
+		el.addEventListener('keydown', () => {
+			setTimeout(() => {
+				this.state[value] = el.value
+			}, 0)
+		})
+	},
+	updated(el, value) {
+		if (el.value !== this.state[value]) el.value = this.state[value]
+	}
+}, 'empty')

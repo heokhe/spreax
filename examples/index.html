@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<meta http-equiv="X-UA-Compatible" content="ie=edge">
+	<title>HDash</title>
+</head>
+<body>
+	<div id="app">
+		<h1>{ title }</h1>
+		<hr>
+		<div id="model">
+			<h3>What's your name?</h3>
+			<input type="text" h-model='model_name'>
+			<button h-on:click='model_name = ""'>clear</button>
+			<div>my name is <b>{ model_name }</b>, formatted name is { model_name | upper }</div>
+		</div>
+		<div id="on-shortcuts">
+			<h3>Shortcuts in "on" directive</h3>
+			<b>{ sh }</b>
+			<br>
+			<button h-on:click='sh = null'>null</button>
+			<button h-on:click='sh = 90.5'>digit</button>
+			<button h-on:click='sh = title'>title</button>
+			<button h-on:click='sh = ""'>empty</button>
+		</div>
+	</div>
+</body>
+<script src="/dist/hdash.browser.js"></script>
+<script src="./index.js"></script>
+</html>

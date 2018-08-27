@@ -1,6 +1,7 @@
-import  './defaults/text'
+import getModifiers from './getModifiers'
 import './defaults/model'
-import './defaults/on/index'
 import './defaults/class'
+import './defaults/on'
 
-export * from './core'
+export * from './register'
+export { getModifiers }

@@ -1,5 +1,3 @@
-'use strict';
-
 function generateSelectorString(el, root) {
 	if ( root === void 0 ) root = 'body';
 	if (typeof root === 'string') { root = document.querySelector(root); }
@@ -19,14 +17,42 @@ function generateSelectorString(el, root) {
 	return pathSections.join(' > ')
 }
 
-function error$1(msg, isWarn) {
+function error(msg, isWarn) {
 	var fmsg = "[hdash" + (!isWarn ? ' error' : '') + "] " + msg;
 	if (isWarn) { console.warn(fmsg); }
 	else { throw new Error(fmsg) }
 }
-function domError(msg, el){
-	error$1(msg + "\n -------\n(at " + (generateSelectorString(el)) + ")");
+function domError(msg, el, isWarn){
+	error(msg + "\n -------\n(at " + (generateSelectorString(el)) + ")", isWarn);
 }
+
+function getTextNodes(el) {
+	var n = [];
+	for (var i = 0, list = el.childNodes; i < list.length; i += 1) {
+		var node = list[i];
+		var type = node.nodeType;
+		if (type === document.TEXT_NODE) {
+			n.push(node);
+		} else if (type === document.ELEMENT_NODE) {
+			n = n.concat( getTextNodes(node));
+		}
+	}
+	return n.filter(function (e) {
+		return /\S+/g.test(e.textContent)
+	})
+}
+
+function arrayUnique(arr){
+	return arr.filter(function (elem, pos, _arr) { return arr.indexOf(elem) === pos; })
+}
+
+function trim(str) {
+	return str.replace(/\{ /g, '').replace(/ \}/g, '')
+}
+function contains(str){
+	return /\{ \w+(?: \| \w+)* \}/gi.test(str)
+}
+var global = /\{ \w+(?: \| \w+)* \}/gi;
 
 function record(keys, value){
 	var o = {};
@@ -36,309 +62,261 @@ function record(keys, value){
 	return o
 }
 
-function camel(str){
-	return str.replace(/-(.)/g, function ($, next) {
-		return /[a-z]/.test(next) ? next.toUpperCase() : next
-	})
+var _registry = {};
+function register(name, callback, argState) {
+	if ( argState === void 0 ) argState = 'optional';
+	if (name in _registry) { error(("directive \"" + name + "\" already exists")); }
+	if (!['optional', 'empty', 'required'].includes(argState)) { error(("argument state for directive \"" + name + "\" is not valid. choosing the default value (\"optional\")"), true); }
+	if (!/^[a-z]+(?:-[a-z]+)*$/.test(name)) { error(("\"" + name + "\" is not a valid directive name")); }
+	_registry[name] = {
+		argState: argState, callback: callback
+	};
 }
+var all = _registry;
 
-function parse(attr) {
-	var reg = /((?: --(?:(?:[a-z]+-)*[a-z0-9]+)+)+)$/,
-	value = attr.replace(reg, ''),
-	modString = reg.exec(attr),
-	modObject = {};
-	modString = modString === null ? null : modString[0];
-	if (modString !== null) {
-		var modKeys = modString.split(' --').filter(function (e) { return !!e; }).map(camel);
-		modObject = record(modKeys, true);
-	}
-	return {
-		value: value,
-		modifiers: modObject
-	}
-}
-
-var alld = [];
-function register(name, fn, arg){
-	if ( arg === void 0 ) arg = 1;
-	if (!/^[a-z]+$/.test(name)) { error$1(("invalid directive name \"" + name + "\"; only a-z and numbers are accepted")); }
-	alld.push({
-		name: name, fn: fn, arg: arg
-	});
-}
-function exec(name, arg, ins, el){
-	var d = null;
-	for (var i = 0, l = alld.length; i < l; i++) {
-		if (alld[i].name === name) {
-			d = alld[i];
-			break
-		}
-	}
-	if (d === null) { error$1(("directive \"" + name + "\" not found")); }
-	switch (d.arg){
-		case 0:
-			if (!!arg) { error$1(("no argument is accepted for directive \"" + name + "\" (got \"" + arg + "\")")); }
-			break
-		case 2:
-			if (!arg) { error$1(("argument is required for directive \"" + name + "\"")); }
-			break
-	}
-	var attrName = 'h-' + (!!arg ? (name + ":" + arg) : name),
-	parsed = parse(el.getAttribute(attrName));
-	d.fn.call(ins, el, Object.assign({}, parsed,
-		{arg: arg}));
-}
-
-function sanitizeHTML(html) {
-	return html.replace(/&/g, '&amp;')
-		.replace(/</g, '&lt;')
-		.replace(/"/g, '&quot;')
-}
-
-function arrayUnique(arr){
-	return arr.filter(function (elem, pos, _arr) { return arr.indexOf(elem) === pos; })
-}
-
-register('text', function(el, ref) {
-	var this$1 = this;
-	var value = ref.value;
-	if (!!value) {
-		this.$_onChange(value, function (text) {
-			text = String(text);
-			text = sanitizeHTML(text).replace(/  /g, '&nbsp;&nbsp;').replace(/\n/g, '<br>');
-			el.innerHTML = text;
-		}, true);
-	} else {
-		var REG = /\{\{\w+\}\}/gi,
-		removeBraces = function (p) { return p.replace(/^\{\{/, '').replace(/\}\}$/, ''); };
-		var els = Array.from(el.children);
-		els.unshift(el);
-		els.forEach(function (el) {
-			Array.from(el.childNodes)
-				.filter(function (n) { return n.nodeType === 3; })
-				.filter(function (n) { return !!n.textContent.trim(); })
-				.filter(function (n) { return REG.test(n.textContent); })
-				.forEach(function (node) {
-					var text = node.textContent,
-					usedProps = arrayUnique(text.match(REG).map(removeBraces));
-					usedProps.forEach(function (prop) {
-						this$1.$_onChange(prop, function (v) {
-							node.textContent = text.replace(new RegExp('\\{\\{' + prop + '\\}\\}', 'g'), v);
-						}, true);
-					});
-				});
+register('model', {
+	ready: function ready(el, value) {
+		var this$1 = this;
+		el.value = this.state[value];
+		el.addEventListener('keydown', function () {
+			setTimeout(function () {
+				this$1.state[value] = el.value;
+			}, 0);
 		});
+	},
+	updated: function updated(el, value) {
+		if (el.value !== this.state[value]) { el.value = this.state[value]; }
 	}
-}, 0);
+}, 'empty');
 
-register('model', function(el, ref) {
+var fn = function (el, value, mod, arg) {
+	var list = el.classList,
+	bool = !!this.state[value || arg];
+	list[bool ? 'add' : 'remove'](arg || value);
+};
+register('class', {
+	ready: fn,
+	updated: fn
+}, 'required');
+
+register('on', function(el, value, modifiers, arg) {
 	var this$1 = this;
-	var value = ref.value;
-	var modifiers = ref.modifiers;
-	if (!/^(?:INPUT|TEXTAREA)$/.test(el.tagName)) { domError('<input> or <textarea> required for "model" directive', el); }
-	var eventName = modifiers.lazy ? 'change' : 'keydown';
-	el.addEventListener(eventName, function () {
-		setTimeout(function () {
-			var v = el.value,
-			isNumberInput = el.type === 'number';
-			if (isNumberInput) { v = Number(v); }
-			if (modifiers.trim && !isNumberInput) { v = v.trim(); }
-			if (v !== this$1.state[value]) { this$1.state[value] = v; }
-		}, 0);
-	});
-	this.$_onChange(value, function (v) {
-		el.value = v;
-	}, true);
-}, 0);
-
-var list = [];
-function isValidEvent(event){
-	if (list.length === 0) { list = Object.keys(window).filter(function (e) { return /^on/.test(e); }).map(function (e) { return e.replace(/^on/, ''); }); }
-	return list.includes(event)
-}
-
-function keyboardEvent(ev){
-	var alt = ev.altKey,
-		shift = ev.shiftKey,
-		ctrl = ev.ctrlKey,
-		meta = ev.metaKey,
-		key = ev.which;
-	return {
-		alt: alt,
-		shift: shift,
-		ctrl: ctrl,
-		meta: meta,
-		key: key
-	}
-}
-
-register('on', function(el, binding) {
-	var this$1 = this;
-	if (!isValidEvent(binding.arg)) { domError(("event " + (binding.arg) + " is not a valid DOM event."), el); }
-	var isKeyboardEvent = /^key(?:down|up|press)$/.test(binding.arg);
-	el.addEventListener(binding.arg, function (e) {
-		binding.modifiers.prevent && e.preventDefault();
-		var SHORTCUT_REGEXP = /(?:--|\+\+|[`"']|!|:null)$/;
-		var prop = binding.value,
-		shortcut = prop.match(SHORTCUT_REGEXP),
-		isAction = shortcut === null;
-		shortcut = shortcut === null ? null : shortcut[0];
-		if (isKeyboardEvent) {
-			var kb = keyboardEvent(e);
-			var RESERVED_KEYS = {
-				backspace: 8,
-				tab: 9,
-				enter: 13,
-				shift: 16,
-				ctrl: 17,
-				alt: 18,
-				capslock: 20,
-				esc: 27,
-				pageup: 33,
-				pagedown: 34,
-				end: 35,
-				home: 36,
-				left: 37,
-				up: 38,
-				right: 39,
-				down: 40,
-				insert: 45,
-				delete: 46
-			};
-			var key = Object.keys(binding.modifiers).filter(function (e) { return /^key/.test(e); }).map(function (e) { return e.replace(/^key/, '').toLowerCase(); });
-			if (!!key.length) { key = kb.key; }
-			else { key = key[0]; }
-			if (key.length > 1) { error(("more than one keys are declared for " + eventName), true); }
-			if (/^[a-z]$/.test(key)) { key = key.charCodeAt(0) - 32; }
-			if (key in RESERVED_KEYS) { key = RESERVED_KEYS[key]; }
-			if (
-				key != kb.key ||
-				'shift' in binding.modifiers !== kb.shift ||
-				'alt' in binding.modifiers !== kb.alt ||
-				'meta' in binding.modifiers !== kb.meta ||
-				'ctrl' in binding.modifiers !== kb.ctrl
-			) { return }
-		}
-		if (isAction) {
-			this$1.actions[prop](e);
+	var sh_reg = / = (.*)$/;
+	var ref = value.match(sh_reg) || [];
+	var shortcut = ref[1];
+	var hasShortcut = !!shortcut,
+	pureValue = value.replace(sh_reg, '');
+	el.addEventListener(arg, function () {
+		if (hasShortcut) {
+			var v;
+			if (['""', "''", '``'].includes(shortcut)) { v = ''; }
+			else if (shortcut === 'null') { v = null; }
+			else if (shortcut === 'true') { v = true; }
+			else if (shortcut === 'false') { v = false; }
+			else if (shortcut === '!0') { v = true; }
+			else if (shortcut === '!1') { v = false; }
+			else if (!isNaN(Number(shortcut)) && shortcut !== 'Infinity') { v = Number(shortcut); }
+			else { v = this$1.state[shortcut]; }
+			this$1.state[pureValue] = v;
 		} else {
-			prop = prop.replace(SHORTCUT_REGEXP, '');
-			if (/'|"|`/.test(shortcut)) { return this$1.state[prop] = '' }
-			switch (shortcut) {
-				case '-':
-					this$1.state[prop]--;
-					break
-				case '+':
-					this$1.state[prop]++;
-					break
-				case '!':
-					this$1.state[prop] = !this$1.state[prop];
-					break
-				case ':null':
-					this$1.state[prop] = null;
-					break
-			}
+			this$1.actions[value]();
 		}
 	}, {
-		once: binding.modifiers.once,
-		passive: binding.modifiers.passive,
-		capture: binding.modifiers.capture,
+		once: modifiers.once,
+		passive: modifiers.passive,
+		capture: modifiers.once,
 	});
-}, 2);
+}, 'required');
 
-register('class', function(el, ref){
-	var value = ref.value;
-	var arg = ref.arg;
-	this.$_onChange(value || arg, function (b) {
-		el.classList[!b ? 'remove' : 'add'](arg);
-	}, true);
-});
+function directivesOf(el) {
+	return Array.from(el.attributes)
+		.map(function (e) { return e.name; })
+		.filter(function (e) { return /^h-/.test(e); })
+		.map(function (e) { return e.replace(/^h-/, ''); })
+		.map(function (e) {
+			var ref = e.match(/^([a-z]+(?:-[a-z]+)*)(:[a-z0-9]+)?((?:\.[a-z0-9]+))*$/);
+			var name = ref[1];
+			var arg = ref[2];
+			var modifiers = ref[3];
+			if (arg) { arg = arg.replace(/^:/, ''); }
+			if (modifiers) {
+				modifiers = record(modifiers.split('.').filter(Boolean), true);
+			} else { modifiers = {}; }
+			return { name: name, arg: arg, modifiers: modifiers }
+		}).filter(function (e, index, arr) {
+			var getFullName = function (e) { return e.arg ? [e.name, e.arg].join(':') : e.name; },
+			fullName = getFullName(e),
+			withThisFullName = arr.filter(function (e) { return getFullName(e) === fullName; });
+			if (withThisFullName.length > 1) {
+				domError(("duplicate directive " + (e.name)), el, true);
+				return withThisFullName[0]
+			} else { return e }
+		})
+}
 
 var Hdash = function Hdash(el, options) {
-	if (!this instanceof Hdash) { error$1('Hdash must be called with new operator'); }
+	if (!this instanceof Hdash) { error('Hdash must be called with new operator'); }
 	if (typeof el === 'string') {
-		this.el = document.querySelector(el);
+		this.$el = document.querySelector(el);
 	} else if (el instanceof HTMLElement) {
-		this.el = el;
+		this.$el = el;
 	} else {
-		error$1(("wrong selector or element: expected element or string, got \"" + (String(el)) + "\""));
+		error(("wrong selector or element: expected element or string, got \"" + (String(el)) + "\""));
 	}
 	this.state = options.state || {};
 	this.actions = options.actions || {};
-	this.$_watchers = options.watchers || {};
-	this.$_events = {};
-	this.$_init();
+	this.$watchers = options.watchers || {};
+	this.$formatters = options.formatters || {};
+	this.$events = [];
+	this.$init();
 };
-Hdash.prototype.$_initProxy = function $_initProxy () {
-		var this$1 = this;
-	this.state = new Proxy(this.state, {
-		get: function (obj, key) {
-			if (key in obj) { return obj[key] }
-			else { error$1(("unknown state property \"" + key + "\"")); }
-		},
-		set: function (obj, key, value) {
-			if (!(key in obj)) { error$1(("unknown state property \"" + key + "\"")); }
-			obj[key] = value;
-			this$1.$_emit(key);
-			return true
-		}
-	});
-};
-Hdash.prototype.$_emit = function $_emit (name) {
-		var this$1 = this;
-	if (!(name in this.$_events)) { this.$_events[name] = []; }
-	this.$_events[name].forEach(function (e) {
-		e(this$1.state[name]);
-	});
-};
-Hdash.prototype.$_onChange = function $_onChange (name, fn, immediate) {
-	var evs = this.$_events[name];
-	if (typeof evs === 'undefined') { evs = []; }
-	evs.push(fn);
-	this.$_events[name] = evs;
-	if (immediate) {
-		this.$_emit(name);
-	}
-};
-Hdash.prototype.$_init = function $_init () {
+Hdash.prototype.$init = function $init () {
 		var this$1 = this;
 	Object.keys(this.actions).forEach(function (k) {
 		this$1.actions[k] = this$1.actions[k].bind(this$1);
 	});
-	Object.keys(this.$_watchers).forEach(function (k) {
-		this$1.$_onChange(k, this$1.$_watchers[k].bind(this$1));
+	Object.keys(this.$watchers).forEach(function (k) {
+		this$1.$on(k, this$1.$watchers[k]);
 	});
-	this.$_initProxy();
-	this.el.querySelectorAll('*').forEach(this.$_execDirectives.bind(this));
-	this.$_observe();
+	this.$initProxy();
+	this.$el.querySelectorAll('*').forEach(this.$execDirectives.bind(this));
+	this.$interpolation();
+	this.$observe();
 };
-Hdash.prototype.$_execDirectives = function $_execDirectives (el){
+Hdash.prototype.$initProxy = function $initProxy () {
 		var this$1 = this;
-	Array.from(el.attributes)
-		.map(function (e) { return e.name; })
-		.filter(function (e) { return /^h-/.test(e); })
-		.forEach(function (dir) {
-			var ref = /^([a-z]+(?:-[a-z]+)*)(:(?:[a-z]+))?$/.exec(dir);
-				var name = ref[1];
-				var arg = ref[2];
-			if (!!arg) { arg = arg.replace(/^:/, ''); }
-			name = name.replace(/^h-/, '');
-			exec(name, arg, this$1, el);
-		});
+	this.state = new Proxy(this.state, {
+		get: function (obj, key) {
+			if (key in obj) { return obj[key] }
+			else { error(("unknown state property \"" + key + "\"")); }
+		},
+		set: function (obj, key, value) {
+			if (!key in obj) { error(("unknown state property \"" + key + "\"")); }
+			obj[key] = value;
+			this$1.$emit(key);
+			this$1.$emit();
+			return true
+		}
+	});
 };
-Hdash.prototype.$_observe = function $_observe (){
+Hdash.prototype.$execDirectives = function $execDirectives (el) {
+		var this$1 = this;
+	var loop = function () {
+		var ref = list[i];
+			var name = ref.name;
+			var arg = ref.arg;
+			var modifiers = ref.modifiers;
+			var dir = all[name];
+		if (dir === undefined) { domError(("directive \"" + name + "\" not found"), el); }
+		switch (dir.argState) {
+			case 'empty':
+				if (!!arg) { domError(("directive \"" + name + "\" needed no arguments, but there is an argument"), el); }
+				break
+			case 'required':
+				if (!arg) { domError("directive needs an arguments, but there's nothing", el); }
+				break
+		}
+		var attrValue = el.getAttribute('h-' + (!!arg ? (name + ':' + arg) : name)),
+		argArray = [el, attrValue, modifiers, arg];
+		if (typeof dir.callback === 'function') {
+			dir.callback.apply(this$1, argArray);
+		} else {
+			if ('ready' in dir.callback) { dir.callback.ready.apply(this$1, argArray); }
+			if ('updated' in dir.callback) {
+				this$1.$on('', function () {
+					dir.callback.updated.apply(this$1, argArray);
+				}, {
+					type: 'DIRECTIVE'
+				});
+			}
+		}
+	};
+		for (var i = 0, list = directivesOf(el); i < list.length; i += 1) loop();
+};
+Hdash.prototype.$interpolation = function $interpolation () {
+	getTextNodes(this.$el).forEach(this.$interpolateNode.bind(this));
+};
+Hdash.prototype.$interpolateNode = function $interpolateNode (node){
+		var this$1 = this;
+	if (!contains(node.textContent)) { return; }
+	var exps = arrayUnique(node.textContent.match(global).map(trim));
+	var initText = node.textContent;
+	var loop = function () {
+		var exp = list[i];
+			var ref = exp.split(' | ');
+			var prop = ref[0];
+			var formatters = ref.slice(1);
+		var reg = new RegExp('\\{ ' + exp.replace(/\|/g, '\\|') + ' \\}', 'g');
+		if (formatters.length){
+			formatters = formatters.map(function (e) {
+				if (e in this$1.$formatters) { return this$1.$formatters[e] }
+				else { error(("formatter \"" + e + "\" not found")); }
+			}).reduce(function (a, b) {
+				return function (arg) {
+					return b(a(arg))
+				}
+			});
+		} else {
+			formatters = function (x) { return x; };
+		}
+		this$1.$on(prop, function (v) {
+			var replaced = initText.replace(reg, formatters(v));
+			if (node.textContent !== replaced) { node.textContent = replaced; }
+		}, {
+			immediate: true,
+			type: 'INTERPOLATION',
+			id: node
+		});
+	};
+		for (var i = 0, list = exps; i < list.length; i += 1) loop();
+};
+Hdash.prototype.$observe = function $observe (){
 		var this$1 = this;
 	var m = new MutationObserver(function (muts) {
 		muts.forEach(function (mut) {
-			var added = Array.from(mut.addedNodes).filter(function (e) { return e.nodeName !== '#text'; });
-			added.forEach(this$1.$_execDirectives.bind(this$1));
+			for (var i = 0, list = mut.addedNodes; i < list.length; i += 1) {
+				var anode = list[i];
+					if (anode.nodeType === document.TEXT_NODE) { this$1.$interpolateNode(anode); }
+			}
+			for (var i$1 = 0, list$1 = mut.removedNodes; i$1 < list$1.length; i$1 += 1) {
+				var rnode = list$1[i$1];
+					var removeNodeFromEvents = function (node) {
+					this$1.$events.filter(function (e) {
+						return e.type === 'INTERPOLATION' && e.id === node
+					}).map(function (e) { return this$1.$events.indexOf(e); }).forEach(function (i) {
+						this$1.$events.splice(i, 1);
+					});
+				};
+				if (rnode.nodeType === document.TEXT_NODE) {
+					removeNodeFromEvents(rnode);
+				} else if (rnode.nodeType === document.ELEMENT_NODE) {
+					getTextNodes(rnode).forEach(removeNodeFromEvents);
+				}
+			}
 		});
 	});
-	m.observe(this.el, {
-		childList: true
+	m.observe(this.$el, {
+		childList: true,
+		subtree: true
 	});
 };
-
-Hdash.directive = register;
+Hdash.prototype.$on = function $on (key, fn, options) {
+	this.$events.push({
+		key: key,
+		fn: fn,
+		type: options.type,
+		id: options.id,
+	});
+	if (options.immediate) { this.$emit(key); }
+};
+Hdash.prototype.$emit = function $emit (key) {
+		var this$1 = this;
+	this.$events.filter(function (ev) {
+		return key ? ev.key === key : true
+	}).forEach(function (ev) {
+		var args = ev.key ? [this$1.state[ev.key]] : [];
+		ev.fn.apply(this$1, args);
+	});
+};
 
 module.exports = Hdash;

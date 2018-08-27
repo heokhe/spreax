@@ -1,11 +1,10 @@
 {
 	"name": "hdash",
-	"version": "0.1.0",
 	"main": "dist/hdash.cjs.js",
 	"browser": "dist/hdash.browser.js",
 	"module": "dist/hdash.esm.js",
 	"scripts": {
-		"build": "rollup -c",
+		"build": "rollup -c --no-strict",
 		"test:start-server": "http-server . -p 8383 -s",
 		"test": "cypress run",
 		"test:video": "cypress run --config '{\"video\":true}'",
@@ -19,7 +18,7 @@
 		"rollup-plugin-cleanup": "2",
 		"rollup-plugin-commonjs": "^9.1.4",
 		"rollup-plugin-node-resolve": "^3.3.0",
-		"rollup-plugin-uglify": "^4.0.0"
+		"rollup-plugin-terser": "^1.0.1"
 	},
 	"repository": "git@github.com:Hkh12/hdash.git",
 	"author": "Hosein Khansari <hrk.x11@gmail.com>",
