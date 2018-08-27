@@ -4,6 +4,7 @@ import arrayUnique from './utils/arrayUnique'
 import * as interpolation from './interpolation'
 import * as d from './directives/index'
 import directivesOf from './dom/directivesOf'
+import toString from './directives/toString'
 
 export default class Hdash {
 	constructor(el, options) {
@@ -75,7 +76,7 @@ export default class Hdash {
 					break
 			}
 
-			const attrValue = el.getAttribute('h-' + (!!arg ? (name + ':' + arg) : name)),
+			const attrValue = el.getAttribute(toString({name, arg, modifiers})),
 			argArray = [el, attrValue, modifiers, arg]
 
 			if (typeof dir.callback === 'function') {

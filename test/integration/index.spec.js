@@ -16,7 +16,9 @@ describe('Hdash', () => {
 					expect(e.text()).to.match(/HOSEIN$/)
 				})
 				.get('button').click()
-				.get('input').should('have.value', '')
+				.get('input').should('have.value', '').type('(this should not be cleared)')
+				.get('button').click()
+				.get('input').should('not.have.value', '')
 		})
 	})
 	it('parses "on" shortcuts', () => {

@@ -13,7 +13,7 @@
 		<div id="model">
 			<h3>What's your name?</h3>
 			<input type="text" h-model='model_name'>
-			<button h-on:click='model_name = ""'>clear</button>
+			<button h-on:click.once='model_name = ""'>clear</button>
 			<div>my name is <b>{ model_name }</b>, formatted name is { model_name | upper }</div>
 		</div>
 		<div id="on-shortcuts">

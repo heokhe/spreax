@@ -101,6 +101,7 @@ register('class', {
 
 register('on', function(el, value, modifiers, arg) {
 	var this$1 = this;
+	console.log(value);
 	var sh_reg = / = (.*)$/;
 	var ref = value.match(sh_reg) || [];
 	var shortcut = ref[1];
@@ -124,7 +125,7 @@ register('on', function(el, value, modifiers, arg) {
 	}, {
 		once: modifiers.once,
 		passive: modifiers.passive,
-		capture: modifiers.once,
+		capture: modifiers.capture,
 	});
 }, 'required');
 
@@ -152,6 +153,14 @@ function directivesOf(el) {
 				return withThisFullName[0]
 			} else { return e }
 		})
+}
+
+function toString(d){
+	var o = 'h-' + d.name;
+	if (d.arg) { o += ':' + d.arg; }
+	var k = Object.keys(d.modifiers);
+	if (k.length) { o += '.' + k.join('.'); }
+	return o
 }
 
 var Hdash = function Hdash(el, options) {
@@ -216,7 +225,7 @@ Hdash.prototype.$execDirectives = function $execDirectives (el) {
 				if (!arg) { domError("directive needs an arguments, but there's nothing", el); }
 				break
 		}
-		var attrValue = el.getAttribute('h-' + (!!arg ? (name + ':' + arg) : name)),
+		var attrValue = el.getAttribute(toString({name: name, arg: arg, modifiers: modifiers})),
 		argArray = [el, attrValue, modifiers, arg];
 		if (typeof dir.callback === 'function') {
 			dir.callback.apply(this$1, argArray);
