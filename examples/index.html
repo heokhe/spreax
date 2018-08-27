@@ -18,12 +18,16 @@
 		</div>
 		<div id="on-shortcuts">
 			<h3>Shortcuts in "on" directive</h3>
-			<b>{ sh }</b>
+			<div>{ sh }</div>
 			<br>
 			<button h-on:click='sh = null'>null</button>
 			<button h-on:click='sh = 90.5'>digit</button>
 			<button h-on:click='sh = title'>title</button>
 			<button h-on:click='sh = ""'>empty</button>
+		</div>
+		<div id="class">
+			<h1 h-class:cls>class directive</h1>
+			<button h-on:click='cls = !1'>remove class</button>
 		</div>
 	</div>
 </body>

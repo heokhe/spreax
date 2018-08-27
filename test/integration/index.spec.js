@@ -22,15 +22,23 @@ describe('Hdash', () => {
 	it('parses "on" shortcuts', () => {
 		cy.get('#on-shortcuts').within(() => {
 			cy
-				.get('b').should('be.empty')
+				.get('div').should('be.empty')
 				.get('button').eq(0).click()
-				.get('b').should('have.text', 'null')
+				.get('div').should('have.text', 'null')
 				.get('button').eq(1).click()
-				.get('b').should('have.text', '90.5')
+				.get('div').should('have.text', '90.5')
 				.get('button').eq(2).click()
-				.get('b').should('have.text', 'Hello!')
+				.get('div').should('have.text', 'Hello!')
 				.get('button').eq(3).click()
-				.get('b').should('be.empty')
+				.get('div').should('be.empty')
+		})
+	})
+	it('works with "class" directive', () => {
+		cy.get('#class').within(() => {
+			cy
+				.get('h1').should('have.class', 'cls')
+				.get('button').click()
+				.get('h1').should('not.have.class', 'cls')
 		})
 	})
 })
