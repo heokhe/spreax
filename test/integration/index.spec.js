@@ -5,7 +5,7 @@ describe('Hdash', () => {
 		cy.visit('/')
 	})
 	it('interpolates text', () => {
-		cy.get('h1').first().should('not.match', /\{ \w+ \}/)
+		cy.get('h1').first().should('have.text', 'Hello!')
 	})
 	it('works with "model" directive', () => {
 		cy.get('#model').within(() => {
@@ -38,9 +38,17 @@ describe('Hdash', () => {
 	it('works with "class" directive', () => {
 		cy.get('#class').within(() => {
 			cy
-				.get('h1').should('have.class', 'cls')
+				.get('h3').should('have.class', 'cls')
 				.get('button').click()
-				.get('h1').should('not.have.class', 'cls')
+				.get('h3').should('not.have.class', 'cls')
+		})
+	})
+	it('observes...', () => {
+		cy.get('#observer').within(() => {
+			cy
+				.get('h3').should('exist').should('not.match', /\{ [^\}] \}/)
+				.get('input').clear().type('🎉')
+				.get('h3').should('have.text', '🎉')
 		})
 	})
 })

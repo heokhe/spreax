@@ -1,8 +1,6 @@
 import { register } from '../register'
 
 register('on', function(el, value, modifiers, arg) {
-	console.log(value);
-	
 	let sh_reg = / = (.*)$/,
 	[, shortcut] = value.match(sh_reg) || [],
 	hasShortcut = !!shortcut,

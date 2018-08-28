@@ -3,5 +3,5 @@
  * @returns {Array}
  */
 export default function arrayUnique(arr){
-	return arr.filter((elem, pos, _arr) => arr.indexOf(elem) === pos)
+	return arr.filter((elem, pos) => arr.indexOf(elem) === pos)
 }

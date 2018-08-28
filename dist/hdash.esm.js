@@ -43,7 +43,7 @@ function getTextNodes(el) {
 }
 
 function arrayUnique(arr){
-	return arr.filter(function (elem, pos, _arr) { return arr.indexOf(elem) === pos; })
+	return arr.filter(function (elem, pos) { return arr.indexOf(elem) === pos; })
 }
 
 function trim(str) {
@@ -101,7 +101,6 @@ register('class', {
 
 register('on', function(el, value, modifiers, arg) {
 	var this$1 = this;
-	console.log(value);
 	var sh_reg = / = (.*)$/;
 	var ref = value.match(sh_reg) || [];
 	var shortcut = ref[1];
@@ -194,22 +193,25 @@ Hdash.prototype.$init = function $init () {
 };
 Hdash.prototype.$initProxy = function $initProxy () {
 		var this$1 = this;
-	this.state = new Proxy(this.state, {
+	var traps = {
 		get: function (obj, key) {
-			if (key in obj) { return obj[key] }
-			else { error(("unknown state property \"" + key + "\"")); }
+			if (!obj.hasOwnProperty(key)) { error(("unknown state property \"" + key + "\"")); }
+			var v = obj[key];
+			return v
 		},
 		set: function (obj, key, value) {
-			if (!key in obj) { error(("unknown state property \"" + key + "\"")); }
+			if (!obj.hasOwnProperty(key)) { error(("unknown state property \"" + key + "\"")); }
 			obj[key] = value;
 			this$1.$emit(key);
 			this$1.$emit();
 			return true
 		}
-	});
+	};
+	this.state = new Proxy(this.state, traps);
 };
 Hdash.prototype.$execDirectives = function $execDirectives (el) {
 		var this$1 = this;
+	if (!el.attributes || !el.attributes.length) { return; }
 	var loop = function () {
 		var ref = list[i];
 			var name = ref.name;
@@ -235,7 +237,7 @@ Hdash.prototype.$execDirectives = function $execDirectives (el) {
 				this$1.$on('', function () {
 					dir.callback.updated.apply(this$1, argArray);
 				}, {
-					type: 'DIRECTIVE'
+					type: 'DIRECTIVE',
 				});
 			}
 		}
@@ -285,7 +287,13 @@ Hdash.prototype.$observe = function $observe (){
 		muts.forEach(function (mut) {
 			for (var i = 0, list = mut.addedNodes; i < list.length; i += 1) {
 				var anode = list[i];
-					if (anode.nodeType === document.TEXT_NODE) { this$1.$interpolateNode(anode); }
+					switch (anode.nodeType) {
+					case document.TEXT_NODE:
+						this$1.$interpolateNode(anode);
+					case document.ELEMENT_NODE:
+						getTextNodes(anode).forEach(this$1.$interpolateNode.bind(this$1));
+						this$1.$execDirectives(anode);
+				}
 			}
 			for (var i$1 = 0, list$1 = mut.removedNodes; i$1 < list$1.length; i$1 += 1) {
 				var rnode = list$1[i$1];

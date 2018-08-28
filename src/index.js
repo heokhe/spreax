@@ -44,25 +44,29 @@ export default class Hdash {
 	}
 
 	$initProxy() {
-		this.state = new Proxy(this.state, {
+		const traps = {
 			get: (obj, key) => {
-				if (key in obj) return obj[key]
-				else error(`unknown state property "${key}"`)
+				if (!obj.hasOwnProperty(key)) error(`unknown state property "${key}"`)
+
+				let v = obj[key]
+				return v
 			},
 			set: (obj, key, value) => {
-				if (!key in obj) error(`unknown state property "${key}"`)
+				if (!obj.hasOwnProperty(key)) error(`unknown state property "${key}"`)
 				obj[key] = value
 				this.$emit(key)
 				this.$emit()
 				return true
 			}
-		})
+		}
+		this.state = new Proxy(this.state, traps)
 	}
 
 	/**
 	 * @param {Element} el 
 	 */
 	$execDirectives(el) {
+		if (!el.attributes || !el.attributes.length) return;
 		for (const { name, arg, modifiers } of directivesOf(el)) {
 			const dir = d.all[name];
 			if (dir === undefined) domError(`directive "${name}" not found`, el)
@@ -87,7 +91,7 @@ export default class Hdash {
 					this.$on('', () => {
 						dir.callback.updated.apply(this, argArray)
 					}, {
-						type: 'DIRECTIVE'
+						type: 'DIRECTIVE',
 					})
 				}
 			}
@@ -139,7 +143,13 @@ export default class Hdash {
 		const m = new MutationObserver(muts => {
 			muts.forEach(mut => {
 				for (const anode of mut.addedNodes) {
-					if (anode.nodeType === document.TEXT_NODE) this.$interpolateNode(anode)
+					switch (anode.nodeType) {
+						case document.TEXT_NODE:
+							this.$interpolateNode(anode)
+						case document.ELEMENT_NODE:
+							getTextNodes(anode).forEach(this.$interpolateNode.bind(this))
+							this.$execDirectives(anode)
+					}
 				}
 				for (const rnode of mut.removedNodes) {
 					const removeNodeFromEvents = node => {

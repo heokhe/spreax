@@ -16,6 +16,7 @@
 			<button h-on:click.once='model_name = ""'>clear</button>
 			<div>my name is <b>{ model_name }</b>, formatted name is { model_name | upper }</div>
 		</div>
+		<hr>
 		<div id="on-shortcuts">
 			<h3>Shortcuts in "on" directive</h3>
 			<div>{ sh }</div>
@@ -25,10 +26,13 @@
 			<button h-on:click='sh = title'>title</button>
 			<button h-on:click='sh = ""'>empty</button>
 		</div>
+		<hr>
 		<div id="class">
-			<h1 h-class:cls>class directive</h1>
+			<h3 h-class:cls>class directive</h3>
 			<button h-on:click='cls = !1'>remove class</button>
 		</div>
+		<hr>
+		<div id="observer"></div>
 	</div>
 </body>
 <script src="/dist/hdash.browser.js"></script>
