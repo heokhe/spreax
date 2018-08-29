@@ -80,8 +80,8 @@ export default class Hdash {
 					break
 			}
 
-			const attrValue = el.getAttribute(toString({name, arg, modifiers})),
-			argArray = [el, attrValue, modifiers, arg]
+			const attrValue = el.getAttribute(toString({ name, arg, modifiers })),
+				argArray = [el, attrValue, modifiers, arg]
 
 			if (typeof dir.callback === 'function') {
 				dir.callback.apply(this, argArray)
@@ -92,6 +92,7 @@ export default class Hdash {
 						dir.callback.updated.apply(this, argArray)
 					}, {
 						type: 'DIRECTIVE',
+						id: el
 					})
 				}
 			}
@@ -105,7 +106,7 @@ export default class Hdash {
 	/**
 	 * @param {Node} node 
 	 */
-	$interpolateNode(node){
+	$interpolateNode(node) {
 		if (!interpolation.contains(node.textContent)) return;
 
 		let exps = arrayUnique(node.textContent.match(interpolation.global).map(interpolation.trim))
@@ -114,8 +115,8 @@ export default class Hdash {
 		for (const exp of exps) {
 			let [prop, ...formatters] = exp.split(' | ')
 			const reg = new RegExp('\\{ ' + exp.replace(/\|/g, '\\|') + ' \\}', 'g')
-			
-			if (formatters.length){
+
+			if (formatters.length) {
 				formatters = formatters.map(e => {
 					if (e in this.$formatters) return this.$formatters[e]
 					else error(`formatter "${e}" not found`)
@@ -132,17 +133,17 @@ export default class Hdash {
 				let replaced = initText.replace(reg, formatters(v))
 				if (node.textContent !== replaced) node.textContent = replaced
 			}, {
-				immediate: true,
-				type: 'INTERPOLATION',
-				id: node
-			})
+					immediate: true,
+					type: 'INTERPOLATION',
+					id: node
+				})
 		}
 	}
 
-	$observe(){
+	$observe() {
 		const m = new MutationObserver(muts => {
-			muts.forEach(mut => {
-				for (const anode of mut.addedNodes) {
+			for (const { addedNodes, removedNodes } of muts) {
+				for (const anode of addedNodes) {
 					switch (anode.nodeType) {
 						case document.TEXT_NODE:
 							this.$interpolateNode(anode)
@@ -151,7 +152,7 @@ export default class Hdash {
 							this.$execDirectives(anode)
 					}
 				}
-				for (const rnode of mut.removedNodes) {
+				for (const rnode of removedNodes) {
 					const removeNodeFromEvents = node => {
 						this.$events.filter(e => {
 							return e.type === 'INTERPOLATION' && e.id === node
@@ -164,9 +165,14 @@ export default class Hdash {
 						removeNodeFromEvents(rnode)
 					} else if (rnode.nodeType === document.ELEMENT_NODE) {
 						getTextNodes(rnode).forEach(removeNodeFromEvents)
+						this.$events.filter(e => {
+							return e.type === 'DIRECTIVE' && e.id === rnode
+						}).map(e => this.$events.indexOf(e)).forEach(i => {
+							this.$events.splice(i, 1)
+						})
 					}
 				}
-			})
+			}
 		})
 
 		m.observe(this.$el, {
@@ -184,7 +190,7 @@ export default class Hdash {
 		})
 		if (options.immediate) this.$emit(key)
 	}
-	
+
 	$emit(key) {
 		this.$events.filter(ev => {
 			return key ? ev.key === key : true

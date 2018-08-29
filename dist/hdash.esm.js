@@ -54,14 +54,6 @@ function contains(str){
 }
 var global = /\{ \w+(?: \| \w+)* \}/gi;
 
-function record(keys, value){
-	var o = {};
-	keys.forEach(function (k) {
-		o[k] = value;
-	});
-	return o
-}
-
 var _registry = {};
 function register(name, callback, argState) {
 	if ( argState === void 0 ) argState = 'optional';
@@ -75,17 +67,27 @@ function register(name, callback, argState) {
 var all = _registry;
 
 register('model', {
-	ready: function ready(el, value) {
+	ready: function ready(el, value, ref) {
 		var this$1 = this;
+		var lazy = ref.lazy;
 		el.value = this.state[value];
-		el.addEventListener('keydown', function () {
-			setTimeout(function () {
-				this$1.state[value] = el.value;
-			}, 0);
+		el.addEventListener('change', function () {
+			var v = el.value;
+			if (el.type === 'checkbox') { v = el.checked; }
+			this$1.state[value] = v;
 		});
+		if (el.type === 'text' && !lazy) {
+			el.addEventListener('keydown', function () {
+				setTimeout(function () {
+					this$1.state[value] = el.value;
+				}, 0);
+			});
+		}
 	},
 	updated: function updated(el, value) {
-		if (el.value !== this.state[value]) { el.value = this.state[value]; }
+		var prop = 'value';
+		if (el.type === 'checkbox') { prop = 'checked'; }
+		if (el[prop] !== this.state[value]) { el[prop] = this.state[value]; }
 	}
 }, 'empty');
 
@@ -127,6 +129,14 @@ register('on', function(el, value, modifiers, arg) {
 		capture: modifiers.capture,
 	});
 }, 'required');
+
+function record(keys, value){
+	var o = {};
+	keys.forEach(function (k) {
+		o[k] = value;
+	});
+	return o
+}
 
 function directivesOf(el) {
 	return Array.from(el.attributes)
@@ -227,8 +237,8 @@ Hdash.prototype.$execDirectives = function $execDirectives (el) {
 				if (!arg) { domError("directive needs an arguments, but there's nothing", el); }
 				break
 		}
-		var attrValue = el.getAttribute(toString({name: name, arg: arg, modifiers: modifiers})),
-		argArray = [el, attrValue, modifiers, arg];
+		var attrValue = el.getAttribute(toString({ name: name, arg: arg, modifiers: modifiers })),
+			argArray = [el, attrValue, modifiers, arg];
 		if (typeof dir.callback === 'function') {
 			dir.callback.apply(this$1, argArray);
 		} else {
@@ -238,6 +248,7 @@ Hdash.prototype.$execDirectives = function $execDirectives (el) {
 					dir.callback.updated.apply(this$1, argArray);
 				}, {
 					type: 'DIRECTIVE',
+					id: el
 				});
 			}
 		}
@@ -247,7 +258,7 @@ Hdash.prototype.$execDirectives = function $execDirectives (el) {
 Hdash.prototype.$interpolation = function $interpolation () {
 	getTextNodes(this.$el).forEach(this.$interpolateNode.bind(this));
 };
-Hdash.prototype.$interpolateNode = function $interpolateNode (node){
+Hdash.prototype.$interpolateNode = function $interpolateNode (node) {
 		var this$1 = this;
 	if (!contains(node.textContent)) { return; }
 	var exps = arrayUnique(node.textContent.match(global).map(trim));
@@ -258,7 +269,7 @@ Hdash.prototype.$interpolateNode = function $interpolateNode (node){
 			var prop = ref[0];
 			var formatters = ref.slice(1);
 		var reg = new RegExp('\\{ ' + exp.replace(/\|/g, '\\|') + ' \\}', 'g');
-		if (formatters.length){
+		if (formatters.length) {
 			formatters = formatters.map(function (e) {
 				if (e in this$1.$formatters) { return this$1.$formatters[e] }
 				else { error(("formatter \"" + e + "\" not found")); }
@@ -274,18 +285,21 @@ Hdash.prototype.$interpolateNode = function $interpolateNode (node){
 			var replaced = initText.replace(reg, formatters(v));
 			if (node.textContent !== replaced) { node.textContent = replaced; }
 		}, {
-			immediate: true,
-			type: 'INTERPOLATION',
-			id: node
-		});
+				immediate: true,
+				type: 'INTERPOLATION',
+				id: node
+			});
 	};
 		for (var i = 0, list = exps; i < list.length; i += 1) loop();
 };
-Hdash.prototype.$observe = function $observe (){
+Hdash.prototype.$observe = function $observe () {
 		var this$1 = this;
 	var m = new MutationObserver(function (muts) {
-		muts.forEach(function (mut) {
-			for (var i = 0, list = mut.addedNodes; i < list.length; i += 1) {
+		for (var i$2 = 0, list$2 = muts; i$2 < list$2.length; i$2 += 1) {
+			var ref = list$2[i$2];
+				var addedNodes = ref.addedNodes;
+				var removedNodes = ref.removedNodes;
+				for (var i = 0, list = addedNodes; i < list.length; i += 1) {
 				var anode = list[i];
 					switch (anode.nodeType) {
 					case document.TEXT_NODE:
@@ -295,7 +309,7 @@ Hdash.prototype.$observe = function $observe (){
 						this$1.$execDirectives(anode);
 				}
 			}
-			for (var i$1 = 0, list$1 = mut.removedNodes; i$1 < list$1.length; i$1 += 1) {
+			var loop = function () {
 				var rnode = list$1[i$1];
 					var removeNodeFromEvents = function (node) {
 					this$1.$events.filter(function (e) {
@@ -308,9 +322,15 @@ Hdash.prototype.$observe = function $observe (){
 					removeNodeFromEvents(rnode);
 				} else if (rnode.nodeType === document.ELEMENT_NODE) {
 					getTextNodes(rnode).forEach(removeNodeFromEvents);
+					this$1.$events.filter(function (e) {
+						return e.type === 'DIRECTIVE' && e.id === rnode
+					}).map(function (e) { return this$1.$events.indexOf(e); }).forEach(function (i) {
+						this$1.$events.splice(i, 1);
+					});
 				}
-			}
-		});
+			};
+				for (var i$1 = 0, list$1 = removedNodes; i$1 < list$1.length; i$1 += 1) loop();
+		}
 	});
 	m.observe(this.$el, {
 		childList: true,

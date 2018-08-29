@@ -1,34 +1,35 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<meta http-equiv="X-UA-Compatible" content="ie=edge">
 	<title>HDash</title>
 </head>
+
 <body>
 	<div id="app">
-		<h1>{ title }</h1>
-		<hr>
-		<div id="model">
-			<h3>What's your name?</h3>
-			<input type="text" h-model='model_name'>
-			<button h-on:click.once='model_name = ""'>clear</button>
-			<div>my name is <b>{ model_name }</b>, formatted name is { model_name | upper }</div>
+		<div id="interpolation">
+			<h1>Interpolation</h1>
+			<span>{ int_name }</span>
+			<br>
+			<b>{ int_name | upper }</b>
 		</div>
 		<hr>
-		<div id="on-shortcuts">
-			<h3>Shortcuts in "on" directive</h3>
-			<div>{ sh }</div>
-			<br>
-			<button h-on:click='sh = null'>null</button>
-			<button h-on:click='sh = 90.5'>digit</button>
-			<button h-on:click='sh = title'>title</button>
-			<button h-on:click='sh = ""'>empty</button>
+		<div id="model">
+			<h1>Model</h1>
+			<h3>Text input</h3>
+			<input type="text" h-model='model'>
+			<button h-on:click.once='model = ""'>clear</button>
+			<div>{ model }</div>
+			<h3>Checkbox inputs</h3>
+			<input type="checkbox" h-model='checkbox'>
+			<label>{ checkbox }</label>
 		</div>
 		<hr>
 		<div id="class">
-			<h3 h-class:cls>class directive</h3>
+			<h1 h-class:cls>class directive</h1>
 			<button h-on:click='cls = !1'>remove class</button>
 		</div>
 		<hr>
@@ -37,4 +38,5 @@
 </body>
 <script src="/dist/hdash.browser.js"></script>
 <script src="./index.js"></script>
+
 </html>

@@ -1,10 +1,10 @@
 var instance = new Hdash('#app', {
 	state: {
-		title: 'Hello!',
-		model_name: 'type your name',
-		sh: '',
+		model: 'type your name',
 		cls: true,
-		observer_title: 'if you see this, observer works.'
+		observer_title: 'if you see this, observer works.',
+		checkbox: false,
+		int_name: 'Hosein'
 	},
 	formatters: {
 		upper: s => s.toUpperCase()
@@ -13,7 +13,7 @@ var instance = new Hdash('#app', {
 
 setTimeout(() => {
 	document.querySelector('#observer').innerHTML = `
-		<h3>{ observer_title }</h3>
+		<h1>{ observer_title }</h1>
 		<input h-model='observer_title'>
 	`
 }, 1000)

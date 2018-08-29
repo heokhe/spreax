@@ -7,6 +7,6 @@ export interface HdashConstructor {
 		state?: State
 	})
 }
-const Hdash: HdashConstructor
+declare const Hdash: HdashConstructor
 export default Hdash
 export as namespace Hdash
