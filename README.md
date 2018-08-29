@@ -1,35 +1,56 @@
 # Hdash
-[![CircleCI](https://circleci.com/gh/Hkh12/hdash.svg?style=svg)](https://circleci.com/gh/Hkh12/hdash)
+![CircleCI](https://circleci.com/gh/Hkh12/hdash.svg?style=svg)
 ![Dependencies](https://david-dm.org/Hkh12/hdash.svg)
 
-A new front-end tool, to bring interactivity to web elements.
+A new front-end tool to bind UI with app state.
 ## Explanation
-Hdash is not a framework or even a big library. and, it's not so concerned with rendering. Hdash's main duty is **to keep the interface synchronized with the state**. 
+Hdash is not a framework, and it's not concerned with rendering things. No template parsers, virtual dom, files, loaders, etc. Its API is inspired by [Rivets.js](http://rivetsjs.com), [Stimulus](https://stimulusjs.org) and [Vue](https://vuejs.org). Rivets is no longer maintained, and Stimulus has some limitations.
 
-there is no any special elements; everything is marked and controlled using special attributes called **directives** that start with `h-`. There are some default ones, and, of course, you can make and register yours.
+It's simple to work with Hdash. you create an **instance**, define state, actions and everything else you need, add some atributes to your HTML code (some special attributes called **directives**), and you're done.
 
-Using Hdash, there's no need to focus on front-end stuff (specially if you are a back-end dev). But Hdash would not be so useful in modern front-end projects (like a SPA).
-## Get started
-First, get Hdash's source code. intall it via npm (or yarn), or use a `<script>` tag:
+## Getting started
+> The module is not published yet, and it's work in progress.
+imagine this is your HTML document:
 ```html
-<script src="https://unpkg.com/hdash/dist/hdash.browser.js"></script>
+<body>
+	<div id="app">
+		<input type="text" placeholder='Type your name...'>
+		<button>Clear input</button>
+		<button>Log name</button>
+		<hr>
+		<h1>Hello</h1>
+	</div>
+</body>
 ```
-now you should have a global variable called `Hdash`.
-### Hello world
-then, in your `app.js` (or any other name):
+we want to create a simple greeter app. Now, it's time to add the scripts:
+```html
+<script src="hdash.js"></script>
+<script src="app.js"></script>
+```
+and, in your `app.js`:
 ```js
-var app = new Hdash('#app', {
+new Hdash('#app', {
 	state: {
-		text: 'Hello world!'
+		name: ''
+	},
+	actions: {
+		log(){
+			console.log(this.state.name)
+		}
 	}
 })
 ```
-and, your HTML document:
+now, we should add the directives. update the HTML to this: 
 ```html
 <div id="app">
-	{ text }
+	<input type="text" placeholder='Type your name...' h-model='name'>
+	<button h-on:click='name = ""'>clear</button>
+	<button h-on:click='log'>log</button>
+	<hr>
+	<h1>Hello { name }</h1>
 </div>
 ```
-That's it, a "hello world" 🎉
-
-> There is no complete documentation for Hdash. after alpha (or beta) release, I'll start working on the official site.
+Refresh the page and, boom! 
+- as you type in the input, content of `h1` will be updated
+- when you click on "clear" button, input will become empty
+- when you click on "log" button, input's value will be logged into console
