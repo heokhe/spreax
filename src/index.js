@@ -6,7 +6,7 @@ import * as d from './directives/index'
 import directivesOf from './dom/directivesOf'
 import toString from './directives/toString'
 
-export default class Hdash {
+class Hdash {
 	constructor(el, options) {
 		if (!this instanceof Hdash) error('Hdash must be called with new operator')
 		if (typeof el === 'string') {
@@ -200,3 +200,7 @@ export default class Hdash {
 		})
 	}
 }
+
+Hdash.directive = d.register
+
+export default Hdash

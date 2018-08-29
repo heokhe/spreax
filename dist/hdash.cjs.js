@@ -108,7 +108,8 @@ register('on', function(el, value, modifiers, arg) {
 	var shortcut = ref[1];
 	var hasShortcut = !!shortcut,
 	pureValue = value.replace(sh_reg, '');
-	el.addEventListener(arg, function () {
+	el.addEventListener(arg, function (event) {
+		if (modifiers.prevent) { event.preventDefault(); }
 		if (hasShortcut) {
 			var v;
 			if (['""', "''", '``'].includes(shortcut)) { v = ''; }
@@ -355,5 +356,6 @@ Hdash.prototype.$emit = function $emit (key) {
 		ev.fn.apply(this$1, args);
 	});
 };
+Hdash.directive = register;
 
 module.exports = Hdash;

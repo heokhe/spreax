@@ -5,7 +5,8 @@ register('on', function(el, value, modifiers, arg) {
 	[, shortcut] = value.match(sh_reg) || [],
 	hasShortcut = !!shortcut,
 	pureValue = value.replace(sh_reg, '')
-	el.addEventListener(arg, () => {
+	el.addEventListener(arg, event => {
+		if (modifiers.prevent) event.preventDefault()
 		if (hasShortcut) {
 			let v;
 			if (['""', "''", '``'].includes(shortcut)) v = ''

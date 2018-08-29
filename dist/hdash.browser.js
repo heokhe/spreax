@@ -109,7 +109,8 @@ var Hdash = (function () {
 		var shortcut = ref[1];
 		var hasShortcut = !!shortcut,
 		pureValue = value.replace(sh_reg, '');
-		el.addEventListener(arg, function () {
+		el.addEventListener(arg, function (event) {
+			if (modifiers.prevent) { event.preventDefault(); }
 			if (hasShortcut) {
 				var v;
 				if (['""', "''", '``'].includes(shortcut)) { v = ''; }
@@ -356,6 +357,7 @@ var Hdash = (function () {
 			ev.fn.apply(this$1, args);
 		});
 	};
+	Hdash.directive = register;
 
 	return Hdash;
 
