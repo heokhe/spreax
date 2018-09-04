@@ -10,7 +10,7 @@ describe('Model directive', () => {
 				.window().then(window => {
 					window.instance.state.model = 'x'
 				})
-				.get('input').should('have.value', 'x')
+				.get('input').first().should('have.value', 'x')
 		})
 	})
 	it('works with checkbox inputs', () => {

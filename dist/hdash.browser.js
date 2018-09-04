@@ -92,14 +92,15 @@ var Hdash = (function () {
 		}
 	}, 'empty');
 
-	var fn = function (el, value, mod, arg) {
-		var list = el.classList,
-		bool = !!this.state[value || arg];
-		list[bool ? 'add' : 'remove'](arg || value);
-	};
-	register('class', {
-		ready: fn,
-		updated: fn
+	register('class', function (el, value, mod, arg) {
+		var prop = value || arg;
+		this.$on(prop, function (v) {
+			el.classList[!!v ? 'add' : 'remove'](arg || value);
+		}, {
+			immediate: true,
+			id: el,
+			type: 'DIRECTIVE'
+		});
 	}, 'required');
 
 	register('on', function(el, value, modifiers, arg) {
@@ -172,6 +173,14 @@ var Hdash = (function () {
 		var k = Object.keys(d.modifiers);
 		if (k.length) { o += '.' + k.join('.'); }
 		return o
+	}
+
+	function makeFormatterFn(formatters, source) {
+		if (!formatters.length) { return function (v) { return v; } }
+		return formatters.map(function (f) {
+			if (!(f in source)) { error(("formatter " + f + " not found")); }
+			else { return source[f] }
+		}).reduce(function (a, b) { return function (arg) { return b(a(arg)); }; })
 	}
 
 	var Hdash = function Hdash(el, options) {
@@ -270,21 +279,10 @@ var Hdash = (function () {
 				var ref = exp.split(' | ');
 				var prop = ref[0];
 				var formatters = ref.slice(1);
-			var reg = new RegExp('\\{ ' + exp.replace(/\|/g, '\\|') + ' \\}', 'g');
-			if (formatters.length) {
-				formatters = formatters.map(function (e) {
-					if (e in this$1.$formatters) { return this$1.$formatters[e] }
-					else { error(("formatter \"" + e + "\" not found")); }
-				}).reduce(function (a, b) {
-					return function (arg) {
-						return b(a(arg))
-					}
-				});
-			} else {
-				formatters = function (x) { return x; };
-			}
+			var reg = new RegExp('\\{ ' + exp.replace(/\|/g, '\\|') + ' \\}', 'g'),
+			formatterFn = makeFormatterFn(formatters, this$1.$formatters);
 			this$1.$on(prop, function (v) {
-				var replaced = initText.replace(reg, formatters(v));
+				var replaced = initText.replace(reg, formatterFn.call(this$1, v));
 				if (node.textContent !== replaced) { node.textContent = replaced; }
 			}, {
 					immediate: true,

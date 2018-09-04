@@ -5,6 +5,7 @@ import * as interpolation from './interpolation'
 import * as d from './directives/index'
 import directivesOf from './dom/directivesOf'
 import toString from './directives/toString'
+import makeFormatterFn from './makeFormatterFn'
 
 class Hdash {
 	constructor(el, options) {
@@ -105,7 +106,7 @@ class Hdash {
 
 	/**
 	 * @param {Node} node 
-	 */
+	 */	
 	$interpolateNode(node) {
 		if (!interpolation.contains(node.textContent)) return;
 
@@ -114,23 +115,10 @@ class Hdash {
 
 		for (const exp of exps) {
 			let [prop, ...formatters] = exp.split(' | ')
-			const reg = new RegExp('\\{ ' + exp.replace(/\|/g, '\\|') + ' \\}', 'g')
-
-			if (formatters.length) {
-				formatters = formatters.map(e => {
-					if (e in this.$formatters) return this.$formatters[e]
-					else error(`formatter "${e}" not found`)
-				}).reduce((a, b) => {
-					return arg => {
-						return b(a(arg))
-					}
-				})
-			} else {
-				formatters = x => x
-			}
-
+			const reg = new RegExp('\\{ ' + exp.replace(/\|/g, '\\|') + ' \\}', 'g'),
+			formatterFn = makeFormatterFn(formatters, this.$formatters)
 			this.$on(prop, v => {
-				let replaced = initText.replace(reg, formatters(v))
+				let replaced = initText.replace(reg, formatterFn.call(this, v))
 				if (node.textContent !== replaced) node.textContent = replaced
 			}, {
 					immediate: true,

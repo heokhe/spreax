@@ -1,13 +1,13 @@
 import { register } from "../register"
 
-const fn = function (el, value, mod, arg) {
-	const list = el.classList,
-	bool = !!this.state[value || arg];
+register('class', function (el, value, mod, arg) {
+	const prop = value || arg;
 
-	list[bool ? 'add' : 'remove'](arg || value)
-}
-
-register('class', {
-	ready: fn,
-	updated: fn
+	this.$on(prop, v => {
+		el.classList[!!v ? 'add' : 'remove'](arg || value)
+	}, {
+		immediate: true,
+		id: el,
+		type: 'DIRECTIVE'
+	})
 }, 'required')
