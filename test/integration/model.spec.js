@@ -8,7 +8,7 @@ describe('Model directive', () => {
 				.get('input').first().clear().type('Hosein')
 				.get('div').should('have.text', 'Hosein')
 				.window().then(window => {
-					window.instance.state.model = 'x'
+					window.instance.model = 'x'
 				})
 				.get('input').first().should('have.value', 'x')
 		})
@@ -20,7 +20,7 @@ describe('Model directive', () => {
 				.get('input[type=checkbox]').should('not.be.checked').check()
 				.get('label').should('have.text', 'true')
 				.window().then(window => {
-					window.instance.state.checkbox = false
+					window.instance.checkbox = false
 				})
 				.get('input[type=checkbox]').should('not.be.checked')
 		})

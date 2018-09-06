@@ -17,40 +17,51 @@ class Hdash {
 		} else {
 			error(`wrong selector or element: expected element or string, got "${String(el)}"`)
 		}
-		this.state = options.state || {}
-		this.actions = options.actions || {}
-		this.$watchers = options.watchers || {}
-		this.$formatters = options.formatters || {}
-		this.$events = []
-		this.$init()
-	}
 
-	$init() {
-		// bind actions to instance
-		Object.keys(this.actions).forEach(k => {
-			this.actions[k] = this.actions[k].bind(this)
-		})
-		// add listeners for watchers
-		Object.keys(this.$watchers).forEach(k => {
-			this.$on(k, this.$watchers[k])
-		})
-		// make state proxy
-		this.$initProxy()
-		// attach directives
-		this.$el.querySelectorAll('*').forEach(this.$execDirectives.bind(this))
-		// start interpolation functionality
+		this.$events = []
+		this.$formatters = {}
+		this.$_proxy = null
+		this.$extendWith(
+			options.state || {},
+			options.actions || {},
+			options.computed || {},
+			options.formatters || {}
+		)
 		this.$interpolation()
-		// start observer
+		this.$el.querySelectorAll('*').forEach(this.$execDirectives.bind(this))
 		this.$observe()
 	}
 
-	$initProxy() {
-		const traps = {
+	$extendWith(state, actions, computed, formatters) {
+		this.$makeProxy(state)
+
+		Object.keys(state).forEach(p => {
+			Object.defineProperty(this, p, {
+				get: () => this.$_proxy[p],
+				set: nv => {
+					this.$_proxy[p] = nv
+				}
+			})
+		})
+		Object.entries(actions).forEach(([name, fn]) => {
+			this[name] = fn.bind(this)
+		})
+		Object.entries(computed).forEach(([name, fn]) => {
+			Object.defineProperty(this, name, {
+				get: fn.bind(this),
+				set: () => false
+			})
+		})
+		Object.entries(formatters).forEach(([name, fn]) => {
+			this.$formatters[name] = fn.bind(this)
+		})
+	}
+
+	$makeProxy(o) {
+		this.$_proxy = new Proxy(o, {
 			get: (obj, key) => {
 				if (!obj.hasOwnProperty(key)) error(`unknown state property "${key}"`)
-
-				let v = obj[key]
-				return v
+				return obj[key]
 			},
 			set: (obj, key, value) => {
 				if (!obj.hasOwnProperty(key)) error(`unknown state property "${key}"`)
@@ -58,9 +69,15 @@ class Hdash {
 				this.$emit(key)
 				this.$emit()
 				return true
-			}
-		}
-		this.state = new Proxy(this.state, traps)
+			},
+			deleteProperty: () => false
+		})
+	}
+
+	$pipeFormatters(formatters) {
+		if (arguments.length > 1) formatters = Array.prototype.slice.call(arguments)
+		else if (arguments.length === 1 && typeof formatters === 'string') formatters = [formatters]
+		return makeFormatterFn(formatters, this.$formatters).bind(this)
 	}
 
 	/**
@@ -92,9 +109,9 @@ class Hdash {
 					this.$on('', () => {
 						dir.callback.updated.apply(this, argArray)
 					}, {
-						type: 'DIRECTIVE',
-						id: el
-					})
+							type: 'DIRECTIVE',
+							id: el
+						})
 				}
 			}
 		}
@@ -106,7 +123,7 @@ class Hdash {
 
 	/**
 	 * @param {Node} node 
-	 */	
+	 */
 	$interpolateNode(node) {
 		if (!interpolation.contains(node.textContent)) return;
 
@@ -114,11 +131,12 @@ class Hdash {
 		const initText = node.textContent
 
 		for (const exp of exps) {
-			let [prop, ...formatters] = exp.split(' | ')
-			const reg = new RegExp('\\{ ' + exp.replace(/\|/g, '\\|') + ' \\}', 'g'),
-			formatterFn = makeFormatterFn(formatters, this.$formatters)
+			const [prop, ...formatters] = exp.split(' | '),
+			reg = new RegExp('\\{ ' + exp.replace(/\|/g, '\\|') + ' \\}', 'g'),
+			formatterFn = this.$pipeFormatters(formatters)
+
 			this.$on(prop, v => {
-				let replaced = initText.replace(reg, formatterFn.call(this, v))
+				let replaced = initText.replace(reg, formatterFn(v))
 				if (node.textContent !== replaced) node.textContent = replaced
 			}, {
 					immediate: true,
@@ -169,7 +187,7 @@ class Hdash {
 		})
 	}
 
-	$on(key, fn, options) {
+	$on(key, fn, options = {}) {
 		this.$events.push({
 			key,
 			fn,
@@ -183,7 +201,7 @@ class Hdash {
 		this.$events.filter(ev => {
 			return key ? ev.key === key : true
 		}).forEach(ev => {
-			let args = ev.key ? [this.state[ev.key]] : []
+			let args = ev.key ? [this[ev.key]] : []
 			ev.fn.apply(this, args)
 		})
 	}

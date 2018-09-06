@@ -16,11 +16,11 @@ register('on', function(el, value, modifiers, arg) {
 			else if (shortcut === '!0') v = true
 			else if (shortcut === '!1') v = false
 			else if (!isNaN(Number(shortcut)) && shortcut !== 'Infinity') v = Number(shortcut)
-			else v = this.state[shortcut]
+			else v = this[shortcut]
 
-			this.state[pureValue] = v
+			this[pureValue] = v
 		} else {
-			this.actions[value]()
+			this[value]()
 		}
 	}, {
 		once: modifiers.once,

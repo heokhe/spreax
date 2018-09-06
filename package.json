@@ -1,13 +1,13 @@
 {
 	"name": "hdash",
+	"description": "A new front-end tool to bind UI with app state.",
 	"main": "dist/hdash.cjs.js",
 	"browser": "dist/hdash.browser.js",
 	"module": "dist/hdash.esm.js",
 	"scripts": {
 		"build": "rollup -c --no-strict",
-		"test:start-server": "http-server . -p 8383 -s",
+		"start": "http-server . -p 8383 -s",
 		"test": "cypress run",
-		"test:video": "cypress run --config '{\"video\":true}'",
 		"test:gui": "cypress open"
 	},
 	"devDependencies": {
@@ -22,6 +22,5 @@
 	},
 	"repository": "git@github.com:Hkh12/hdash.git",
 	"author": "Hosein Khansari <hrk.x11@gmail.com>",
-	"license": "MIT",
-	"typings": "types/index.d.ts"
+	"license": "MIT"
 }

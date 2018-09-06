@@ -67,42 +67,6 @@ var Hdash = (function () {
 	}
 	var all = _registry;
 
-	register('model', {
-		ready: function ready(el, value, ref) {
-			var this$1 = this;
-			var lazy = ref.lazy;
-			el.value = this.state[value];
-			el.addEventListener('change', function () {
-				var v = el.value;
-				if (el.type === 'checkbox') { v = el.checked; }
-				this$1.state[value] = v;
-			});
-			if (el.type === 'text' && !lazy) {
-				el.addEventListener('keydown', function () {
-					setTimeout(function () {
-						this$1.state[value] = el.value;
-					}, 0);
-				});
-			}
-		},
-		updated: function updated(el, value) {
-			var prop = 'value';
-			if (el.type === 'checkbox') { prop = 'checked'; }
-			if (el[prop] !== this.state[value]) { el[prop] = this.state[value]; }
-		}
-	}, 'empty');
-
-	register('class', function (el, value, mod, arg) {
-		var prop = value || arg;
-		this.$on(prop, function (v) {
-			el.classList[!!v ? 'add' : 'remove'](arg || value);
-		}, {
-			immediate: true,
-			id: el,
-			type: 'DIRECTIVE'
-		});
-	}, 'required');
-
 	register('on', function(el, value, modifiers, arg) {
 		var this$1 = this;
 		var sh_reg = / = (.*)$/;
@@ -121,15 +85,51 @@ var Hdash = (function () {
 				else if (shortcut === '!0') { v = true; }
 				else if (shortcut === '!1') { v = false; }
 				else if (!isNaN(Number(shortcut)) && shortcut !== 'Infinity') { v = Number(shortcut); }
-				else { v = this$1.state[shortcut]; }
-				this$1.state[pureValue] = v;
+				else { v = this$1[shortcut]; }
+				this$1[pureValue] = v;
 			} else {
-				this$1.actions[value]();
+				this$1[value]();
 			}
 		}, {
 			once: modifiers.once,
 			passive: modifiers.passive,
 			capture: modifiers.capture,
+		});
+	}, 'required');
+
+	register('model', {
+		ready: function ready(el, value, ref) {
+			var this$1 = this;
+			var lazy = ref.lazy;
+			el.value = this[value];
+			el.addEventListener('change', function () {
+				var v = el.value;
+				if (el.type === 'checkbox') { v = el.checked; }
+				this$1[value] = v;
+			});
+			if (el.type === 'text' && !lazy) {
+				el.addEventListener('keydown', function () {
+					setTimeout(function () {
+						this$1[value] = el.value;
+					}, 0);
+				});
+			}
+		},
+		updated: function updated(el, value) {
+			var prop = 'value';
+			if (el.type === 'checkbox') { prop = 'checked'; }
+			if (el[prop] !== this[value]) { el[prop] = this[value]; }
+		}
+	}, 'empty');
+
+	register('class', function (el, value, mod, arg) {
+		var prop = value || arg;
+		this.$on(prop, function (v) {
+			el.classList[!!v ? 'add' : 'remove'](arg || value);
+		}, {
+			immediate: true,
+			id: el,
+			type: 'DIRECTIVE'
 		});
 	}, 'required');
 
@@ -192,33 +192,55 @@ var Hdash = (function () {
 		} else {
 			error(("wrong selector or element: expected element or string, got \"" + (String(el)) + "\""));
 		}
-		this.state = options.state || {};
-		this.actions = options.actions || {};
-		this.$watchers = options.watchers || {};
-		this.$formatters = options.formatters || {};
 		this.$events = [];
-		this.$init();
-	};
-	Hdash.prototype.$init = function $init () {
-			var this$1 = this;
-		Object.keys(this.actions).forEach(function (k) {
-			this$1.actions[k] = this$1.actions[k].bind(this$1);
-		});
-		Object.keys(this.$watchers).forEach(function (k) {
-			this$1.$on(k, this$1.$watchers[k]);
-		});
-		this.$initProxy();
-		this.$el.querySelectorAll('*').forEach(this.$execDirectives.bind(this));
+		this.$formatters = {};
+		this.$_proxy = null;
+		this.$extendWith(
+			options.state || {},
+			options.actions || {},
+			options.computed || {},
+			options.formatters || {}
+		);
 		this.$interpolation();
+		this.$el.querySelectorAll('*').forEach(this.$execDirectives.bind(this));
 		this.$observe();
 	};
-	Hdash.prototype.$initProxy = function $initProxy () {
+	Hdash.prototype.$extendWith = function $extendWith (state, actions, computed, formatters) {
 			var this$1 = this;
-		var traps = {
+		this.$makeProxy(state);
+		Object.keys(state).forEach(function (p) {
+			Object.defineProperty(this$1, p, {
+				get: function () { return this$1.$_proxy[p]; },
+				set: function (nv) {
+					this$1.$_proxy[p] = nv;
+				}
+			});
+		});
+		Object.entries(actions).forEach(function (ref) {
+				var name = ref[0];
+				var fn = ref[1];
+			this$1[name] = fn.bind(this$1);
+		});
+		Object.entries(computed).forEach(function (ref) {
+				var name = ref[0];
+				var fn = ref[1];
+			Object.defineProperty(this$1, name, {
+				get: fn.bind(this$1),
+				set: function () { return false; }
+			});
+		});
+		Object.entries(formatters).forEach(function (ref) {
+				var name = ref[0];
+				var fn = ref[1];
+			this$1.$formatters[name] = fn.bind(this$1);
+		});
+	};
+	Hdash.prototype.$makeProxy = function $makeProxy (o) {
+			var this$1 = this;
+		this.$_proxy = new Proxy(o, {
 			get: function (obj, key) {
 				if (!obj.hasOwnProperty(key)) { error(("unknown state property \"" + key + "\"")); }
-				var v = obj[key];
-				return v
+				return obj[key]
 			},
 			set: function (obj, key, value) {
 				if (!obj.hasOwnProperty(key)) { error(("unknown state property \"" + key + "\"")); }
@@ -226,9 +248,14 @@ var Hdash = (function () {
 				this$1.$emit(key);
 				this$1.$emit();
 				return true
-			}
-		};
-		this.state = new Proxy(this.state, traps);
+			},
+			deleteProperty: function () { return false; }
+		});
+	};
+	Hdash.prototype.$pipeFormatters = function $pipeFormatters (formatters) {
+		if (arguments.length > 1) { formatters = Array.prototype.slice.call(arguments); }
+		else if (arguments.length === 1 && typeof formatters === 'string') { formatters = [formatters]; }
+		return makeFormatterFn(formatters, this.$formatters).bind(this)
 	};
 	Hdash.prototype.$execDirectives = function $execDirectives (el) {
 			var this$1 = this;
@@ -258,9 +285,9 @@ var Hdash = (function () {
 					this$1.$on('', function () {
 						dir.callback.updated.apply(this$1, argArray);
 					}, {
-						type: 'DIRECTIVE',
-						id: el
-					});
+							type: 'DIRECTIVE',
+							id: el
+						});
 				}
 			}
 		};
@@ -279,10 +306,10 @@ var Hdash = (function () {
 				var ref = exp.split(' | ');
 				var prop = ref[0];
 				var formatters = ref.slice(1);
-			var reg = new RegExp('\\{ ' + exp.replace(/\|/g, '\\|') + ' \\}', 'g'),
-			formatterFn = makeFormatterFn(formatters, this$1.$formatters);
+				var reg = new RegExp('\\{ ' + exp.replace(/\|/g, '\\|') + ' \\}', 'g'),
+			formatterFn = this$1.$pipeFormatters(formatters);
 			this$1.$on(prop, function (v) {
-				var replaced = initText.replace(reg, formatterFn.call(this$1, v));
+				var replaced = initText.replace(reg, formatterFn(v));
 				if (node.textContent !== replaced) { node.textContent = replaced; }
 			}, {
 					immediate: true,
@@ -338,6 +365,7 @@ var Hdash = (function () {
 		});
 	};
 	Hdash.prototype.$on = function $on (key, fn, options) {
+			if ( options === void 0 ) options = {};
 		this.$events.push({
 			key: key,
 			fn: fn,
@@ -351,7 +379,7 @@ var Hdash = (function () {
 		this.$events.filter(function (ev) {
 			return key ? ev.key === key : true
 		}).forEach(function (ev) {
-			var args = ev.key ? [this$1.state[ev.key]] : [];
+			var args = ev.key ? [this$1[ev.key]] : [];
 			ev.fn.apply(this$1, args);
 		});
 	};

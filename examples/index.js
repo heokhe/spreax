@@ -6,8 +6,18 @@ var instance = new Hdash('#app', {
 		checkbox: false,
 		int_name: 'Hosein'
 	},
+	computed: {
+		greetSentence(){
+			return `Hello, ${this.int_name}!`
+		}
+	},
 	formatters: {
 		upper: s => s.toUpperCase()
+	},
+	actions: {
+		log(){
+			console.log('lol')
+		}
 	}
 })
 
