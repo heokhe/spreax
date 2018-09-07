@@ -5,6 +5,5 @@
 	"fixturesFolder": "test/fixtures",
 	"video": false,
 	"pluginsFile": "test/plugins/index.js",
-	"supportFile": "test/support/index.js",
-	"baseUrl": "http://localhost:8383/examples"
+	"supportFile": "test/support/index.js"
 }

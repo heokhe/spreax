@@ -13,28 +13,33 @@
 	<div id="app">
 		<div id="interpolation">
 			<h1>Interpolation</h1>
-			<span>{ int_name }</span>
+			my name is <b>{ name }</b>
 			<br>
-			<b>{ int_name | upper }</b>
+			uppercased name (made using formatters) <b>{ name | upper }</b>
+			<br>
+			formatted sentence (made using computed props) is <b>{ sentence }</b>
 		</div>
 		<hr>
 		<div id="model">
 			<h1>Model</h1>
 			<h3>Text input</h3>
-			<input type="text" h-model='model'>
-			<button h-on:click.once='model = ""'>clear</button>
-			<div>{ model }</div>
+			<input type="text" h-model='name'>
+			<button h-on:click.once='name = ""'>clear (works once)</button>
+			<div>You typed <b>{ name }</b></div>
 			<h3>Checkbox inputs</h3>
 			<input type="checkbox" h-model='checkbox'>
 			<label>{ checkbox }</label>
 		</div>
 		<hr>
 		<div id="class">
-			<h1 h-class:cls>class directive</h1>
-			<button h-on:click='cls = !1'>remove class</button>
+			<h1>Class directive</h1>
+			<div h-class:active='classIsActive'>{ classIsActive }</div>
+			<button h-on:click='classIsActive = false'>remove class</button>
 		</div>
 		<hr>
-		<div id="observer"></div>
+		<div id="observer">
+			<h1>Observer</h1>
+		</div>
 	</div>
 </body>
 <script src="/dist/hdash.browser.min.js"></script>

@@ -1,29 +1,22 @@
 var instance = new Hdash('#app', {
 	state: {
-		model: 'type your name',
-		cls: true,
-		observer_title: 'if you see this, observer works.',
+		name: 'Hosein',
 		checkbox: false,
-		int_name: 'Hosein'
+		classIsActive: true,
+		observerTitle: 'If you see this, it works.',
 	},
 	computed: {
-		greetSentence(){
-			return `Hello, ${this.int_name}!`
+		sentence() {
+			return `My name is ${this.name}`
 		}
 	},
 	formatters: {
 		upper: s => s.toUpperCase()
-	},
-	actions: {
-		log(){
-			console.log('lol')
-		}
 	}
 })
 
 setTimeout(() => {
-	document.querySelector('#observer').innerHTML = `
-		<h1>{ observer_title }</h1>
-		<input h-model='observer_title'>
-	`
+	document.querySelector('#observer').insertAdjacentHTML('beforeend', `
+		<span>{ observerTitle }</span>
+	`)
 }, 1000)

@@ -125,6 +125,8 @@ register('class', function (el, value, mod, arg) {
 	var prop = value || arg;
 	this.$on(prop, function (v) {
 		el.classList[!!v ? 'add' : 'remove'](arg || value);
+		var attr = el.getAttribute('class');
+		if (attr !== null && !attr.length) { el.removeAttribute('class'); }
 	}, {
 		immediate: true,
 		id: el,

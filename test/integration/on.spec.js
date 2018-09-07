@@ -3,9 +3,9 @@ describe('On directive', () => {
 		cy.get('#model').within(() => {
 			cy
 				.get('button').click()
-				.get('input').first().should('have.value', '').type(':|')
+				.get('input').first().should('have.value', '').type('Bob')
 				.get('button').click()
-				.get('input').first().should('not.have.value', '')
+				.get('input').first().should('have.value', 'Bob')
 		})
 	})
 })

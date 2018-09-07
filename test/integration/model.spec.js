@@ -6,12 +6,13 @@ describe('Model directive', () => {
 		cy.get('#model').within(() => {
 			cy
 				.get('input').first().clear().type('Hosein')
-				.get('div').should('have.text', 'Hosein')
+				.get('div>b').should('have.text', 'Hosein')
 				.window().then(window => {
-					window.instance.model = 'x'
+					window.instance.name = 'John'
 				})
-				.get('input').first().should('have.value', 'x')
-		})
+				.get('input').first().should('have.value', 'John')
+				.get('div>b').should('have.text', 'John')
+			})
 	})
 	it('works with checkbox inputs', () => {
 		cy.get('#model').within(() => {
