@@ -17,7 +17,7 @@ jobs:
                       - ~/.cache
               - run:
                   name: Start app in background
-                  command: yarn test:start-server
+                  command: yarn start
                   background: true
               - run:
                   name: Run E2E tests
