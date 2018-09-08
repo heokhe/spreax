@@ -8,10 +8,10 @@ describe('Model directive', () => {
 				.get('input').first().clear().type('Hosein')
 				.get('div>b').should('have.text', 'Hosein')
 				.window().then(window => {
-					window.instance.name = 'John'
+					window.instance.name = 'Tom'
 				})
-				.get('input').first().should('have.value', 'John')
-				.get('div>b').should('have.text', 'John')
+				.get('input').first().should('have.value', 'Tom')
+				.get('div>b').should('have.text', 'Tom')
 			})
 	})
 	it('works with checkbox inputs', () => {
@@ -24,6 +24,16 @@ describe('Model directive', () => {
 					window.instance.checkbox = false
 				})
 				.get('input[type=checkbox]').should('not.be.checked')
+		})
+	})
+	it('works with select elements', () => {
+		cy.get('#model').within(() => {
+			cy
+				.get('select').should('have.value', 'Tom')
+				.select('Hosein')
+				.window().then(w => {
+					expect(w.instance.name).to.equal('Hosein')
+				})
 		})
 	})
 })

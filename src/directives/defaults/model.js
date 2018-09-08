@@ -1,8 +1,15 @@
 import { register } from '../register'
+import { domError } from '../../error'
 
 register('model', {
 	ready(el, value, { lazy }) {
-		el.value = this[value]
+		if (!/^(?:select|input|textarea)$/.test(el.tagName.toLowerCase())) domError(`model directive only works on input, textarea or select tags`, el)
+
+		if (el.type === 'checkbox') {
+			el.checked = !!this[value]
+		} else {
+			el.value = this[value]
+		}
 		el.addEventListener('change', () => {
 			let v = el.value;
 			if (el.type === 'checkbox') v = el.checked

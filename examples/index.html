@@ -25,10 +25,17 @@
 			<h3>Text input</h3>
 			<input type="text" h-model='name'>
 			<button h-on:click.once='name = ""'>clear (works once)</button>
-			<div>You typed <b>{ name }</b></div>
+			<div>Name is <b>{ name }</b></div>
 			<h3>Checkbox inputs</h3>
-			<input type="checkbox" h-model='checkbox'>
+			<input type="checkbox" h-model='checkbox' checked>
 			<label>{ checkbox }</label>
+			<h3>Select elements</h3>
+			<select h-model='name'>
+				<option>Bob</option>
+				<option>Jack</option>
+				<option>Tom</option>
+				<option>Hosein</option>
+			</select>
 		</div>
 		<hr>
 		<div id="class">
