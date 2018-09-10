@@ -1,12 +1,7 @@
 describe('Computed properties', () => {
 	it('works', () => {
 		cy.window().then(({instance: i}) => {
-			let {name} = i
-			const prefix = 'My name is ';
-			expect(i.sentence).to.equal(prefix + i.name)
-			i.name = 'Jack'
-			expect(i.sentence).to.equal(prefix + i.name)
-			i.name = name
+			expect(i.sentence).to.equal('My name is ' + i.name)
 		})
 	})
 	it('prevents assigning value to them', () => {

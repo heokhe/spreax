@@ -190,7 +190,7 @@ function makeFormatterFn(formatters, source) {
 }
 
 var Hdash = function Hdash(el, options) {
-	if (!this instanceof Hdash) { error('Hdash must be called with new operator'); }
+	if (!(this instanceof Hdash)) { error('Hdash must be called with new operator'); }
 	if (typeof el === 'string') {
 		this.$el = document.querySelector(el);
 	} else if (el instanceof HTMLElement) {
@@ -337,9 +337,11 @@ Hdash.prototype.$observe = function $observe () {
 					switch (anode.nodeType) {
 					case document.TEXT_NODE:
 						this$1.$interpolateNode(anode);
+						break
 					case document.ELEMENT_NODE:
 						getTextNodes(anode).forEach(this$1.$interpolateNode.bind(this$1));
 						this$1.$execDirectives(anode);
+						break
 				}
 			}
 			var loop = function () {

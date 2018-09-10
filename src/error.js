@@ -6,6 +6,7 @@ import generateSelector from './dom/generateSelector'
  */
 export default function error(msg, isWarn) {
 	const fmsg = `[hdash${!isWarn ? ' error' : ''}] ${msg}`
+	// eslint-disable-next-line no-console
 	if (isWarn) console.warn(fmsg)
 	else throw new Error(fmsg)
 }

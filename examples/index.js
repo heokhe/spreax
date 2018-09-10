@@ -3,7 +3,7 @@ var instance = new Hdash('#app', {
 		name: 'Hosein',
 		checkbox: false,
 		classIsActive: true,
-		observerTitle: 'If you see this, it works.',
+		observerTitle: 'If you see this, it works.'
 	},
 	computed: {
 		sentence() {

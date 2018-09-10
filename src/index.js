@@ -9,7 +9,7 @@ import makeFormatterFn from './makeFormatterFn'
 
 class Hdash {
 	constructor(el, options) {
-		if (!this instanceof Hdash) error('Hdash must be called with new operator')
+		if (!(this instanceof Hdash)) error('Hdash must be called with new operator')
 		if (typeof el === 'string') {
 			this.$el = document.querySelector(el)
 		} else if (el instanceof HTMLElement) {
@@ -118,7 +118,7 @@ class Hdash {
 	}
 
 	$interpolation() {
-		getTextNodes(this.$el).forEach(this.$interpolateNode.bind(this))
+		getTextNodes(this.$el).forEach(this.$interpolateNode, this)
 	}
 
 	/**
@@ -153,9 +153,11 @@ class Hdash {
 					switch (anode.nodeType) {
 						case document.TEXT_NODE:
 							this.$interpolateNode(anode)
+							break
 						case document.ELEMENT_NODE:
-							getTextNodes(anode).forEach(this.$interpolateNode.bind(this))
+							getTextNodes(anode).forEach(this.$interpolateNode, this)
 							this.$execDirectives(anode)
+							break
 					}
 				}
 				for (const rnode of removedNodes) {

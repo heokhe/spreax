@@ -1,0 +1,22 @@
+{
+	"root": true,
+    "env": {
+        "browser": true,
+        "es6": true,
+		"node": true,
+		"mocha": true,
+		"jasmine": true
+	},
+	"globals": {
+		"cy": true,
+		"Cypress": true
+	},
+    "extends": "eslint:recommended",
+    "parserOptions": {
+        "ecmaVersion": 2018,
+        "sourceType": "module"
+    },
+    "rules": {
+		"no-extra-boolean-cast": 0
+	}
+}
