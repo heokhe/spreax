@@ -1,5 +1,5 @@
 var Hdash = (function () {
-	function generateSelectorString(el, root) {
+	function generateSelector(el, root) {
 		if ( root === void 0 ) root = 'body';
 		if (typeof root === 'string') { root = document.querySelector(root); }
 		var pathSections = [];
@@ -13,18 +13,18 @@ var Hdash = (function () {
 			if (ps.className) { selector += '.' + ps.className.trim().split(' ').join('.'); }
 			if (ps.id) { selector += '#' + ps.id; }
 			selector = selector.replace(/^div([^$]+)/, '$1');
-			return selector
+			return selector;
 		});
-		return pathSections.join(' > ')
+		return pathSections.join(' > ');
 	}
 
 	function error(msg, isWarn) {
 		var fmsg = "[hdash" + (!isWarn ? ' error' : '') + "] " + msg;
 		if (isWarn) { console.warn(fmsg); }
-		else { throw new Error(fmsg) }
+		else { throw new Error(fmsg); }
 	}
 	function domError(msg, el, isWarn){
-		error(msg + "\n -------\n(at " + (generateSelectorString(el)) + ")", isWarn);
+		error((msg + "\n -------\n(at " + (generateSelector(el)) + ")"), isWarn);
 	}
 
 	function getTextNodes(el) {
@@ -39,19 +39,19 @@ var Hdash = (function () {
 			}
 		}
 		return n.filter(function (e) {
-			return /\S+/g.test(e.textContent)
-		})
+			return /\S+/g.test(e.textContent);
+		});
 	}
 
-	function arrayUnique(arr){
-		return arr.filter(function (elem, pos) { return arr.indexOf(elem) === pos; })
+	function arrayUnique (arr){
+		return arr.filter(function (elem, pos) { return arr.indexOf(elem) === pos; });
 	}
 
 	function trim(str) {
-		return str.replace(/\{ /g, '').replace(/ \}/g, '')
+		return str.replace(/\{ /g, '').replace(/ \}/g, '');
 	}
 	function contains(str){
-		return /\{ \w+(?: \| \w+)* \}/gi.test(str)
+		return /\{ \w+(?: \| \w+)* \}/gi.test(str);
 	}
 	var global = /\{ \w+(?: \| \w+)* \}/gi;
 
@@ -145,7 +145,7 @@ var Hdash = (function () {
 		keys.forEach(function (k) {
 			o[k] = value;
 		});
-		return o
+		return o;
 	}
 
 	function directivesOf(el) {
@@ -162,32 +162,32 @@ var Hdash = (function () {
 				if (modifiers) {
 					modifiers = record(modifiers.split('.').filter(Boolean), true);
 				} else { modifiers = {}; }
-				return { name: name, arg: arg, modifiers: modifiers }
+				return { name: name, arg: arg, modifiers: modifiers };
 			}).filter(function (e, index, arr) {
 				var getFullName = function (e) { return e.arg ? [e.name, e.arg].join(':') : e.name; },
 				fullName = getFullName(e),
 				withThisFullName = arr.filter(function (e) { return getFullName(e) === fullName; });
 				if (withThisFullName.length > 1) {
 					domError(("duplicate directive " + (e.name)), el, true);
-					return withThisFullName[0]
-				} else { return e }
-			})
+					return withThisFullName[0];
+				} else { return e; }
+			});
 	}
 
 	function toString(d){
-		var o = 'h-' + d.name;
+		var o = "h-" + (d.name);
 		if (d.arg) { o += ':' + d.arg; }
 		var k = Object.keys(d.modifiers);
 		if (k.length) { o += '.' + k.join('.'); }
-		return o
+		return o;
 	}
 
 	function makeFormatterFn(formatters, source) {
-		if (!formatters.length) { return function (v) { return v; } }
+		if (!formatters.length) { return function (v) { return v; }; }
 		return formatters.map(function (f) {
 			if (!(f in source)) { error(("formatter " + f + " not found")); }
-			else { return source[f] }
-		}).reduce(function (a, b) { return function (arg) { return b(a(arg)); }; })
+			else { return source[f]; }
+		}).reduce(function (a, b) { return function (arg) { return b(a(arg)); }; });
 	}
 
 	var Hdash = function Hdash(el, options) {
@@ -247,14 +247,14 @@ var Hdash = (function () {
 		this.$_proxy = new Proxy(o, {
 			get: function (obj, key) {
 				if (!obj.hasOwnProperty(key)) { error(("unknown state property \"" + key + "\"")); }
-				return obj[key]
+				return obj[key];
 			},
 			set: function (obj, key, value) {
 				if (!obj.hasOwnProperty(key)) { error(("unknown state property \"" + key + "\"")); }
 				obj[key] = value;
 				this$1.$emit(key);
 				this$1.$emit();
-				return true
+				return true;
 			},
 			deleteProperty: function () { return false; }
 		});
@@ -262,7 +262,7 @@ var Hdash = (function () {
 	Hdash.prototype.$pipeFormatters = function $pipeFormatters (formatters) {
 		if (arguments.length > 1) { formatters = Array.prototype.slice.call(arguments); }
 		else if (arguments.length === 1 && typeof formatters === 'string') { formatters = [formatters]; }
-		return makeFormatterFn(formatters, this.$formatters).bind(this)
+		return makeFormatterFn(formatters, this.$formatters).bind(this);
 	};
 	Hdash.prototype.$execDirectives = function $execDirectives (el) {
 			var this$1 = this;
@@ -277,10 +277,10 @@ var Hdash = (function () {
 			switch (dir.argState) {
 				case 'empty':
 					if (!!arg) { domError(("directive \"" + name + "\" needed no arguments, but there is an argument"), el); }
-					break
+					break;
 				case 'required':
 					if (!arg) { domError("directive needs an arguments, but there's nothing", el); }
-					break
+					break;
 			}
 			var attrValue = el.getAttribute(toString({ name: name, arg: arg, modifiers: modifiers })),
 				argArray = [el, attrValue, modifiers, arg];
@@ -301,7 +301,7 @@ var Hdash = (function () {
 			for (var i = 0, list = directivesOf(el); i < list.length; i += 1) loop();
 	};
 	Hdash.prototype.$interpolation = function $interpolation () {
-		getTextNodes(this.$el).forEach(this.$interpolateNode.bind(this));
+		getTextNodes(this.$el).forEach(this.$interpolateNode, this);
 	};
 	Hdash.prototype.$interpolateNode = function $interpolateNode (node) {
 			var this$1 = this;
@@ -313,7 +313,7 @@ var Hdash = (function () {
 				var ref = exp.split(' | ');
 				var prop = ref[0];
 				var formatters = ref.slice(1);
-				var reg = new RegExp('\\{ ' + exp.replace(/\|/g, '\\|') + ' \\}', 'g'),
+				var reg = new RegExp(("\\{ " + (exp.replace(/\|/g, '\\|')) + " \\}"), 'g'),
 			formatterFn = this$1.$pipeFormatters(formatters);
 			this$1.$on(prop, function (v) {
 				var replaced = initText.replace(reg, formatterFn(v));
@@ -338,18 +338,19 @@ var Hdash = (function () {
 						switch (anode.nodeType) {
 						case document.TEXT_NODE:
 							this$1.$interpolateNode(anode);
-							break
+							break;
 						case document.ELEMENT_NODE:
-							getTextNodes(anode).forEach(this$1.$interpolateNode.bind(this$1));
+							getTextNodes(anode).forEach(this$1.$interpolateNode, this$1);
 							this$1.$execDirectives(anode);
-							break
+							break;
 					}
 				}
-				var loop = function () {
+				for (var i$1 = 0, list$1 = removedNodes; i$1 < list$1.length; i$1 += 1) {
 					var rnode = list$1[i$1];
-						var removeNodeFromEvents = function (node) {
+						var removeNodeFromEvents = function (node, type) {
+							if ( type === void 0 ) type = 'INTERPOLATION';
 						this$1.$events.filter(function (e) {
-							return e.type === 'INTERPOLATION' && e.id === node
+							return e.type === type && e.id === node;
 						}).map(function (e) { return this$1.$events.indexOf(e); }).forEach(function (i) {
 							this$1.$events.splice(i, 1);
 						});
@@ -358,14 +359,9 @@ var Hdash = (function () {
 						removeNodeFromEvents(rnode);
 					} else if (rnode.nodeType === document.ELEMENT_NODE) {
 						getTextNodes(rnode).forEach(removeNodeFromEvents);
-						this$1.$events.filter(function (e) {
-							return e.type === 'DIRECTIVE' && e.id === rnode
-						}).map(function (e) { return this$1.$events.indexOf(e); }).forEach(function (i) {
-							this$1.$events.splice(i, 1);
-						});
+						removeNodeFromEvents(rnode, 'DIRECTIVE');
 					}
-				};
-					for (var i$1 = 0, list$1 = removedNodes; i$1 < list$1.length; i$1 += 1) loop();
+				}
 			}
 		});
 		m.observe(this.$el, {
@@ -386,7 +382,7 @@ var Hdash = (function () {
 	Hdash.prototype.$emit = function $emit (key) {
 			var this$1 = this;
 		this.$events.filter(function (ev) {
-			return key ? ev.key === key : true
+			return key ? ev.key === key : true;
 		}).forEach(function (ev) {
 			var args = ev.key ? [this$1[ev.key]] : [];
 			ev.fn.apply(this$1, args);

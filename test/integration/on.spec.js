@@ -5,7 +5,7 @@ describe('On directive', () => {
 				.get('button').click()
 				.get('input').first().should('have.value', '').type('Bob')
 				.get('button').click()
-				.get('input').first().should('have.value', 'Bob')
-		})
-	})
-})
+				.get('input').first().should('have.value', 'Bob');
+		});
+	});
+});

@@ -1,9 +1,9 @@
-import error from "../error"
+import error from "../error";
 
 /**
  * @type {{[x: string]: {callback: Callback, argState: ArgState}}}
  */
-const _registry = {}
+const _registry = {};
 
 /**
  * @typedef {{[x: string]: true}} Modifiers
@@ -18,13 +18,13 @@ const _registry = {}
  * @param {ArgState} [argState]
  */
 export function register(name, callback, argState = 'optional') {
-	if (name in _registry) error(`directive "${name}" already exists`)
-	if (!['optional', 'empty', 'required'].includes(argState)) error(`argument state for directive "${name}" is not valid. choosing the default value ("optional")`, true)
-	if (!/^[a-z]+(?:-[a-z]+)*$/.test(name)) error(`"${name}" is not a valid directive name`)
+	if (name in _registry) error(`directive "${name}" already exists`);
+	if (!['optional', 'empty', 'required'].includes(argState)) error(`argument state for directive "${name}" is not valid. choosing the default value ("optional")`, true);
+	if (!/^[a-z]+(?:-[a-z]+)*$/.test(name)) error(`"${name}" is not a valid directive name`);
 
 	_registry[name] = {
 		argState, callback
-	}
+	};
 }
 
-export const all = _registry
+export const all = _registry;
