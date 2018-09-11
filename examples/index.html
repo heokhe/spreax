@@ -20,11 +20,16 @@
 			formatted sentence (made using computed props) is <b>{ sentence }</b>
 		</div>
 		<hr>
+		<div id="on">
+			<h1>On directive</h1>
+			<button h-on:click.once="log">Log</button>
+		</div>
+		<hr>
 		<div id="model">
 			<h1>Model</h1>
 			<h3>Text input</h3>
 			<input type="text" h-model='name'>
-			<button h-on:click.once='name = ""'>clear (works once)</button>
+			<button h-on:click='name = ""'>clear</button>
 			<div>Name is <b>{ name }</b></div>
 			<h3>Checkbox inputs</h3>
 			<input type="checkbox" h-model='checkbox' checked>

@@ -10,6 +10,11 @@ var instance = new Hdash('#app', {
 			return `My name is ${this.name}`
 		}
 	},
+	actions: {
+		log(){
+			console.log('Logged ;)')
+		}
+	},
 	formatters: {
 		upper: s => s.toUpperCase()
 	}

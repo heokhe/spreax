@@ -173,7 +173,7 @@ class Hdash {
 						removeNodeFromEvents(rnode);
 					} else if (rnode.nodeType === document.ELEMENT_NODE) {
 						getTextNodes(rnode).forEach(removeNodeFromEvents);
-						removeNodeFromEvents(rnode, 'DIRECTIVE')
+						removeNodeFromEvents(rnode, 'DIRECTIVE');
 					}
 				}
 			}
