@@ -4,6 +4,7 @@
 	"main": "dist/spreax.cjs.js",
 	"browser": "dist/spreax.browser.js",
 	"module": "dist/spreax.esm.js",
+	"unpkg": "dist/spreax.min.js",
 	"scripts": {
 		"build": "rollup -c --no-strict",
 		"start": "http-server . -p 8383 -s",
@@ -23,6 +24,10 @@
 		"rollup-plugin-terser": "^1.0.1"
 	},
 	"repository": "git@github.com:Hkh12/spreax.git",
+	"bugs": {
+		"url": "https://github.com/Hkh12/spreax/issues"
+	},
+	"homepage": "https://github.com/Hkh12/spreax",
 	"author": "Hosein Khansari <hrk.x11@gmail.com>",
 	"license": "MIT"
 }
