@@ -18,7 +18,7 @@ function generateSelector(el, root) {
 }
 
 function error(msg, isWarn) {
-	var fmsg = "[hdash" + (!isWarn ? ' error' : '') + "] " + msg;
+	var fmsg = "[spreax" + (!isWarn ? ' error' : '') + "] " + msg;
 	if (isWarn) { console.warn(fmsg); }
 	else { throw new Error(fmsg); }
 }
@@ -189,8 +189,8 @@ function makeFormatterFn(formatters, source) {
 	}).reduce(function (a, b) { return function (arg) { return b(a(arg)); }; });
 }
 
-var Hdash = function Hdash(el, options) {
-	if (!(this instanceof Hdash)) { error('Hdash must be called with new operator'); }
+var Spreax = function Spreax(el, options) {
+	if (!(this instanceof Spreax)) { error('Spreax must be called with new operator'); }
 	if (typeof el === 'string') {
 		this.$el = document.querySelector(el);
 	} else if (el instanceof HTMLElement) {
@@ -211,7 +211,7 @@ var Hdash = function Hdash(el, options) {
 	this.$el.querySelectorAll('*').forEach(this.$execDirectives.bind(this));
 	this.$observe();
 };
-Hdash.prototype.$extendWith = function $extendWith (state, actions, computed, formatters) {
+Spreax.prototype.$extendWith = function $extendWith (state, actions, computed, formatters) {
 		var this$1 = this;
 	this.$makeProxy(state);
 	Object.keys(state).forEach(function (p) {
@@ -241,7 +241,7 @@ Hdash.prototype.$extendWith = function $extendWith (state, actions, computed, fo
 		this$1.$formatters[name] = fn.bind(this$1);
 	});
 };
-Hdash.prototype.$makeProxy = function $makeProxy (o) {
+Spreax.prototype.$makeProxy = function $makeProxy (o) {
 		var this$1 = this;
 	this.$_proxy = new Proxy(o, {
 		get: function (obj, key) {
@@ -258,12 +258,12 @@ Hdash.prototype.$makeProxy = function $makeProxy (o) {
 		deleteProperty: function () { return false; }
 	});
 };
-Hdash.prototype.$pipeFormatters = function $pipeFormatters (formatters) {
+Spreax.prototype.$pipeFormatters = function $pipeFormatters (formatters) {
 	if (arguments.length > 1) { formatters = Array.prototype.slice.call(arguments); }
 	else if (arguments.length === 1 && typeof formatters === 'string') { formatters = [formatters]; }
 	return makeFormatterFn(formatters, this.$formatters).bind(this);
 };
-Hdash.prototype.$execDirectives = function $execDirectives (el) {
+Spreax.prototype.$execDirectives = function $execDirectives (el) {
 		var this$1 = this;
 	if (!el.attributes || !el.attributes.length) { return; }
 	var loop = function () {
@@ -299,10 +299,10 @@ Hdash.prototype.$execDirectives = function $execDirectives (el) {
 	};
 		for (var i = 0, list = directivesOf(el); i < list.length; i += 1) loop();
 };
-Hdash.prototype.$interpolation = function $interpolation () {
+Spreax.prototype.$interpolation = function $interpolation () {
 	getTextNodes(this.$el).forEach(this.$interpolateNode, this);
 };
-Hdash.prototype.$interpolateNode = function $interpolateNode (node) {
+Spreax.prototype.$interpolateNode = function $interpolateNode (node) {
 		var this$1 = this;
 	if (!contains(node.textContent)) { return; }
 	var exps = arrayUnique(node.textContent.match(global).map(trim));
@@ -325,7 +325,7 @@ Hdash.prototype.$interpolateNode = function $interpolateNode (node) {
 	};
 		for (var i = 0, list = exps; i < list.length; i += 1) loop();
 };
-Hdash.prototype.$observe = function $observe () {
+Spreax.prototype.$observe = function $observe () {
 		var this$1 = this;
 	var m = new MutationObserver(function (muts) {
 		for (var i$2 = 0, list$2 = muts; i$2 < list$2.length; i$2 += 1) {
@@ -368,7 +368,7 @@ Hdash.prototype.$observe = function $observe () {
 		subtree: true
 	});
 };
-Hdash.prototype.$on = function $on (key, fn, options) {
+Spreax.prototype.$on = function $on (key, fn, options) {
 		if ( options === void 0 ) options = {};
 	this.$events.push({
 		key: key,
@@ -378,7 +378,7 @@ Hdash.prototype.$on = function $on (key, fn, options) {
 	});
 	if (options.immediate) { this.$emit(key); }
 };
-Hdash.prototype.$emit = function $emit (key) {
+Spreax.prototype.$emit = function $emit (key) {
 		var this$1 = this;
 	this.$events.filter(function (ev) {
 		return key ? ev.key === key : true;
@@ -387,6 +387,6 @@ Hdash.prototype.$emit = function $emit (key) {
 		ev.fn.apply(this$1, args);
 	});
 };
-Hdash.directive = register;
+Spreax.directive = register;
 
-export default Hdash;
+module.exports = Spreax;

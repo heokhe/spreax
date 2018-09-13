@@ -1,9 +1,9 @@
 {
-	"name": "hdash",
+	"name": "spreax",
 	"description": "A new front-end tool to bind UI with app state.",
-	"main": "dist/hdash.cjs.js",
-	"browser": "dist/hdash.browser.js",
-	"module": "dist/hdash.esm.js",
+	"main": "dist/spreax.cjs.js",
+	"browser": "dist/spreax.browser.js",
+	"module": "dist/spreax.esm.js",
 	"scripts": {
 		"build": "rollup -c --no-strict",
 		"start": "http-server . -p 8383 -s",
@@ -22,7 +22,7 @@
 		"rollup-plugin-node-resolve": "^3.3.0",
 		"rollup-plugin-terser": "^1.0.1"
 	},
-	"repository": "git@github.com:Hkh12/hdash.git",
+	"repository": "git@github.com:Hkh12/spreax.git",
 	"author": "Hosein Khansari <hrk.x11@gmail.com>",
 	"license": "MIT"
 }

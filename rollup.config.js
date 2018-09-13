@@ -41,7 +41,7 @@ export default [
 		output: {
 			file: browser,
 			format: 'iife',
-			name: 'Hdash'
+			name: 'Spreax'
 		},
 		plugins
 	},
@@ -50,7 +50,7 @@ export default [
 		output: {
 			file: browser.replace(/\.js/, '.min.js'),
 			format: 'iife',
-			name: 'Hdash'
+			name: 'Spreax'
 		},
 		plugins: [...plugins.slice(0, -1), terser()]
 	},

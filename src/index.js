@@ -7,9 +7,9 @@ import directivesOf from './dom/directivesOf';
 import toString from './directives/toString';
 import makeFormatterFn from './makeFormatterFn';
 
-class Hdash {
+class Spreax {
 	constructor(el, options) {
-		if (!(this instanceof Hdash)) error('Hdash must be called with new operator');
+		if (!(this instanceof Spreax)) error('Spreax must be called with new operator');
 		if (typeof el === 'string') {
 			this.$el = document.querySelector(el);
 		} else if (el instanceof HTMLElement) {
@@ -205,6 +205,6 @@ class Hdash {
 	}
 }
 
-Hdash.directive = d.register;
+Spreax.directive = d.register;
 
-export default Hdash;
+export default Spreax;

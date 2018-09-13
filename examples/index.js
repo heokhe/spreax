@@ -1,4 +1,4 @@
-var instance = new Hdash('#app', {
+var instance = new Spreax('#app', {
 	state: {
 		name: 'Hosein',
 		checkbox: false,
