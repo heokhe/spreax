@@ -29,5 +29,6 @@
 	},
 	"homepage": "https://github.com/Hkh12/spreax",
 	"author": "Hosein Khansari <hrk.x11@gmail.com>",
-	"license": "MIT"
+	"license": "MIT",
+	"version": "1.0.0-alpha.0"
 }
