@@ -1,10 +1,10 @@
 {
 	"name": "spreax",
-	"description": "A new front-end tool to bind UI with app state.",
+	"description": "A new front-end tool to bind UI with app state",
 	"main": "dist/spreax.cjs.js",
 	"browser": "dist/spreax.browser.js",
 	"module": "dist/spreax.esm.js",
-	"unpkg": "dist/spreax.min.js",
+	"unpkg": "dist/spreax.browser.js",
 	"scripts": {
 		"build": "rollup -c --no-strict",
 		"start": "http-server . -p 8383 -s",
@@ -27,8 +27,7 @@
 	"bugs": {
 		"url": "https://github.com/Hkh12/spreax/issues"
 	},
-	"homepage": "https://github.com/Hkh12/spreax",
+	"homepage": "https://github.com/Hkh12/spreax#readme",
 	"author": "Hosein Khansari <hrk.x11@gmail.com>",
-	"license": "MIT",
-	"version": "1.0.0-alpha.0"
+	"license": "MIT"
 }
