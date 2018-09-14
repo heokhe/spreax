@@ -50,9 +50,9 @@ new Spreax('#app', {
 now, we should add the directives. update the HTML to this: 
 ```html
 <div id="app">
-	<input type="text" placeholder='Type your name...' h-model='name'>
-	<button h-on:click='name = ""'>clear</button>
-	<button h-on:click='log'>log</button>
+	<input type="text" placeholder='Type your name...' sp-model='name'>
+	<button sp-on:click='name = ""'>clear</button>
+	<button sp-on:click='log'>log</button>
 	<hr>
 	<h1>Hello { name }</h1>
 </div>

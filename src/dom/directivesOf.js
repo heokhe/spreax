@@ -7,8 +7,8 @@ import { domError } from "../error";
 export default function(el) {
 	return Array.from(el.attributes)
 		.map(e => e.name)
-		.filter(e => /^h-/.test(e))
-		.map(e => e.replace(/^h-/, ''))
+		.filter(e => /^sp-/.test(e))
+		.map(e => e.replace(/^sp-/, ''))
 		.map(e => {
 			let [, name, arg, modifiers] = e.match(/^([a-z]+(?:-[a-z]+)*)(:[a-z0-9]+)?((?:\.[a-z0-9]+))*$/);
 			if (arg) arg = arg.replace(/^:/, '');

@@ -151,8 +151,8 @@ var Spreax = (function () {
 	function directivesOf(el) {
 		return Array.from(el.attributes)
 			.map(function (e) { return e.name; })
-			.filter(function (e) { return /^h-/.test(e); })
-			.map(function (e) { return e.replace(/^h-/, ''); })
+			.filter(function (e) { return /^sp-/.test(e); })
+			.map(function (e) { return e.replace(/^sp-/, ''); })
 			.map(function (e) {
 				var ref = e.match(/^([a-z]+(?:-[a-z]+)*)(:[a-z0-9]+)?((?:\.[a-z0-9]+))*$/);
 				var name = ref[1];
@@ -175,7 +175,7 @@ var Spreax = (function () {
 	}
 
 	function toString(d){
-		var o = "h-" + (d.name);
+		var o = "sp-" + (d.name);
 		if (d.arg) { o += ':' + d.arg; }
 		var k = Object.keys(d.modifiers);
 		if (k.length) { o += '.' + k.join('.'); }

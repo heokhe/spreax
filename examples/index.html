@@ -20,20 +20,20 @@
 		<hr>
 		<div id="on">
 			<h1>On directive</h1>
-			<button h-on:click.once="log">Log</button>
+			<button sp-on:click.once="log">Log</button>
 		</div>
 		<hr>
 		<div id="model">
 			<h1>Model</h1>
 			<h3>Text input</h3>
-			<input type="text" h-model='name'>
-			<button h-on:click='name = ""'>clear</button>
+			<input type="text" sp-model='name'>
+			<button sp-on:click='name = ""'>clear</button>
 			<div>Name is <b>{ name }</b></div>
 			<h3>Checkbox inputs</h3>
-			<input type="checkbox" h-model='checkbox' checked>
+			<input type="checkbox" sp-model='checkbox' checked>
 			<label>{ checkbox }</label>
 			<h3>Select elements</h3>
-			<select h-model='name'>
+			<select sp-model='name'>
 				<option>Bob</option>
 				<option>Jack</option>
 				<option>Tom</option>
@@ -43,8 +43,8 @@
 		<hr>
 		<div id="class">
 			<h1>Class directive</h1>
-			<div h-class:active='classIsActive'>{ classIsActive }</div>
-			<button h-on:click='classIsActive = false'>remove class</button>
+			<div sp-class:active='classIsActive'>{ classIsActive }</div>
+			<button sp-on:click='classIsActive = false'>remove class</button>
 		</div>
 		<hr>
 		<div id="observer">
