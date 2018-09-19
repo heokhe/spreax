@@ -1,6 +1,5 @@
 import error, { domError } from './error';
 import getTextNodes from './dom/getTextNodes';
-import arrayUnique from './utils/arrayUnique';
 import * as interpolation from './interpolation';
 import * as d from './directives/index';
 import directivesOf from './dom/directivesOf';
@@ -127,7 +126,9 @@ class Spreax {
 	$interpolateNode(node) {
 		if (!interpolation.contains(node.textContent)) return;
 
-		let exps = arrayUnique(node.textContent.match(interpolation.global).map(interpolation.trim));
+		let exps = node.textContent.match(interpolation.global)
+			.map(interpolation.trim)
+			.filter((item, index, array) => array.indexOf(item) === index);
 		const initText = node.textContent;
 
 		for (const exp of exps) {

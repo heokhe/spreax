@@ -43,10 +43,6 @@ var Spreax = (function () {
 		});
 	}
 
-	function arrayUnique (arr){
-		return arr.filter(function (elem, pos) { return arr.indexOf(elem) === pos; });
-	}
-
 	function trim(str) {
 		return str.replace(/\{ /g, '').replace(/ \}/g, '');
 	}
@@ -78,7 +74,7 @@ var Spreax = (function () {
 			if (modifiers.prevent) { event.preventDefault(); }
 			if (hasShortcut) {
 				var v;
-				if (['""', "''", '``'].includes(shortcut)) { v = ''; }
+				if (/^(['"`]).*\1$/.test(shortcut)) { v = shortcut.slice(1, -1); }
 				else if (shortcut === 'null') { v = null; }
 				else if (shortcut === 'true') { v = true; }
 				else if (shortcut === 'false') { v = false; }
@@ -306,7 +302,9 @@ var Spreax = (function () {
 	Spreax.prototype.$interpolateNode = function $interpolateNode (node) {
 			var this$1 = this;
 		if (!contains(node.textContent)) { return; }
-		var exps = arrayUnique(node.textContent.match(global).map(trim));
+		var exps = node.textContent.match(global)
+			.map(trim)
+			.filter(function (item, index, array) { return array.indexOf(item) === index; });
 		var initText = node.textContent;
 		var loop = function () {
 			var exp = list[i];

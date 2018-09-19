@@ -16,8 +16,10 @@ describe('On directive', () => {
 	it('works when using shortcuts', () => {
 		cy.get('#model').within(() => {
 			cy
-				.get('button').click()
-				.get('input').first().should('have.value', '');
+				.get('button').first().click()
+				.get('input').first().should('have.value', '')
+				.get('button').last().click()
+				.get('input').first().should('not.have.value', '');
 		});
 	});
 });

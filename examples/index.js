@@ -16,7 +16,7 @@ var instance = new Spreax('#app', {
 		}
 	},
 	formatters: {
-		upper: s => s.toUpperCase()
+		upper: s => String(s).toUpperCase()
 	}
 })
 

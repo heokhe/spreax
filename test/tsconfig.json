@@ -7,6 +7,6 @@
 		]
 	},
 	"include": [
-		"test/integration/*.spec.js"
+		"integration/*.spec.js"
 	]
 }

@@ -28,6 +28,7 @@
 			<h3>Text input</h3>
 			<input type="text" sp-model='name'>
 			<button sp-on:click='name = ""'>clear</button>
+			<button sp-on:click='name = "Hosein"'>set</button>
 			<div>Name is <b>{ name }</b></div>
 			<h3>Checkbox inputs</h3>
 			<input type="checkbox" sp-model='checkbox' checked>
@@ -52,7 +53,7 @@
 		</div>
 	</div>
 </body>
-<script src="/dist/spreax.browser.min.js"></script>
+<script src="/dist/spreax.browser.js"></script>
 <script src="./index.js"></script>
 
 </html>
