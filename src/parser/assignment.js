@@ -6,7 +6,7 @@ import PRIMITIVES from './_primitives';
  * @returns {{prop: string, getValue: (o?: any) => any}}
  * @throws {SyntaxError}
  */
-export function parseAssignment(string) {
+export default function(string) {
 	const match = string.match(/^(.+) = (.+)$/);
 	if (match === null) throw new SyntaxError(`string "${string}" is not a valid assignment statement`);
 

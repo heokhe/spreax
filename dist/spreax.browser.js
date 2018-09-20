@@ -31,16 +31,15 @@ var Spreax = (function () {
 		var n = [];
 		for (var i = 0, list = el.childNodes; i < list.length; i += 1) {
 			var node = list[i];
+			if (!/\S+/g.test(node.textContent)) { continue; }
 			var type = node.nodeType;
-			if (type === document.TEXT_NODE) {
+			if (type === Node.TEXT_NODE) {
 				n.push(node);
-			} else if (type === document.ELEMENT_NODE) {
+			} else if (type === Node.ELEMENT_NODE) {
 				n = n.concat( getTextNodes(node));
 			}
 		}
-		return n.filter(function (e) {
-			return /\S+/g.test(e.textContent);
-		});
+		return n;
 	}
 
 	function trim(str) {
@@ -72,7 +71,7 @@ var Spreax = (function () {
 		'undefined': undefined
 	};
 
-	function parseAssignment(string) {
+	function parse(string) {
 		var match = string.match(/^(.+) = (.+)$/);
 		if (match === null) { throw new SyntaxError(("string \"" + string + "\" is not a valid assignment statement")); }
 		var prop = match[1];
@@ -95,7 +94,7 @@ var Spreax = (function () {
 		el.addEventListener(arg, function (event) {
 			if (modifiers.prevent) { event.preventDefault(); }
 			if (hasShortcut) {
-				var pa = parseAssignment(value);
+				var pa = parse(value);
 				this$1[pa.prop] = pa.getValue(this$1);
 			} else {
 				this$1[value]();
@@ -111,7 +110,7 @@ var Spreax = (function () {
 		ready: function ready(el, value, ref) {
 			var this$1 = this;
 			var lazy = ref.lazy;
-			if (!/^(?:select|input|textarea)$/.test(el.tagName.toLowerCase())) { domError("model directive only works on input, textarea or select tags", el); }
+			if (!['select', 'input', 'textarea'].includes(el.tagName.toLowerCase())) { domError("model directive only works on input, textarea or select tags", el); }
 			if (el.type === 'checkbox') {
 				el.checked = !!this[value];
 			} else {
@@ -326,7 +325,7 @@ var Spreax = (function () {
 				var prop = ref[0];
 				var formatters = ref.slice(1);
 				var reg = new RegExp(("\\{ " + (exp.replace(/\|/g, '\\|')) + " \\}"), 'g'),
-			formatterFn = this$1.$pipeFormatters(formatters);
+				formatterFn = this$1.$pipeFormatters(formatters);
 			this$1.$on(prop, function (v) {
 				var replaced = initText.replace(reg, formatterFn(v));
 				if (node.textContent !== replaced) { node.textContent = replaced; }
@@ -342,22 +341,23 @@ var Spreax = (function () {
 			var this$1 = this;
 		var m = new MutationObserver(function (muts) {
 			for (var i$2 = 0, list$2 = muts; i$2 < list$2.length; i$2 += 1) {
-				var ref = list$2[i$2];
-					var addedNodes = ref.addedNodes;
-					var removedNodes = ref.removedNodes;
-					for (var i = 0, list = addedNodes; i < list.length; i += 1) {
+				var mut = list$2[i$2];
+					for (var i = 0, list = mut.addedNodes; i < list.length; i += 1) {
 					var anode = list[i];
-						switch (anode.nodeType) {
-						case document.TEXT_NODE:
+						if (mut.type === 'childList' &&
+						anode.nodeType === Node.TEXT_NODE &&
+						mut.target.hasChildNodes(anode)) { continue; }
+					switch (anode.nodeType) {
+						case Node.TEXT_NODE:
 							this$1.$interpolateNode(anode);
 							break;
-						case document.ELEMENT_NODE:
+						case Node.ELEMENT_NODE:
 							getTextNodes(anode).forEach(this$1.$interpolateNode, this$1);
 							this$1.$execDirectives(anode);
 							break;
 					}
 				}
-				for (var i$1 = 0, list$1 = removedNodes; i$1 < list$1.length; i$1 += 1) {
+				for (var i$1 = 0, list$1 = mut.removedNodes; i$1 < list$1.length; i$1 += 1) {
 					var rnode = list$1[i$1];
 						var removeNodeFromEvents = function (node, type) {
 							if ( type === void 0 ) type = 'INTERPOLATION';
@@ -367,9 +367,9 @@ var Spreax = (function () {
 							this$1.$events.splice(i, 1);
 						});
 					};
-					if (rnode.nodeType === document.TEXT_NODE) {
+					if (rnode.nodeType === Node.TEXT_NODE) {
 						removeNodeFromEvents(rnode);
-					} else if (rnode.nodeType === document.ELEMENT_NODE) {
+					} else if (rnode.nodeType === Node.ELEMENT_NODE) {
 						getTextNodes(rnode).forEach(removeNodeFromEvents);
 						removeNodeFromEvents(rnode, 'DIRECTIVE');
 					}

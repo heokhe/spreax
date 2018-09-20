@@ -2,8 +2,7 @@ var instance = new Spreax('#app', {
 	state: {
 		name: 'Hosein',
 		checkbox: false,
-		classIsActive: true,
-		observerTitle: 'If you see this, it works.'
+		classIsActive: true
 	},
 	computed: {
 		sentence() {
@@ -19,9 +18,3 @@ var instance = new Spreax('#app', {
 		upper: s => String(s).toUpperCase()
 	}
 })
-
-setTimeout(() => {
-	document.querySelector('#observer').insertAdjacentHTML('beforeend', `
-		<span>{ observerTitle }</span>
-	`)
-}, 1000)

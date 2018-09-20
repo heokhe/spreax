@@ -133,8 +133,8 @@ class Spreax {
 
 		for (const exp of exps) {
 			const [prop, ...formatters] = exp.split(' | '),
-			reg = new RegExp(`\\{ ${exp.replace(/\|/g, '\\|')  } \\}`, 'g'),
-			formatterFn = this.$pipeFormatters(formatters);
+				reg = new RegExp(`\\{ ${exp.replace(/\|/g, '\\|')} \\}`, 'g'),
+				formatterFn = this.$pipeFormatters(formatters);
 
 			this.$on(prop, v => {
 				let replaced = initText.replace(reg, formatterFn(v));
@@ -149,19 +149,22 @@ class Spreax {
 
 	$observe() {
 		const m = new MutationObserver(muts => {
-			for (const { addedNodes, removedNodes } of muts) {
-				for (const anode of addedNodes) {
+			for (const mut of muts) {
+				for (const anode of mut.addedNodes) {
+					if (mut.type === 'childList' && 
+						anode.nodeType === Node.TEXT_NODE &&
+						mut.target.hasChildNodes(anode)) continue;
 					switch (anode.nodeType) {
-						case document.TEXT_NODE:
+						case Node.TEXT_NODE:
 							this.$interpolateNode(anode);
 							break;
-						case document.ELEMENT_NODE:
+						case Node.ELEMENT_NODE:
 							getTextNodes(anode).forEach(this.$interpolateNode, this);
 							this.$execDirectives(anode);
 							break;
 					}
 				}
-				for (const rnode of removedNodes) {
+				for (const rnode of mut.removedNodes) {
 					const removeNodeFromEvents = (node, type = 'INTERPOLATION') => {
 						this.$events.filter(e => {
 							return e.type === type && e.id === node;
@@ -170,9 +173,9 @@ class Spreax {
 						});
 					};
 
-					if (rnode.nodeType === document.TEXT_NODE) {
+					if (rnode.nodeType === Node.TEXT_NODE) {
 						removeNodeFromEvents(rnode);
-					} else if (rnode.nodeType === document.ELEMENT_NODE) {
+					} else if (rnode.nodeType === Node.ELEMENT_NODE) {
 						getTextNodes(rnode).forEach(removeNodeFromEvents);
 						removeNodeFromEvents(rnode, 'DIRECTIVE');
 					}

@@ -1,5 +1,5 @@
 import { register } from '../register';
-import { parseAssignment } from '../../parser/assignment';
+import parse from '../../parser/assignment';
 
 register('on', function(el, value, modifiers, arg) {
 	let hasShortcut = / = .+$/.test(value);
@@ -8,7 +8,7 @@ register('on', function(el, value, modifiers, arg) {
 		if (modifiers.prevent) event.preventDefault();
 		
 		if (hasShortcut) {
-			let pa = parseAssignment(value);
+			let pa = parse(value);
 			this[pa.prop] = pa.getValue(this);
 		} else {
 			this[value]();

@@ -3,7 +3,7 @@ import { domError } from '../../error';
 
 register('model', {
 	ready(el, value, { lazy }) {
-		if (!/^(?:select|input|textarea)$/.test(el.tagName.toLowerCase())) domError(`model directive only works on input, textarea or select tags`, el);
+		if (!['select', 'input', 'textarea'].includes(el.tagName.toLowerCase())) domError(`model directive only works on input, textarea or select tags`, el);
 
 		if (el.type === 'checkbox') {
 			el.checked = !!this[value];
