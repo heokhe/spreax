@@ -26,12 +26,16 @@ Defining actions for just a mutation is hard, so you can use shortcuts:
 ```html
 <button sp-on:click='dialogIsOpen = false'>close</button>
 ```
-Currently you can use these values:
-- **booleans**: `true`, `false`, `!0` or `!1`
-- **string**
-- **numbers**: integers and decimals
-- **null**
-- **property name**: name of another property 
+Currently you can assign primitive values (numbers, strings, `null`, `undefined` and booleans) to properties. in addition to that, you can assign the value of another property.
+```html
+<button sp-on:click='prop = !0'>true</button> <!-- !0 is just equal to `true` -->
+<button sp-on:click='prop = !1'>false</button> <!-- and !1 equal to `false` -->
+<button sp-on:click='prop = "something"'>string</button>
+<button sp-on:click='prop = 123.45'>number</button>
+<button sp-on:click='prop = null'>null</button>
+<button sp-on:click='prop = undefined'>undefined</button>
+<button sp-on:click='prop = anotherProp'>another property</button>
+```
 ### Available modifiers
 - **prevent**: implements `event.preventDefault()`
 - options in `addEventListener` methods: `once`, `passive` and `capture`

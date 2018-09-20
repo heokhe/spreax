@@ -63,26 +63,40 @@ var Spreax = (function () {
 	}
 	var all = _registry;
 
+	var PRIMITIVES = {
+		'null': null,
+		'!0': !0,
+		'!1': !1,
+		'false': false,
+		'true': true,
+		'undefined': undefined
+	};
+
+	function parseAssignment(string) {
+		var match = string.match(/^(.+) = (.+)$/);
+		if (match === null) { throw new SyntaxError(("string \"" + string + "\" is not a valid assignment statement")); }
+		var prop = match[1];
+		var value = match[2];
+		var usesProperty = false;
+		if (value in PRIMITIVES) { value = PRIMITIVES[value]; }
+		else if (!isNaN(Number(value))) { value = Number(value); }
+		else if (/^(['"`]).*\1$/.test(value)) { value = value.slice(1, -1); }
+		else if (/^\w+$/i.test(value)) { usesProperty = true; }
+		else { throw new SyntaxError(("could not find any values matching \"" + value + "\"")); }
+		return {
+			prop: prop,
+			getValue: function (o) { return usesProperty ? o[value] : value; }
+		};
+	}
+
 	register('on', function(el, value, modifiers, arg) {
 		var this$1 = this;
-		var sh_reg = / = (.*)$/;
-		var ref = value.match(sh_reg) || [];
-		var shortcut = ref[1];
-		var hasShortcut = !!shortcut,
-		pureValue = value.replace(sh_reg, '');
+		var hasShortcut = / = .+$/.test(value);
 		el.addEventListener(arg, function (event) {
 			if (modifiers.prevent) { event.preventDefault(); }
 			if (hasShortcut) {
-				var v;
-				if (/^(['"`]).*\1$/.test(shortcut)) { v = shortcut.slice(1, -1); }
-				else if (shortcut === 'null') { v = null; }
-				else if (shortcut === 'true') { v = true; }
-				else if (shortcut === 'false') { v = false; }
-				else if (shortcut === '!0') { v = true; }
-				else if (shortcut === '!1') { v = false; }
-				else if (!isNaN(Number(shortcut)) && shortcut !== 'Infinity') { v = Number(shortcut); }
-				else { v = this$1[shortcut]; }
-				this$1[pureValue] = v;
+				var pa = parseAssignment(value);
+				this$1[pa.prop] = pa.getValue(this$1);
 			} else {
 				this$1[value]();
 			}
