@@ -10,11 +10,11 @@ register('model', {
 		} else {
 			el.value = this[value];
 		}
+
 		el.addEventListener('change', () => {
-			let v = el.value;
-			if (el.type === 'checkbox') v = el.checked;
-			this[value] = v;
+			this[value] = el.type === 'checkbox' ? el.checked : el.value;
 		});
+
 		if (el.type === 'text' && !lazy) {
 			el.addEventListener('keydown', () => {
 				setTimeout(() => {
@@ -24,8 +24,8 @@ register('model', {
 		}
 	},
 	updated(el, value) {
-		let prop = 'value';
-		if (el.type === 'checkbox') prop = 'checked';
-		if (el[prop] !== this[value]) el[prop] = this[value];
+		let prop = el.type === 'checkbox' ? 'checked' : 'value';
+
+		el[prop] = this[value];
 	}
 }, 'empty');

@@ -64,6 +64,7 @@ class Spreax {
 			},
 			set: (obj, key, value) => {
 				if (!obj.hasOwnProperty(key)) error(`unknown state property "${key}"`);
+				if (value === obj[key]) return;
 				obj[key] = value;
 				this.$emit(key);
 				this.$emit();

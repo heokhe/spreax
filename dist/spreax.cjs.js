@@ -116,9 +116,7 @@ register('model', {
 			el.value = this[value];
 		}
 		el.addEventListener('change', function () {
-			var v = el.value;
-			if (el.type === 'checkbox') { v = el.checked; }
-			this$1[value] = v;
+			this$1[value] = el.type === 'checkbox' ? el.checked : el.value;
 		});
 		if (el.type === 'text' && !lazy) {
 			el.addEventListener('keydown', function () {
@@ -129,9 +127,8 @@ register('model', {
 		}
 	},
 	updated: function updated(el, value) {
-		var prop = 'value';
-		if (el.type === 'checkbox') { prop = 'checked'; }
-		if (el[prop] !== this[value]) { el[prop] = this[value]; }
+		var prop = el.type === 'checkbox' ? 'checked' : 'value';
+		el[prop] = this[value];
 	}
 }, 'empty');
 
@@ -259,6 +256,7 @@ Spreax.prototype.$makeProxy = function $makeProxy (o) {
 		},
 		set: function (obj, key, value) {
 			if (!obj.hasOwnProperty(key)) { error(("unknown state property \"" + key + "\"")); }
+			if (value === obj[key]) { return; }
 			obj[key] = value;
 			this$1.$emit(key);
 			this$1.$emit();
