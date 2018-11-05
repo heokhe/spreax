@@ -1,10 +1,10 @@
 import error, { domError } from './error';
-import getTextNodes from './dom/getTextNodes';
-import * as interpolation from './interpolation';
 import * as d from './directives/index';
 import directivesOf from './dom/directivesOf';
 import toString from './directives/toString';
 import makeFormatterFn from './makeFormatterFn';
+import interpolation from './interpolation';
+import getTextNodes from './dom/getTextNodes';
 
 class Spreax {
 	constructor(el, options) {
@@ -26,8 +26,8 @@ class Spreax {
 			options.computed || {},
 			options.formatters || {}
 		);
-		this.$interpolation();
-		this.$el.querySelectorAll('*').forEach(this.$execDirectives.bind(this));
+		getTextNodes(this.$el).forEach(this.$interpolation, this);
+		this.$el.querySelectorAll('*').forEach(this.$execDirectives, this);
 		this.$observe();
 	}
 
@@ -117,35 +117,24 @@ class Spreax {
 		}
 	}
 
-	$interpolation() {
-		getTextNodes(this.$el).forEach(this.$interpolateNode, this);
-	}
+	$interpolation(node) {
+		interpolation(node, ({ initialText: itext, node, propertyName, formatters, match: { startIndex, string } }) => {
+			const formatterFn = this.$pipeFormatters(formatters);
 
-	/**
-	 * @param {Node} node 
-	 */
-	$interpolateNode(node) {
-		if (!interpolation.contains(node.textContent)) return;
+			this.$on(propertyName, v => {
+				v = String(formatterFn(v));
 
-		let exps = node.textContent.match(interpolation.global)
-			.map(interpolation.trim)
-			.filter((item, index, array) => array.indexOf(item) === index);
-		const initText = node.textContent;
+				let beforeValue = itext.slice(0, startIndex),
+				afterValue = itext.slice(startIndex + string.length + v.length, itext.length),
+				newText = beforeValue + v + afterValue;
 
-		for (const exp of exps) {
-			const [prop, ...formatters] = exp.split(' | '),
-				reg = new RegExp(`\\{ ${exp.replace(/\|/g, '\\|')} \\}`, 'g'),
-				formatterFn = this.$pipeFormatters(formatters);
-
-			this.$on(prop, v => {
-				let replaced = initText.replace(reg, formatterFn(v));
-				if (node.textContent !== replaced) node.textContent = replaced;
+				if (itext !== newText) node.textContent = newText;
 			}, {
 					immediate: true,
 					type: 'INTERPOLATION',
 					id: node
 				});
-		}
+		});
 	}
 
 	$observe() {
@@ -160,7 +149,7 @@ class Spreax {
 							this.$interpolateNode(anode);
 							break;
 						case Node.ELEMENT_NODE:
-							getTextNodes(anode).forEach(this.$interpolateNode, this);
+							getTextNodes(anode).forEach(this.$interpolation, this);
 							this.$execDirectives(anode);
 							break;
 					}

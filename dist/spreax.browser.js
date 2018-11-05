@@ -27,29 +27,6 @@ var Spreax = (function () {
 		error((msg + "\n -------\n(at " + (generateSelector(el)) + ")"), isWarn);
 	}
 
-	function getTextNodes(el) {
-		var n = [];
-		for (var i = 0, list = el.childNodes; i < list.length; i += 1) {
-			var node = list[i];
-			if (!/\S+/g.test(node.textContent)) { continue; }
-			var type = node.nodeType;
-			if (type === Node.TEXT_NODE) {
-				n.push(node);
-			} else if (type === Node.ELEMENT_NODE) {
-				n = n.concat( getTextNodes(node));
-			}
-		}
-		return n;
-	}
-
-	function trim(str) {
-		return str.replace(/\{ /g, '').replace(/ \}/g, '');
-	}
-	function contains(str){
-		return /\{ \w+(?: \| \w+)* \}/gi.test(str);
-	}
-	var global = /\{ \w+(?: \| \w+)* \}/gi;
-
 	var _registry = {};
 	function register(name, callback, argState) {
 		if ( argState === void 0 ) argState = 'optional';
@@ -196,6 +173,51 @@ var Spreax = (function () {
 		}).reduce(function (a, b) { return function (arg) { return b(a(arg)); }; });
 	}
 
+	function interpolation (node, callback) {
+		var RE = /\{\{ ?\w+(?: \| \w+)* ?\}\}/gi,
+			text = node.textContent;
+		if (!RE.test(text)) { return; }
+		var matches = [];
+		text.replace(RE, function (match, index) {
+			matches.push({
+				string: match,
+				startIndex: index
+			});
+			return match;
+		});
+		for (var i = 0, list = matches; i < list.length; i += 1) {
+			var ref$1 = list[i];
+			var string = ref$1.string;
+			var startIndex = ref$1.startIndex;
+			var ref = string.replace(/^\{\{ ?/, '')
+				.replace(/ ?\}\}$/, '').split(' | ');
+			var prop = ref[0];
+			var formatters = ref.slice(1);
+			callback({
+				initialText: text,
+				node: node,
+				formatters: formatters,
+				match: { startIndex: startIndex, string: string },
+				propertyName: prop
+			});
+		}
+	}
+
+	function getTextNodes(el) {
+		var n = [];
+		for (var i = 0, list = el.childNodes; i < list.length; i += 1) {
+			var node = list[i];
+			if (!/\S+/g.test(node.textContent)) { continue; }
+			var type = node.nodeType;
+			if (type === Node.TEXT_NODE) {
+				n.push(node);
+			} else if (type === Node.ELEMENT_NODE) {
+				n = n.concat( getTextNodes(node));
+			}
+		}
+		return n;
+	}
+
 	var Spreax = function Spreax(el, options) {
 		if (!(this instanceof Spreax)) { error('Spreax must be called with new operator'); }
 		if (typeof el === 'string') {
@@ -214,8 +236,8 @@ var Spreax = (function () {
 			options.computed || {},
 			options.formatters || {}
 		);
-		this.$interpolation();
-		this.$el.querySelectorAll('*').forEach(this.$execDirectives.bind(this));
+		getTextNodes(this.$el).forEach(this.$interpolation, this);
+		this.$el.querySelectorAll('*').forEach(this.$execDirectives, this);
 		this.$observe();
 	};
 	Spreax.prototype.$extendWith = function $extendWith (state, actions, computed, formatters) {
@@ -307,33 +329,29 @@ var Spreax = (function () {
 		};
 			for (var i = 0, list = directivesOf(el); i < list.length; i += 1) loop();
 	};
-	Spreax.prototype.$interpolation = function $interpolation () {
-		getTextNodes(this.$el).forEach(this.$interpolateNode, this);
-	};
-	Spreax.prototype.$interpolateNode = function $interpolateNode (node) {
+	Spreax.prototype.$interpolation = function $interpolation (node) {
 			var this$1 = this;
-		if (!contains(node.textContent)) { return; }
-		var exps = node.textContent.match(global)
-			.map(trim)
-			.filter(function (item, index, array) { return array.indexOf(item) === index; });
-		var initText = node.textContent;
-		var loop = function () {
-			var exp = list[i];
-				var ref = exp.split(' | ');
-				var prop = ref[0];
-				var formatters = ref.slice(1);
-				var reg = new RegExp(("\\{ " + (exp.replace(/\|/g, '\\|')) + " \\}"), 'g'),
-				formatterFn = this$1.$pipeFormatters(formatters);
-			this$1.$on(prop, function (v) {
-				var replaced = initText.replace(reg, formatterFn(v));
-				if (node.textContent !== replaced) { node.textContent = replaced; }
+		interpolation(node, function (ref) {
+				var itext = ref.initialText;
+				var node = ref.node;
+				var propertyName = ref.propertyName;
+				var formatters = ref.formatters;
+				var ref_match = ref.match;
+				var startIndex = ref_match.startIndex;
+				var string = ref_match.string;
+			var formatterFn = this$1.$pipeFormatters(formatters);
+			this$1.$on(propertyName, function (v) {
+				v = String(formatterFn(v));
+				var beforeValue = itext.slice(0, startIndex),
+				afterValue = itext.slice(startIndex + string.length + v.length, itext.length),
+				newText = beforeValue + v + afterValue;
+				if (itext !== newText) { node.textContent = newText; }
 			}, {
 					immediate: true,
 					type: 'INTERPOLATION',
 					id: node
 				});
-		};
-			for (var i = 0, list = exps; i < list.length; i += 1) loop();
+		});
 	};
 	Spreax.prototype.$observe = function $observe () {
 			var this$1 = this;
@@ -350,7 +368,7 @@ var Spreax = (function () {
 							this$1.$interpolateNode(anode);
 							break;
 						case Node.ELEMENT_NODE:
-							getTextNodes(anode).forEach(this$1.$interpolateNode, this$1);
+							getTextNodes(anode).forEach(this$1.$interpolation, this$1);
 							this$1.$execDirectives(anode);
 							break;
 					}
