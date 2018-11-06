@@ -1,37 +1,15 @@
-function generateSelector(el, root) {
-	if ( root === void 0 ) root = 'body';
-	if (typeof root === 'string') { root = document.querySelector(root); }
-	var pathSections = [];
-	while (el !== root) {
-		pathSections.unshift(el);
-		el = el.parentElement;
-	}
-	pathSections.unshift(root);
-	pathSections = pathSections.map(function (ps) {
-		var selector = ps.tagName.toLowerCase();
-		if (ps.className) { selector += '.' + ps.className.trim().split(' ').join('.'); }
-		if (ps.id) { selector += '#' + ps.id; }
-		selector = selector.replace(/^div([^$]+)/, '$1');
-		return selector;
-	});
-	return pathSections.join(' > ');
-}
-
-function error(msg, isWarn) {
-	var fmsg = "[spreax" + (!isWarn ? ' error' : '') + "] " + msg;
-	if (isWarn) { console.warn(fmsg); }
-	else { throw new Error(fmsg); }
-}
-function domError(msg, el, isWarn){
-	error((msg + "\n -------\n(at " + (generateSelector(el)) + ")"), isWarn);
-}
-
 var _registry = {};
 function register(name, callback, argState) {
 	if ( argState === void 0 ) argState = 'optional';
-	if (name in _registry) { error(("directive \"" + name + "\" already exists")); }
-	if (!['optional', 'empty', 'required'].includes(argState)) { error(("argument state for directive \"" + name + "\" is not valid. choosing the default value (\"optional\")"), true); }
-	if (!/^[a-z]+(?:-[a-z]+)*$/.test(name)) { error(("\"" + name + "\" is not a valid directive name")); }
+	if (name in _registry) {
+		throw new Error(("directive \"" + name + "\" already exists"));
+	}
+	if (!['optional', 'empty', 'required'].includes(argState)) {
+		console.warn(("argument state for directive \"" + name + "\" is not valid. choosing the default value (\"optional\")"));
+	}
+	if (!/^[a-z]+(?:-[a-z]+)*$/.test(name)){
+		throw new Error(("\"" + name + "\" is not a valid directive name"));
+	}
 	_registry[name] = {
 		argState: argState, callback: callback
 	};
@@ -82,11 +60,43 @@ register('on', function(el, value, modifiers, arg) {
 	});
 }, 'required');
 
+function generateSelector(el, root) {
+	if ( root === void 0 ) root = 'body';
+	if (typeof root === 'string') { root = document.querySelector(root); }
+	var pathSections = [];
+	while (el !== root) {
+		pathSections.unshift(el);
+		el = el.parentElement;
+	}
+	pathSections.unshift(root);
+	pathSections = pathSections.map(function (ps) {
+		var selector = ps.tagName.toLowerCase();
+		if (ps.className) { selector += '.' + ps.className.trim().split(' ').join('.'); }
+		if (ps.id) { selector += '#' + ps.id; }
+		selector = selector.replace(/^div([^$]+)/, '$1');
+		return selector;
+	});
+	return pathSections.join(' > ');
+}
+
+var ErrorInElement =              (function (Error) {
+	function ErrorInElement(message, el) {
+		Error.call(this, message);
+		this.message = message + '\n error at: ' + generateSelector(el);
+	}
+	if ( Error ) ErrorInElement.__proto__ = Error;
+	ErrorInElement.prototype = Object.create( Error && Error.prototype );
+	ErrorInElement.prototype.constructor = ErrorInElement;
+	return ErrorInElement;
+}(Error));
+
 register('model', {
 	ready: function ready(el, value, ref) {
 		var this$1 = this;
 		var lazy = ref.lazy;
-		if (!['select', 'input', 'textarea'].includes(el.tagName.toLowerCase())) { domError("model directive only works on input, textarea or select tags", el); }
+		if (!['select', 'input', 'textarea'].includes(el.tagName.toLowerCase())) {
+			throw new ErrorInElement("model directive only works on input, textarea or select tags", el);
+		}
 		if (el.type === 'checkbox') {
 			el.checked = !!this[value];
 		} else {
@@ -150,7 +160,6 @@ function directivesOf(el) {
 			fullName = getFullName(e),
 			withThisFullName = arr.filter(function (e) { return getFullName(e) === fullName; });
 			if (withThisFullName.length > 1) {
-				domError(("duplicate directive " + (e.name)), el, true);
 				return withThisFullName[0];
 			} else { return e; }
 		});
@@ -167,7 +176,7 @@ function toString(d){
 function makeFormatterFn(formatters, source) {
 	if (!formatters.length) { return function (v) { return v; }; }
 	return formatters.map(function (f) {
-		if (!(f in source)) { error(("formatter " + f + " not found")); }
+		if (!(f in source)) { throw new Error(("formatter " + f + " not found")); }
 		else { return source[f]; }
 	}).reduce(function (a, b) { return function (arg) { return b(a(arg)); }; });
 }
@@ -217,14 +226,33 @@ function getTextNodes(el) {
 	return n;
 }
 
+function makeObserver(events) {
+	var TEXT_NODE = Node.TEXT_NODE;
+	var ELEMENT_NODE = Node.ELEMENT_NODE;
+	return new MutationObserver(function (muts) {
+		for (var i$2 = 0, list$2 = muts; i$2 < list$2.length; i$2 += 1) {
+			var mut = list$2[i$2];
+			for (var i = 0, list = mut.addedNodes; i < list.length; i += 1) {
+				var anode = list[i];
+				if (anode.nodeType === TEXT_NODE) {
+					if (mut.type === 'childList' && mut.target.hasChildNodes(anode)) { continue; }
+					events.textAdded(anode);
+				} else if (anode.nodeType === ELEMENT_NODE) { events.elementAdded(anode); }
+			}
+			for (var i$1 = 0, list$1 = mut.removedNodes; i$1 < list$1.length; i$1 += 1) {
+				var rnode = list$1[i$1];
+				if (rnode.nodeType === TEXT_NODE) { events.textRemoved(rnode); }
+				else if (rnode.nodeType === ELEMENT_NODE) { events.elementRemoved(rnode); }
+			}
+		}
+	});
+}
+
 var Spreax = function Spreax(el, options) {
-	if (!(this instanceof Spreax)) { error('Spreax must be called with new operator'); }
-	if (typeof el === 'string') {
-		this.$el = document.querySelector(el);
-	} else if (el instanceof HTMLElement) {
-		this.$el = el;
-	} else {
-		error(("wrong selector or element: expected element or string, got \"" + (String(el)) + "\""));
+	if (typeof el === 'string') { this.$el = document.querySelector(el); }
+	else if (el instanceof HTMLElement) { this.$el = el; }
+	else {
+		throw new TypeError(("wrong selector or element: expected element or string, got \"" + (String(el)) + "\""));
 	}
 	this.$events = [];
 	this.$formatters = {};
@@ -273,11 +301,11 @@ Spreax.prototype.$makeProxy = function $makeProxy (o) {
 		var this$1 = this;
 	this.$_proxy = new Proxy(o, {
 		get: function (obj, key) {
-			if (!obj.hasOwnProperty(key)) { error(("unknown state property \"" + key + "\"")); }
+			if (!obj.hasOwnProperty(key)) { throw new Error(("unknown state property \"" + key + "\"")); }
 			return obj[key];
 		},
 		set: function (obj, key, value) {
-			if (!obj.hasOwnProperty(key)) { error(("unknown state property \"" + key + "\"")); }
+			if (!obj.hasOwnProperty(key)) { throw new Error(("unknown state property \"" + key + "\"")); }
 			if (value === obj[key]) { return; }
 			obj[key] = value;
 			this$1.$emit(key);
@@ -301,13 +329,13 @@ Spreax.prototype.$execDirectives = function $execDirectives (el) {
 			var arg = ref.arg;
 			var modifiers = ref.modifiers;
 			var dir = all[name];
-		if (dir === undefined) { domError(("directive \"" + name + "\" not found"), el); }
+		if (dir === undefined) { throw new ErrorInElement(("directive \"" + name + "\" not found"), el); }
 		switch (dir.argState) {
 			case 'empty':
-				if (!!arg) { domError(("directive \"" + name + "\" needed no arguments, but there is an argument"), el); }
+				if (!!arg) { throw new ErrorInElement(("directive \"" + name + "\" needed no arguments, but there is an argument"), el); }
 				break;
 			case 'required':
-				if (!arg) { domError("directive needs an arguments, but there's nothing", el); }
+				if (!arg) { throw new ErrorInElement("directive needs an arguments, but there's nothing", el); }
 				break;
 		}
 		var attrValue = el.getAttribute(toString({ name: name, arg: arg, modifiers: modifiers })),
@@ -354,64 +382,46 @@ Spreax.prototype.$interpolation = function $interpolation (node) {
 };
 Spreax.prototype.$observe = function $observe () {
 		var this$1 = this;
-	var m = new MutationObserver(function (muts) {
-		for (var i$2 = 0, list$2 = muts; i$2 < list$2.length; i$2 += 1) {
-			var mut = list$2[i$2];
-				for (var i = 0, list = mut.addedNodes; i < list.length; i += 1) {
-				var anode = list[i];
-					if (mut.type === 'childList' &&
-					anode.nodeType === Node.TEXT_NODE &&
-					mut.target.hasChildNodes(anode)) { continue; }
-				switch (anode.nodeType) {
-					case Node.TEXT_NODE:
-						this$1.$interpolateNode(anode);
-						break;
-					case Node.ELEMENT_NODE:
-						getTextNodes(anode).forEach(this$1.$interpolation, this$1);
-						this$1.$execDirectives(anode);
-						break;
-				}
+	var removeNodeFromEvents = function (node, type) {
+			if ( type === void 0 ) type = 'INTERPOLATION';
+		var events = this$1.$events.filter(function (e) {
+			return e.type === type && e.id === node;
+		}).map(function (_, i) { return i; });
+		for (var i = 0, list = events; i < list.length; i += 1) {
+				var e = list[i];
+				this$1.$events.splice(e, 1);
 			}
-			for (var i$1 = 0, list$1 = mut.removedNodes; i$1 < list$1.length; i$1 += 1) {
-				var rnode = list$1[i$1];
-					var removeNodeFromEvents = function (node, type) {
-						if ( type === void 0 ) type = 'INTERPOLATION';
-					this$1.$events.filter(function (e) {
-						return e.type === type && e.id === node;
-					}).map(function (e) { return this$1.$events.indexOf(e); }).forEach(function (i) {
-						this$1.$events.splice(i, 1);
-					});
-				};
-				if (rnode.nodeType === Node.TEXT_NODE) {
-					removeNodeFromEvents(rnode);
-				} else if (rnode.nodeType === Node.ELEMENT_NODE) {
-					getTextNodes(rnode).forEach(removeNodeFromEvents);
-					removeNodeFromEvents(rnode, 'DIRECTIVE');
-				}
-			}
+	};
+	makeObserver({
+		textAdded: this.$interpolation,
+		elementAdded: function (n) {
+			getTextNodes(n).forEach(this$1.$interpolation, this$1);
+			this$1.$execDirectives(n);
+		},
+		textRemoved: removeNodeFromEvents,
+		elementRemoved: function (n) {
+			getTextNodes(n).forEach(removeNodeFromEvents);
+			removeNodeFromEvents(n, 'DIRECTIVE');
 		}
-	});
-	m.observe(this.$el, {
+	}).observe(this.$el, {
 		childList: true,
 		subtree: true
 	});
 };
-Spreax.prototype.$on = function $on (key, fn, options) {
+Spreax.prototype.$on = function $on (prop, fn, options) {
 		if ( options === void 0 ) options = {};
-	this.$events.push({
-		key: key,
-		fn: fn,
-		type: options.type,
-		id: options.id,
-	});
-	if (options.immediate) { this.$emit(key); }
+	this.$events.push(Object.assign({}, {prop: prop,
+		fn: fn},
+		'type' in options ? { type: options.type } : {},
+		'node' in options ? { node: options.node } : {}));
+	if (options.immediate) { this.$emit(prop); }
 };
-Spreax.prototype.$emit = function $emit (key) {
+Spreax.prototype.$emit = function $emit (prop) {
 		var this$1 = this;
 	this.$events.filter(function (ev) {
-		return key ? ev.key === key : true;
+		return prop ? ev.prop === prop : true;
 	}).forEach(function (ev) {
-		var args = ev.key ? [this$1[ev.key]] : [];
+		var args = ev.prop ? [this$1[ev.prop]] : [];
 		ev.fn.apply(this$1, args);
 	});
 };

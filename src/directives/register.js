@@ -1,5 +1,3 @@
-import error from "../error";
-
 /**
  * @type {{[x: string]: {callback: Callback, argState: ArgState}}}
  */
@@ -18,9 +16,16 @@ const _registry = {};
  * @param {ArgState} [argState]
  */
 export function register(name, callback, argState = 'optional') {
-	if (name in _registry) error(`directive "${name}" already exists`);
-	if (!['optional', 'empty', 'required'].includes(argState)) error(`argument state for directive "${name}" is not valid. choosing the default value ("optional")`, true);
-	if (!/^[a-z]+(?:-[a-z]+)*$/.test(name)) error(`"${name}" is not a valid directive name`);
+	if (name in _registry) {
+		throw new Error(`directive "${name}" already exists`);
+	}
+	if (!['optional', 'empty', 'required'].includes(argState)) {
+		// eslint-disable-next-line no-console
+		console.warn(`argument state for directive "${name}" is not valid. choosing the default value ("optional")`);
+	}
+	if (!/^[a-z]+(?:-[a-z]+)*$/.test(name)){
+		throw new Error(`"${name}" is not a valid directive name`);
+	}	
 
 	_registry[name] = {
 		argState, callback

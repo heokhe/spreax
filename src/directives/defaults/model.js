@@ -1,9 +1,11 @@
 import { register } from '../register';
-import { domError } from '../../error';
+import ErrorInElement from '../../domError';
 
 register('model', {
 	ready(el, value, { lazy }) {
-		if (!['select', 'input', 'textarea'].includes(el.tagName.toLowerCase())) domError(`model directive only works on input, textarea or select tags`, el);
+		if (!['select', 'input', 'textarea'].includes(el.tagName.toLowerCase())) {
+			throw new ErrorInElement(`model directive only works on input, textarea or select tags`, el);
+		}
 
 		if (el.type === 'checkbox') {
 			el.checked = !!this[value];

@@ -13,7 +13,7 @@ new Spreax(el, {
 ### Interpolation
 Take a look at the code below:
 ```html
-<h1>{ message | toUpperCase }</h1>
+<h1>{{ message | toUpperCase }}</h1>
 ```
 Whenever `message` changes, uppercased text will be inserted into DOM, not the original text.
 ### From Instance
@@ -24,7 +24,7 @@ instance.$formatters.toUpperCase('hello world')
 ## Piping
 Formatters could be chained to each other, this is called "piping" (like unix pipes). 
 ```html
-<span>{ string | trim | sluggify | upper }</span>
+<span>{{ string | trim | sluggify | upper }}</span>
 ```
 here, Spreax starts from left, and does these steps:
 - passes `string` to `trim` function
@@ -33,6 +33,5 @@ here, Spreax starts from left, and does these steps:
 You can pipe formatters to each other, using `$pipeFormatters` method:
 ```js
 const pipedFunction = instance.$pipeFormatters('trim', 'slugify', 'upper');
-
-return pipedFunction(instance.string);
+// do something 
 ```

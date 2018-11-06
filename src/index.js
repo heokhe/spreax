@@ -1,20 +1,18 @@
-import error, { domError } from './error';
 import * as d from './directives/index';
 import directivesOf from './dom/directivesOf';
 import toString from './directives/toString';
 import makeFormatterFn from './makeFormatterFn';
 import interpolation from './interpolation';
 import getTextNodes from './dom/getTextNodes';
+import makeObserver from './makeObserver';
+import ErrorInElement from './domError';
 
 class Spreax {
 	constructor(el, options) {
-		if (!(this instanceof Spreax)) error('Spreax must be called with new operator');
-		if (typeof el === 'string') {
-			this.$el = document.querySelector(el);
-		} else if (el instanceof HTMLElement) {
-			this.$el = el;
-		} else {
-			error(`wrong selector or element: expected element or string, got "${String(el)}"`);
+		if (typeof el === 'string') this.$el = document.querySelector(el);
+		else if (el instanceof HTMLElement) this.$el = el;
+		else {
+			throw new TypeError(`wrong selector or element: expected element or string, got "${String(el)}"`);
 		}
 
 		this.$events = [];
@@ -59,11 +57,11 @@ class Spreax {
 	$makeProxy(o) {
 		this.$_proxy = new Proxy(o, {
 			get: (obj, key) => {
-				if (!obj.hasOwnProperty(key)) error(`unknown state property "${key}"`);
+				if (!obj.hasOwnProperty(key)) throw new Error(`unknown state property "${key}"`);
 				return obj[key];
 			},
 			set: (obj, key, value) => {
-				if (!obj.hasOwnProperty(key)) error(`unknown state property "${key}"`);
+				if (!obj.hasOwnProperty(key)) throw new Error(`unknown state property "${key}"`);
 				if (value === obj[key]) return;
 				obj[key] = value;
 				this.$emit(key);
@@ -87,14 +85,14 @@ class Spreax {
 		if (!el.attributes || !el.attributes.length) return;
 		for (const { name, arg, modifiers } of directivesOf(el)) {
 			const dir = d.all[name];
-			if (dir === undefined) domError(`directive "${name}" not found`, el);
+			if (dir === undefined) throw new ErrorInElement(`directive "${name}" not found`, el);
 
 			switch (dir.argState) {
 				case 'empty':
-					if (!!arg) domError(`directive "${name}" needed no arguments, but there is an argument`, el);
+					if (!!arg) throw new ErrorInElement(`directive "${name}" needed no arguments, but there is an argument`, el);
 					break;
 				case 'required':
-					if (!arg) domError(`directive needs an arguments, but there's nothing`, el);
+					if (!arg) throw new ErrorInElement(`directive needs an arguments, but there's nothing`, el);
 					break;
 			}
 
@@ -138,62 +136,46 @@ class Spreax {
 	}
 
 	$observe() {
-		const m = new MutationObserver(muts => {
-			for (const mut of muts) {
-				for (const anode of mut.addedNodes) {
-					if (mut.type === 'childList' && 
-						anode.nodeType === Node.TEXT_NODE &&
-						mut.target.hasChildNodes(anode)) continue;
-					switch (anode.nodeType) {
-						case Node.TEXT_NODE:
-							this.$interpolateNode(anode);
-							break;
-						case Node.ELEMENT_NODE:
-							getTextNodes(anode).forEach(this.$interpolation, this);
-							this.$execDirectives(anode);
-							break;
-					}
-				}
-				for (const rnode of mut.removedNodes) {
-					const removeNodeFromEvents = (node, type = 'INTERPOLATION') => {
-						this.$events.filter(e => {
-							return e.type === type && e.id === node;
-						}).map(e => this.$events.indexOf(e)).forEach(i => {
-							this.$events.splice(i, 1);
-						});
-					};
+		const removeNodeFromEvents = (node, type = 'INTERPOLATION') => {
+			const events = this.$events.filter(e => {
+				return e.type === type && e.id === node;
+			}).map((_, i) => i);
 
-					if (rnode.nodeType === Node.TEXT_NODE) {
-						removeNodeFromEvents(rnode);
-					} else if (rnode.nodeType === Node.ELEMENT_NODE) {
-						getTextNodes(rnode).forEach(removeNodeFromEvents);
-						removeNodeFromEvents(rnode, 'DIRECTIVE');
-					}
-				}
+			for (const e of events) this.$events.splice(e, 1); 
+		};
+
+		makeObserver({
+			textAdded: this.$interpolation,
+			elementAdded: n => {
+				getTextNodes(n).forEach(this.$interpolation, this);
+				this.$execDirectives(n);
+			},
+			textRemoved: removeNodeFromEvents,
+			elementRemoved: n => {
+				getTextNodes(n).forEach(removeNodeFromEvents);
+				removeNodeFromEvents(n, 'DIRECTIVE');
 			}
-		});
-
-		m.observe(this.$el, {
+		}).observe(this.$el, {
 			childList: true,
 			subtree: true
 		});
 	}
 
-	$on(key, fn, options = {}) {
+	$on(prop, fn, options = {}) {
 		this.$events.push({
-			key,
+			prop,
 			fn,
-			type: options.type,
-			id: options.id,
+			...'type' in options ? { type: options.type } : {},
+			...'node' in options ? { node: options.node } : {},
 		});
-		if (options.immediate) this.$emit(key);
+		if (options.immediate) this.$emit(prop);
 	}
 
-	$emit(key) {
+	$emit(prop) {
 		this.$events.filter(ev => {
-			return key ? ev.key === key : true;
+			return prop ? ev.prop === prop : true;
 		}).forEach(ev => {
-			let args = ev.key ? [this[ev.key]] : [];
+			let args = ev.prop ? [this[ev.prop]] : [];
 			ev.fn.apply(this, args);
 		});
 	}
