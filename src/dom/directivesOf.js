@@ -1,27 +1,38 @@
 import record from "../utils/record";
+import toString from "../directives/toString";
 
 /**
  * @param {Element} el 
+ * @returns {{name: string, ?arg: string, modifiers: Object<string, true>}[]}
  */
 export default function(el) {
-	return Array.from(el.attributes)
-		.map(e => e.name)
-		.filter(e => /^sp-/.test(e))
-		.map(e => e.replace(/^sp-/, ''))
-		.map(e => {
-			let [, name, arg, modifiers] = e.match(/^([a-z]+(?:-[a-z]+)*)(:[a-z0-9]+)?((?:\.[a-z0-9]+))*$/);
-			if (arg) arg = arg.replace(/^:/, '');
-			if (modifiers) {
-				modifiers = record(modifiers.split('.').filter(Boolean), true);
-			} else modifiers = {};
-			return { name, arg, modifiers };
-		}).filter((e, index, arr) => {
-			const getFullName = e => e.arg ? [e.name, e.arg].join(':') : e.name,
-			fullName = getFullName(e),
-			withThisFullName = arr.filter(e => getFullName(e) === fullName);
+	const { attributes } = el,
+	directives = [];
+	for (let { name: attrName } of attributes) {
+		if (!/^sp-/.test(attrName)) continue;
+		attrName = attrName.replace(/^sp-/, '');
 
-			if (withThisFullName.length > 1) {
-				return withThisFullName[0];
-			} else return e;
+		let [, name, arg, modifiers] = attrName.match(/^([a-z]+(?:-[a-z]+)*)(:[a-z0-9]+)?((?:\.[a-z0-9]+))*$/);
+		if (arg) arg = arg.replace(/^:/, '');
+		const modifierObject = modifiers ? record(modifiers.slice(1).split('.'), true) : {};
+
+		const d = {
+			name,
+			arg: arg || null, 
+			modifiers: modifierObject
+		};
+
+		directives.push({ 
+			...d,
+			// no need to use `toString` function, we just use `${object}` and we have a string form of directive object
+			[Symbol.toPrimitive]: hint => hint === 'number' ? NaN : toString(d)
 		});
+	}
+
+	return directives.filter((d, _, arr) => {
+		const getFullName = e => e.arg ? [e.name, e.arg].join(':') : e.name,
+		withThisName = arr.filter(e => getFullName(e) === getFullName(d));
+
+		return withThisName.length > 1 ? withThisName[0] : d;
+	});
 }

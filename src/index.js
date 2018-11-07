@@ -1,6 +1,5 @@
 import * as d from './directives/index';
 import directivesOf from './dom/directivesOf';
-import toString from './directives/toString';
 import makeFormatterFn from './makeFormatterFn';
 import interpolation from './interpolation';
 import getTextNodes from './dom/getTextNodes';
@@ -82,34 +81,32 @@ class Spreax {
 	 * @param {Element} el 
 	 */
 	$execDirectives(el) {
-		if (!el.attributes || !el.attributes.length) return;
-		for (const { name, arg, modifiers } of directivesOf(el)) {
-			const dir = d.all[name];
-			if (dir === undefined) throw new ErrorInElement(`directive "${name}" not found`, el);
+		if (!el.attributes.length) return;
 
-			switch (dir.argState) {
-				case 'empty':
-					if (!!arg) throw new ErrorInElement(`directive "${name}" needed no arguments, but there is an argument`, el);
-					break;
-				case 'required':
-					if (!arg) throw new ErrorInElement(`directive needs an arguments, but there's nothing`, el);
-					break;
+		const dirsOfEl = directivesOf(el);
+
+		for (const di of dirsOfEl) {
+			if (!d.all.hasOwnProperty(di.name)) throw new ErrorInElement(`directive "${di.name}" not found`, el);
+
+			const { argumentIsRequired, callback } = d.all[di.name];
+			
+			if (argumentIsRequired && !di.arg) {
+				throw new ErrorInElement(`directive needs an arguments, but there's nothing`, el);
 			}
 
-			const attrValue = el.getAttribute(toString({ name, arg, modifiers })),
-				argArray = [el, attrValue, modifiers, arg];
+			const attrValue = el.getAttribute(`${di}`),
+			argArray = [el, attrValue, di.modifiers, di.arg];
 
-			if (typeof dir.callback === 'function') {
-				dir.callback.apply(this, argArray);
-			} else {
-				if ('ready' in dir.callback) dir.callback.ready.apply(this, argArray);
-				if ('updated' in dir.callback) {
+			if (typeof callback === 'function') callback.apply(this, argArray);
+			else {
+				if ('ready' in callback) callback.ready.apply(this, argArray);
+				if ('updated' in callback) {
 					this.$on('', () => {
-						dir.callback.updated.apply(this, argArray);
+						callback.updated.apply(this, argArray);
 					}, {
-							type: 'DIRECTIVE',
-							id: el
-						});
+						type: 'DIRECTIVE',
+						node: el
+					});
 				}
 			}
 		}
@@ -130,7 +127,7 @@ class Spreax {
 			}, {
 					immediate: true,
 					type: 'INTERPOLATION',
-					id: node
+					node
 				});
 		});
 	}
@@ -138,21 +135,17 @@ class Spreax {
 	$observe() {
 		const removeNodeFromEvents = (node, type = 'INTERPOLATION') => {
 			const events = this.$events.filter(e => {
-				return e.type === type && e.id === node;
+				return e.type === type && e.node === node;
 			}).map((_, i) => i);
 
 			for (const e of events) this.$events.splice(e, 1); 
 		};
 
 		makeObserver({
-			textAdded: this.$interpolation,
-			elementAdded: n => {
-				getTextNodes(n).forEach(this.$interpolation, this);
-				this.$execDirectives(n);
-			},
+			textAdded: this.$interpolation.bind(this),
+			elementAdded: this.$execDirectives.bind(this),
 			textRemoved: removeNodeFromEvents,
 			elementRemoved: n => {
-				getTextNodes(n).forEach(removeNodeFromEvents);
 				removeNodeFromEvents(n, 'DIRECTIVE');
 			}
 		}).observe(this.$el, {

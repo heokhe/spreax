@@ -18,4 +18,4 @@ register('on', function(el, value, modifiers, arg) {
 		passive: modifiers.passive,
 		capture: modifiers.capture,
 	});
-}, 'required');
+}, true);

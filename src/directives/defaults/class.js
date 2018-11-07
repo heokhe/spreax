@@ -13,4 +13,4 @@ register('class', function (el, value, mod, arg) {
 		id: el,
 		type: 'DIRECTIVE'
 	});
-}, 'required');
+}, true);

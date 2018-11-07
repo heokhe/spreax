@@ -30,4 +30,4 @@ register('model', {
 
 		el[prop] = this[value];
 	}
-}, 'empty');
+});

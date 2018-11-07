@@ -1,19 +1,12 @@
 var Spreax = (function () {
 	var _registry = {};
-	function register(name, callback, argState) {
-		if ( argState === void 0 ) argState = 'optional';
-		if (name in _registry) {
-			throw new Error(("directive \"" + name + "\" already exists"));
-		}
-		if (!['optional', 'empty', 'required'].includes(argState)) {
-			console.warn(("argument state for directive \"" + name + "\" is not valid. choosing the default value (\"optional\")"));
-		}
+	function register(name, callback, argumentIsRequired) {
+		if ( argumentIsRequired === void 0 ) argumentIsRequired = false;
+		if (name in _registry) { throw new Error(("directive \"" + name + "\" already exists")); }
 		if (!/^[a-z]+(?:-[a-z]+)*$/.test(name)){
 			throw new Error(("\"" + name + "\" is not a valid directive name"));
 		}
-		_registry[name] = {
-			argState: argState, callback: callback
-		};
+		_registry[name] = { argumentIsRequired: argumentIsRequired, callback: callback };
 	}
 	var all = _registry;
 
@@ -59,7 +52,7 @@ var Spreax = (function () {
 			passive: modifiers.passive,
 			capture: modifiers.capture,
 		});
-	}, 'required');
+	}, true);
 
 	function generateSelector(el, root) {
 		if ( root === void 0 ) root = 'body';
@@ -118,7 +111,7 @@ var Spreax = (function () {
 			var prop = el.type === 'checkbox' ? 'checked' : 'value';
 			el[prop] = this[value];
 		}
-	}, 'empty');
+	});
 
 	register('class', function (el, value, mod, arg) {
 		var prop = value || arg;
@@ -131,7 +124,7 @@ var Spreax = (function () {
 			id: el,
 			type: 'DIRECTIVE'
 		});
-	}, 'required');
+	}, true);
 
 	function record(keys, value){
 		var o = {};
@@ -141,37 +134,43 @@ var Spreax = (function () {
 		return o;
 	}
 
-	function directivesOf(el) {
-		return Array.from(el.attributes)
-			.map(function (e) { return e.name; })
-			.filter(function (e) { return /^sp-/.test(e); })
-			.map(function (e) { return e.replace(/^sp-/, ''); })
-			.map(function (e) {
-				var ref = e.match(/^([a-z]+(?:-[a-z]+)*)(:[a-z0-9]+)?((?:\.[a-z0-9]+))*$/);
-				var name = ref[1];
-				var arg = ref[2];
-				var modifiers = ref[3];
-				if (arg) { arg = arg.replace(/^:/, ''); }
-				if (modifiers) {
-					modifiers = record(modifiers.split('.').filter(Boolean), true);
-				} else { modifiers = {}; }
-				return { name: name, arg: arg, modifiers: modifiers };
-			}).filter(function (e, index, arr) {
-				var getFullName = function (e) { return e.arg ? [e.name, e.arg].join(':') : e.name; },
-				fullName = getFullName(e),
-				withThisFullName = arr.filter(function (e) { return getFullName(e) === fullName; });
-				if (withThisFullName.length > 1) {
-					return withThisFullName[0];
-				} else { return e; }
-			});
-	}
-
 	function toString(d){
 		var o = "sp-" + (d.name);
 		if (d.arg) { o += ':' + d.arg; }
 		var k = Object.keys(d.modifiers);
 		if (k.length) { o += '.' + k.join('.'); }
 		return o;
+	}
+
+	function directivesOf(el) {
+		var obj;
+		var attributes = el.attributes;
+		var directives = [];
+		var loop = function () {
+			var ref$1 = list[i];
+			var attrName = ref$1.name;
+			if (!/^sp-/.test(attrName)) { return; }
+			attrName = attrName.replace(/^sp-/, '');
+			var ref = attrName.match(/^([a-z]+(?:-[a-z]+)*)(:[a-z0-9]+)?((?:\.[a-z0-9]+))*$/);
+			var name = ref[1];
+			var arg = ref[2];
+			var modifiers = ref[3];
+			if (arg) { arg = arg.replace(/^:/, ''); }
+			var modifierObject = modifiers ? record(modifiers.slice(1).split('.'), true) : {};
+			var d = {
+				name: name,
+				arg: arg || null,
+				modifiers: modifierObject
+			};
+			directives.push(Object.assign({}, d,
+				( obj = {}, obj[Symbol.toPrimitive] = function (hint) { return hint === 'number' ? NaN : toString(d); }, obj )));
+		};
+		for (var i = 0, list = attributes; i < list.length; i += 1) loop();
+		return directives.filter(function (d, _, arr) {
+			var getFullName = function (e) { return e.arg ? [e.name, e.arg].join(':') : e.name; },
+			withThisName = arr.filter(function (e) { return getFullName(e) === getFullName(d); });
+			return withThisName.length > 1 ? withThisName[0] : d;
+		});
 	}
 
 	function makeFormatterFn(formatters, source) {
@@ -183,7 +182,7 @@ var Spreax = (function () {
 	}
 
 	function interpolation (node, callback) {
-		var RE = /\{\{ ?\w+(?: \| \w+)* ?\}\}/gi,
+		var RE = /{{( ?)\w+(?: \| \w+)*\1}}/gi,
 			text = node.textContent;
 		if (!RE.test(text)) { return; }
 		var matches = [];
@@ -198,8 +197,8 @@ var Spreax = (function () {
 			var ref$1 = list[i];
 			var string = ref$1.string;
 			var startIndex = ref$1.startIndex;
-			var ref = string.replace(/^\{\{ ?/, '')
-				.replace(/ ?\}\}$/, '').split(' | ');
+			var ref = string.replace(/^{{/, '')
+				.replace(/}}$/, '').trim().split(' | ');
 			var prop = ref[0];
 			var formatters = ref.slice(1);
 			callback({
@@ -238,12 +237,18 @@ var Spreax = (function () {
 					if (anode.nodeType === TEXT_NODE) {
 						if (mut.type === 'childList' && mut.target.hasChildNodes(anode)) { continue; }
 						events.textAdded(anode);
-					} else if (anode.nodeType === ELEMENT_NODE) { events.elementAdded(anode); }
+					} else if (anode.nodeType === ELEMENT_NODE) {
+						getTextNodes(anode).forEach(function (n) { return events.textAdded(n); });
+						events.elementAdded(anode);
+					}
 				}
 				for (var i$1 = 0, list$1 = mut.removedNodes; i$1 < list$1.length; i$1 += 1) {
 					var rnode = list$1[i$1];
 					if (rnode.nodeType === TEXT_NODE) { events.textRemoved(rnode); }
-					else if (rnode.nodeType === ELEMENT_NODE) { events.elementRemoved(rnode); }
+					else if (rnode.nodeType === ELEMENT_NODE) {
+						getTextNodes(rnode).forEach(function (n) { return events.textRemoved(n); });
+						events.elementRemoved(rnode);
+					}
 				}
 			}
 		});
@@ -323,39 +328,33 @@ var Spreax = (function () {
 	};
 	Spreax.prototype.$execDirectives = function $execDirectives (el) {
 			var this$1 = this;
-		if (!el.attributes || !el.attributes.length) { return; }
+		if (!el.attributes.length) { return; }
+		var dirsOfEl = directivesOf(el);
 		var loop = function () {
-			var ref = list[i];
-				var name = ref.name;
-				var arg = ref.arg;
-				var modifiers = ref.modifiers;
-				var dir = all[name];
-			if (dir === undefined) { throw new ErrorInElement(("directive \"" + name + "\" not found"), el); }
-			switch (dir.argState) {
-				case 'empty':
-					if (!!arg) { throw new ErrorInElement(("directive \"" + name + "\" needed no arguments, but there is an argument"), el); }
-					break;
-				case 'required':
-					if (!arg) { throw new ErrorInElement("directive needs an arguments, but there's nothing", el); }
-					break;
+			var di = list[i];
+				if (!all.hasOwnProperty(di.name)) { throw new ErrorInElement(("directive \"" + (di.name) + "\" not found"), el); }
+			var ref = all[di.name];
+				var argumentIsRequired = ref.argumentIsRequired;
+				var callback = ref.callback;
+			if (argumentIsRequired && !di.arg) {
+				throw new ErrorInElement("directive needs an arguments, but there's nothing", el);
 			}
-			var attrValue = el.getAttribute(toString({ name: name, arg: arg, modifiers: modifiers })),
-				argArray = [el, attrValue, modifiers, arg];
-			if (typeof dir.callback === 'function') {
-				dir.callback.apply(this$1, argArray);
-			} else {
-				if ('ready' in dir.callback) { dir.callback.ready.apply(this$1, argArray); }
-				if ('updated' in dir.callback) {
+			var attrValue = el.getAttribute(("" + di)),
+			argArray = [el, attrValue, di.modifiers, di.arg];
+			if (typeof callback === 'function') { callback.apply(this$1, argArray); }
+			else {
+				if ('ready' in callback) { callback.ready.apply(this$1, argArray); }
+				if ('updated' in callback) {
 					this$1.$on('', function () {
-						dir.callback.updated.apply(this$1, argArray);
+						callback.updated.apply(this$1, argArray);
 					}, {
-							type: 'DIRECTIVE',
-							id: el
-						});
+						type: 'DIRECTIVE',
+						node: el
+					});
 				}
 			}
 		};
-			for (var i = 0, list = directivesOf(el); i < list.length; i += 1) loop();
+			for (var i = 0, list = dirsOfEl; i < list.length; i += 1) loop();
 	};
 	Spreax.prototype.$interpolation = function $interpolation (node) {
 			var this$1 = this;
@@ -377,7 +376,7 @@ var Spreax = (function () {
 			}, {
 					immediate: true,
 					type: 'INTERPOLATION',
-					id: node
+					node: node
 				});
 		});
 	};
@@ -386,7 +385,7 @@ var Spreax = (function () {
 		var removeNodeFromEvents = function (node, type) {
 				if ( type === void 0 ) type = 'INTERPOLATION';
 			var events = this$1.$events.filter(function (e) {
-				return e.type === type && e.id === node;
+				return e.type === type && e.node === node;
 			}).map(function (_, i) { return i; });
 			for (var i = 0, list = events; i < list.length; i += 1) {
 					var e = list[i];
@@ -394,14 +393,10 @@ var Spreax = (function () {
 				}
 		};
 		makeObserver({
-			textAdded: this.$interpolation,
-			elementAdded: function (n) {
-				getTextNodes(n).forEach(this$1.$interpolation, this$1);
-				this$1.$execDirectives(n);
-			},
+			textAdded: this.$interpolation.bind(this),
+			elementAdded: this.$execDirectives.bind(this),
 			textRemoved: removeNodeFromEvents,
 			elementRemoved: function (n) {
-				getTextNodes(n).forEach(removeNodeFromEvents);
 				removeNodeFromEvents(n, 'DIRECTIVE');
 			}
 		}).observe(this.$el, {

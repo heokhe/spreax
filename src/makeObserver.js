@@ -1,10 +1,12 @@
+import getTextNodes from "./dom/getTextNodes";
+
 /**
  * @typedef {(node: Node) => void} MutationEventCallback
  * @typedef {Object} MutationEventsObject
- * @property {MutationEventCallback} [elementAdded]
- * @property {MutationEventCallback} [textAdded]
- * @property {MutationEventCallback} [elementRemoved]
- * @property {MutationEventCallback} [textRemoved]
+ * @property {MutationEventCallback} elementAdded
+ * @property {MutationEventCallback} textAdded
+ * @property {MutationEventCallback} elementRemoved
+ * @property {MutationEventCallback} textRemoved
  * @private
  */
 
@@ -25,12 +27,18 @@ export default function makeObserver(events) {
 					// `node.innerHTML = "{{ someProp }}"` it should not have value of `someProp`
 					if (mut.type === 'childList' && mut.target.hasChildNodes(anode)) continue;
 					events.textAdded(anode);
-				} else if (anode.nodeType === ELEMENT_NODE) events.elementAdded(anode);
+				} else if (anode.nodeType === ELEMENT_NODE) {
+					getTextNodes(anode).forEach(n => events.textAdded(n));
+					events.elementAdded(anode);
+				}
 			}
 
 			for (const rnode of mut.removedNodes) {
 				if (rnode.nodeType === TEXT_NODE) events.textRemoved(rnode);
-				else if (rnode.nodeType === ELEMENT_NODE) events.elementRemoved(rnode);
+				else if (rnode.nodeType === ELEMENT_NODE) {
+					getTextNodes(rnode).forEach(n => events.textRemoved(n));
+					events.elementRemoved(rnode);
+				}
 			}
 		}
 	});
