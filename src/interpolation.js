@@ -5,35 +5,33 @@
  * @property {string[]} formatters
  * @property {Node} node
  * @property {{startIndex: number, string: string}} match
- * @private
  */
 
 /**
- * Finds curly-braces in a node, extracts info, fires the callback.
+ * Finds curly-braces in `node`, extracts info, executes `callback`.
  * @param {Node} node 
- * @param {(x: IntpCallbackArg) => void} callback
+ * @param {(arg: IntpCallbackArg) => void} callback
  */
 
 export default function (node, callback) {
-	const RE = /{{( ?)\w+(?: \| \w+)*\1}}/gi,
-		text = node.textContent;
+	const RE = /#\[( ?)\w+(?: \w+)*\1\]/gi,
+	text = node.textContent;
 
 	if (!RE.test(text)) return;
 
 	/** @type {{string: string, startIndex: number}[]} */
-	let matches = [];
+	const matches = [];
 
-	text.replace(RE, (match, index) => {
+	text.replace(RE, (string, _, index) => {
 		matches.push({
-			string: match,
-			startIndex: index
+			string, startIndex: index
 		});
-		return match;
+		return string;
 	});
 
 	for (const { string, startIndex } of matches) {
-		let [prop, ...formatters] = string.replace(/^{{/, '')
-			.replace(/}}$/, '').trim().split(' | ');
+		let [prop, ...formatters] = string.replace(/^#\[ ?/, '')
+			.replace(/ ?\]$/, '').split(' ');
 
 		callback({
 			initialText: text,

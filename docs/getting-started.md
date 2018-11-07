@@ -13,7 +13,7 @@ Now, we want to build our "Hello, world" app with Spreax.
 This is our HTML:
 ```html
 <div id="app">
-	<h1>{{ message }}</h1>
+	<h1>#[message]</h1>
 </div>
 ```
 And, our instance:
@@ -35,4 +35,6 @@ And the message has been changed!
 ## Explanation
 - `state` object is actually the reactive data your app needs.
 - every property in `state` is now available in `app` object.
-- we used two curly-braces into `h1` tag to tell Spreax "hey, put the value of `message` property of state into this element". This feature is called **text interpolation**. Of course you can mix this expression with regular text; for example `<h1>hello {{ name }}</h1>`
+- we used `#[message]` into `h1` tag to tell Spreax "hey, put the value of `message` property of state into this element". This feature is called **text interpolation**. Of course you can mix this expression with regular text; for example `<h1>hello #[name]</h1>`
+
+> for better readability, you can seperate the braces and property name with a space, like `#[ message ]`

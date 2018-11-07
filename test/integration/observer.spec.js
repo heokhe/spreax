@@ -5,14 +5,14 @@ describe('Observer', () => {
 
 			let div = document.createElement('div');
 			div.id = 'o';
-			div.innerHTML = '{{ name }}';
+			div.innerHTML = '#[name]';
 			instance.$el.appendChild(div);
 
 			cy.get('#o')
 				.should('have.text', instance.name)
-				.invoke('text', '{{ checkbox }}')
+				.invoke('text', '#[checkbox]')
 				.then(el => {
-					expect(el.text()).to.match(/^\{/);
+					expect(el.text()).to.match(/^#\[/);
 					el.remove();
 				});
 		});

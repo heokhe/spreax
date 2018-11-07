@@ -2,7 +2,7 @@
 As Spreax's main duty is making interactivity, Spreax can handle user inputs well, thanks to `sp-model` directive.
 ```html
 <input type="text" sp-model='name' placeholder='type your name here'>
-<div>My name is {{ name }}</div>
+<div>My name is #[name]</div>
 ```
 ```js
 new Spreax(el, {

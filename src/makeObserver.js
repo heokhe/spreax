@@ -7,7 +7,6 @@ import getTextNodes from "./dom/getTextNodes";
  * @property {MutationEventCallback} textAdded
  * @property {MutationEventCallback} elementRemoved
  * @property {MutationEventCallback} textRemoved
- * @private
  */
 
 /**

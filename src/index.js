@@ -15,6 +15,7 @@ class Spreax {
 		}
 
 		this.$events = [];
+		/** @type {Object<string, (args: any) => any>} */
 		this.$formatters = {};
 		this.$_proxy = null;
 		this.$extendWith(
@@ -74,6 +75,7 @@ class Spreax {
 	$pipeFormatters(formatters) {
 		if (arguments.length > 1) formatters = Array.prototype.slice.call(arguments);
 		else if (arguments.length === 1 && typeof formatters === 'string') formatters = [formatters];
+		
 		return makeFormatterFn(formatters, this.$formatters).bind(this);
 	}
 
@@ -113,7 +115,7 @@ class Spreax {
 	}
 
 	$interpolation(node) {
-		interpolation(node, ({ initialText: itext, node, propertyName, formatters, match: { startIndex, string } }) => {
+		interpolation(node, ({initialText: itext, node, propertyName, formatters, match: { startIndex, string }}) => {
 			const formatterFn = this.$pipeFormatters(formatters);
 
 			this.$on(propertyName, v => {
@@ -134,10 +136,7 @@ class Spreax {
 
 	$observe() {
 		const removeNodeFromEvents = (node, type = 'INTERPOLATION') => {
-			const events = this.$events.filter(e => {
-				return e.type === type && e.node === node;
-			}).map((_, i) => i);
-
+			const events = this.$events.filter(e => e.type === type && e.node === node).map((_, i) => i);
 			for (const e of events) this.$events.splice(e, 1); 
 		};
 
@@ -145,9 +144,7 @@ class Spreax {
 			textAdded: this.$interpolation.bind(this),
 			elementAdded: this.$execDirectives.bind(this),
 			textRemoved: removeNodeFromEvents,
-			elementRemoved: n => {
-				removeNodeFromEvents(n, 'DIRECTIVE');
-			}
+			elementRemoved: n => { removeNodeFromEvents(n, 'DIRECTIVE'); }
 		}).observe(this.$el, {
 			childList: true,
 			subtree: true

@@ -175,29 +175,28 @@ function directivesOf(el) {
 function makeFormatterFn(formatters, source) {
 	if (!formatters.length) { return function (v) { return v; }; }
 	return formatters.map(function (f) {
-		if (!(f in source)) { throw new Error(("formatter " + f + " not found")); }
+		if (!(f in source)) { throw new Error(("formatter \"" + f + "\" not found")); }
 		else { return source[f]; }
 	}).reduce(function (a, b) { return function (arg) { return b(a(arg)); }; });
 }
 
 function interpolation (node, callback) {
-	var RE = /{{( ?)\w+(?: \| \w+)*\1}}/gi,
-		text = node.textContent;
+	var RE = /#\[( ?)\w+(?: \w+)*\1\]/gi,
+	text = node.textContent;
 	if (!RE.test(text)) { return; }
 	var matches = [];
-	text.replace(RE, function (match, index) {
+	text.replace(RE, function (string, _, index) {
 		matches.push({
-			string: match,
-			startIndex: index
+			string: string, startIndex: index
 		});
-		return match;
+		return string;
 	});
 	for (var i = 0, list = matches; i < list.length; i += 1) {
 		var ref$1 = list[i];
 		var string = ref$1.string;
 		var startIndex = ref$1.startIndex;
-		var ref = string.replace(/^{{/, '')
-			.replace(/}}$/, '').trim().split(' | ');
+		var ref = string.replace(/^#\[ ?/, '')
+			.replace(/ ?\]$/, '').split(' ');
 		var prop = ref[0];
 		var formatters = ref.slice(1);
 		callback({
@@ -383,9 +382,7 @@ Spreax.prototype.$observe = function $observe () {
 		var this$1 = this;
 	var removeNodeFromEvents = function (node, type) {
 			if ( type === void 0 ) type = 'INTERPOLATION';
-		var events = this$1.$events.filter(function (e) {
-			return e.type === type && e.node === node;
-		}).map(function (_, i) { return i; });
+		var events = this$1.$events.filter(function (e) { return e.type === type && e.node === node; }).map(function (_, i) { return i; });
 		for (var i = 0, list = events; i < list.length; i += 1) {
 				var e = list[i];
 				this$1.$events.splice(e, 1);
@@ -395,9 +392,7 @@ Spreax.prototype.$observe = function $observe () {
 		textAdded: this.$interpolation.bind(this),
 		elementAdded: this.$execDirectives.bind(this),
 		textRemoved: removeNodeFromEvents,
-		elementRemoved: function (n) {
-			removeNodeFromEvents(n, 'DIRECTIVE');
-		}
+		elementRemoved: function (n) { removeNodeFromEvents(n, 'DIRECTIVE'); }
 	}).observe(this.$el, {
 		childList: true,
 		subtree: true

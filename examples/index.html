@@ -13,9 +13,13 @@
 	<div id="app">
 		<div id="interpolation">
 			<h1>Interpolation</h1>
-			my name is <b>{{ name }}</b>
-			<br> uppercased name (made using formatters) <b>{{ name | upper }}</b>
-			<br> formatted sentence (made using computed props) is <b>{{ sentence }}</b>
+			my name is <b>#[name]</b>
+			<br>
+			my name is #[name upper]
+			<br>
+			uppercased name is <b>#[name upper]</b>
+			<br> 
+			formatted sentence  is <b>#[sentence]</b>
 		</div>
 		<hr>
 		<div id="on">
@@ -29,10 +33,10 @@
 			<input type="text" sp-model='name'>
 			<button sp-on:click='name = ""'>clear</button>
 			<button sp-on:click='name = "Hosein"'>set</button>
-			<div>Name is <b>{{ name }}</b></div>
+			<div>Name is <b>#[name]</b></div>
 			<h3>Checkbox inputs</h3>
 			<input type="checkbox" sp-model='checkbox' checked>
-			<label>{{ checkbox }}</label>
+			<label>#[checkbox]</label>
 			<h3>Select elements</h3>
 			<select sp-model='name'>
 				<option>Bob</option>
@@ -44,7 +48,7 @@
 		<hr>
 		<div id="class">
 			<h1>Class directive</h1>
-			<div sp-class:active='classIsActive'>{{ classIsActive }}</div>
+			<div sp-class:active='classIsActive'>#[classIsActive]</div>
 			<button sp-on:click='classIsActive = false'>remove class</button>
 		</div>
 	</div>
