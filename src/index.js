@@ -90,21 +90,25 @@ class Spreax {
 		for (const di of dirsOfEl) {
 			if (!d.all.hasOwnProperty(di.name)) throw new ErrorInElement(`directive "${di.name}" not found`, el);
 
-			const { argumentIsRequired, callback } = d.all[di.name];
+			const { options, callback } = d.all[di.name];
 			
-			if (argumentIsRequired && !di.arg) {
+			if (options.argumentIsRequired && !di.arg) {
 				throw new ErrorInElement(`directive needs an arguments, but there's nothing`, el);
 			}
 
-			const attrValue = el.getAttribute(`${di}`),
-			argArray = [el, attrValue, di.modifiers, di.arg];
+			const argumentsObject = {
+				element: el,
+				attributeValue: el.getAttribute(`${di}`), 
+				modifiers: di.modifiers,
+				argument: di.arg
+			};
 
-			if (typeof callback === 'function') callback.apply(this, argArray);
+			if (typeof callback === 'function') callback.call(this, argumentsObject);
 			else {
-				if ('ready' in callback) callback.ready.apply(this, argArray);
+				if ('ready' in callback) callback.ready.call(this, argumentsObject);
 				if ('updated' in callback) {
 					this.$on('', () => {
-						callback.updated.apply(this, argArray);
+						callback.updated.call(this, argumentsObject);
 					}, {
 						type: 'DIRECTIVE',
 						node: el
@@ -127,10 +131,10 @@ class Spreax {
 
 				if (itext !== newText) node.textContent = newText;
 			}, {
-					immediate: true,
-					type: 'INTERPOLATION',
-					node
-				});
+				immediate: true,
+				type: 'INTERPOLATION',
+				node
+			});
 		});
 	}
 

@@ -23,7 +23,7 @@ export default function makeObserver(events) {
 			for (const anode of mut.addedNodes) {
 				if (anode.nodeType === TEXT_NODE) {
 					// when changing a node's text with any method like 
-					// `node.innerHTML = "{{ someProp }}"` it should not have value of `someProp`
+					// `node.innerHTML = "#[someProp]"` it should not have value of `someProp`
 					if (mut.type === 'childList' && mut.target.hasChildNodes(anode)) continue;
 					events.textAdded(anode);
 				} else if (anode.nodeType === ELEMENT_NODE) {

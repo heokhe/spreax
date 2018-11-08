@@ -1,5 +1,6 @@
 import record from "../utils/record";
 import toString from "../directives/toString";
+import { kebabToCamel } from '../utils/case';
 
 /**
  * @param {Element} el 
@@ -12,9 +13,9 @@ export default function(el) {
 		if (!/^sp-/.test(attrName)) continue;
 		attrName = attrName.replace(/^sp-/, '');
 
-		let [, name, arg, modifiers] = attrName.match(/^([a-z]+(?:-[a-z]+)*)(:[a-z0-9]+)?((?:\.[a-z0-9]+))*$/);
+		let [, name, arg, modifiers] = attrName.match(/^([a-z]+(?:-[a-z]+)*)(:[a-z0-9]+(?:-[a-z0-9]+)*)?((?:\.[a-z0-9]+))*$/);
 		if (arg) arg = arg.replace(/^:/, '');
-		const modifierObject = modifiers ? record(modifiers.slice(1).split('.'), true) : {};
+		const modifierObject = modifiers ? record(modifiers.slice(1).split('.').map(kebabToCamel), true) : {};
 
 		const d = {
 			name,

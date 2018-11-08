@@ -2,7 +2,9 @@ var instance = new Spreax('#app', {
 	state: {
 		name: 'Hosein',
 		checkbox: false,
-		classIsActive: true
+		classIsActive: true,
+		color: 'red',
+		number: 10
 	},
 	computed: {
 		sentence() {

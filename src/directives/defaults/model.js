@@ -2,32 +2,32 @@ import { register } from '../register';
 import ErrorInElement from '../../domError';
 
 register('model', {
-	ready(el, value, { lazy }) {
+	ready({ element: el, attributeValue: propName, modifiers: { lazy } }) {
 		if (!['select', 'input', 'textarea'].includes(el.tagName.toLowerCase())) {
 			throw new ErrorInElement(`model directive only works on input, textarea or select tags`, el);
 		}
 
 		if (el.type === 'checkbox') {
-			el.checked = !!this[value];
+			el.checked = !!this[propName];
 		} else {
-			el.value = this[value];
+			el.value = this[propName];
 		}
 
 		el.addEventListener('change', () => {
-			this[value] = el.type === 'checkbox' ? el.checked : el.value;
+			this[propName] = el.type === 'checkbox' ? el.checked : el.value;
 		});
 
 		if (el.type === 'text' && !lazy) {
 			el.addEventListener('keydown', () => {
 				setTimeout(() => {
-					this[value] = el.value;
+					this[propName] = el.value;
 				}, 0);
 			});
 		}
 	},
-	updated(el, value) {
-		let prop = el.type === 'checkbox' ? 'checked' : 'value';
+	updated({ element: el, attributeValue: value }) {
+		let propName = el.type === 'checkbox' ? 'checked' : 'value';
 
-		el[prop] = this[value];
+		el[propName] = this[value];
 	}
 });

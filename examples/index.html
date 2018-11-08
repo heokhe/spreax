@@ -11,20 +11,17 @@
 
 <body>
 	<div id="app">
+		<!-- You better not modify these examples because all tests run in this page! -->
 		<div id="interpolation">
 			<h1>Interpolation</h1>
-			my name is <b>#[name]</b>
-			<br>
-			my name is #[name upper]
-			<br>
-			uppercased name is <b>#[name upper]</b>
-			<br> 
-			formatted sentence  is <b>#[sentence]</b>
+			<div>my name is #[name]</div>
+			<div>uppercased name is #[name upper]</div>
+			<div>sentence is #[sentence]</div>
 		</div>
 		<hr>
 		<div id="on">
 			<h1>On directive</h1>
-			<button sp-on:click.once="log">Log</button>
+			<button sp-on:click.once="log">Log to console</button>
 		</div>
 		<hr>
 		<div id="model">
@@ -50,6 +47,10 @@
 			<h1>Class directive</h1>
 			<div sp-class:active='classIsActive'>#[classIsActive]</div>
 			<button sp-on:click='classIsActive = false'>remove class</button>
+		</div>
+		<hr>
+		<div id="style">
+			<h1 sp-style:color sp-style:padding-left='number'>Style directive</h1>
 		</div>
 	</div>
 </body>
