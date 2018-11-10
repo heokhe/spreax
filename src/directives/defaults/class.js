@@ -9,6 +9,6 @@ register('class', function ({ element: el, argument: className, attributeValue: 
 	}, {
 		immediate: true,
 		node: el,
-		type: 'DIRECTIVE'
+		type: 'd'
 	});
 }, { argumentIsRequired: true });

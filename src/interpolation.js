@@ -14,7 +14,7 @@
  */
 
 export default function (node, callback) {
-	const RE = /#\[( ?)\w+(?: \w+)*\1\]/gi, // #[property formatter1 formatter2 ...]
+	const RE = /#\[( ?)\w+(?: \w+)*\1\]/gi, // #[property fn1 fn2 fnN...]
 	text = node.textContent;
 
 	if (!RE.test(text)) return;
@@ -23,9 +23,7 @@ export default function (node, callback) {
 	const matches = [];
 
 	text.replace(RE, (string, _, index) => {
-		matches.push({
-			string, startIndex: index
-		});
+		matches.push({ string, startIndex: index });
 		return string;
 	});
 
@@ -35,8 +33,7 @@ export default function (node, callback) {
 
 		callback({
 			initialText: text,
-			node,
-			formatters,
+			node, formatters,
 			match: { startIndex, string },
 			propertyName: prop
 		});

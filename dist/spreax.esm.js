@@ -24,13 +24,16 @@ function parse (string) {
 	var value = match[2];
 	var usesProperty = false;
 	if (value in PRIMITIVES) { value = PRIMITIVES[value]; }
-	else if (!isNaN(Number(value))) { value = Number(value); }
+	else if (!isNaN(+value)) { value = Number(value); }
 	else if (/^(['"`]).*\1$/.test(value)) { value = value.slice(1, -1); }
-	else if (/^\w+$/i.test(value)) { usesProperty = true; }
+	else if (/^!?\w+$/i.test(value)) { usesProperty = true; }
 	else { throw new SyntaxError(("could not find any values matching \"" + value + "\"")); }
 	return {
 		prop: prop,
-		getValue: function (o) { return usesProperty ? o[value] : value; }
+		getValue: function (o) {
+			if (!usesProperty) { return value; }
+			return value.charAt(0) === '!' ? !o[value.slice(1)] : o[value];
+		}
 	};
 }
 
@@ -137,7 +140,7 @@ register('class', function (ref) {
 	}, {
 		immediate: true,
 		node: el,
-		type: 'DIRECTIVE'
+		type: 'd'
 	});
 }, { argumentIsRequired: true });
 
@@ -145,7 +148,7 @@ function kebabToCamel(str) {
 	return str.replace(/-([a-z])/g, function (_, next) { return next.toUpperCase(); });
 }
 
-register('style', function (ref){
+register('style', function (ref) {
 	var element = ref.element;
 	var cssProp = ref.argument;
 	var attributeValue = ref.attributeValue;
@@ -156,7 +159,7 @@ register('style', function (ref){
 		element.style[cssProp] = v;
 	}, {
 		node: element,
-		type: 'DIRECTIVE',
+		type: 'd',
 		immediate: true
 	});
 }, { argumentIsRequired: true });
@@ -222,9 +225,7 @@ function interpolation (node, callback) {
 	if (!RE.test(text)) { return; }
 	var matches = [];
 	text.replace(RE, function (string, _, index) {
-		matches.push({
-			string: string, startIndex: index
-		});
+		matches.push({ string: string, startIndex: index });
 		return string;
 	});
 	for (var i = 0, list = matches; i < list.length; i += 1) {
@@ -237,8 +238,7 @@ function interpolation (node, callback) {
 		var formatters = ref.slice(1);
 		callback({
 			initialText: text,
-			node: node,
-			formatters: formatters,
+			node: node, formatters: formatters,
 			match: { startIndex: startIndex, string: string },
 			propertyName: prop
 		});
@@ -247,15 +247,15 @@ function interpolation (node, callback) {
 
 function getTextNodes(el) {
 	var n = [];
+	var TEXT_NODE = Node.TEXT_NODE;
+	var ELEMENT_NODE = Node.ELEMENT_NODE;
 	for (var i = 0, list = el.childNodes; i < list.length; i += 1) {
 		var node = list[i];
 		if (!/\S+/g.test(node.textContent)) { continue; }
 		var type = node.nodeType;
-		if (type === Node.TEXT_NODE) {
-			n.push(node);
-		} else if (type === Node.ELEMENT_NODE) {
-			n = n.concat( getTextNodes(node));
-		}
+		if (type === TEXT_NODE) { n.push(node); }
+		else if (type === ELEMENT_NODE) { n = n.concat( getTextNodes(node)); }
+		else { continue; }
 	}
 	return n;
 }
@@ -386,7 +386,7 @@ Spreax.prototype.$execDirectives = function $execDirectives (el) {
 				this$1.$on('', function () {
 					callback.updated.call(this$1, argumentsObject);
 				}, {
-					type: 'DIRECTIVE',
+					type: 'd',
 					node: el
 				});
 			}
@@ -413,7 +413,7 @@ Spreax.prototype.$interpolation = function $interpolation (node) {
 			if (itext !== newText) { node.textContent = newText; }
 		}, {
 			immediate: true,
-			type: 'INTERPOLATION',
+			type: 'i',
 			node: node
 		});
 	});
@@ -421,7 +421,7 @@ Spreax.prototype.$interpolation = function $interpolation (node) {
 Spreax.prototype.$observe = function $observe () {
 		var this$1 = this;
 	var removeNodeFromEvents = function (node, type) {
-			if ( type === void 0 ) type = 'INTERPOLATION';
+			if ( type === void 0 ) type = 'i';
 		var events = this$1.$events.filter(function (e) { return e.type === type && e.node === node; }).map(function (_, i) { return i; });
 		for (var i = 0, list = events; i < list.length; i += 1) {
 				var e = list[i];
@@ -432,19 +432,20 @@ Spreax.prototype.$observe = function $observe () {
 		textAdded: this.$interpolation.bind(this),
 		elementAdded: this.$execDirectives.bind(this),
 		textRemoved: removeNodeFromEvents,
-		elementRemoved: function (n) { removeNodeFromEvents(n, 'DIRECTIVE'); }
+		elementRemoved: function (n) { removeNodeFromEvents(n, 'd'); }
 	}).observe(this.$el, {
 		childList: true,
 		subtree: true
 	});
 };
-Spreax.prototype.$on = function $on (prop, fn, options) {
-		if ( options === void 0 ) options = {};
-	this.$events.push(Object.assign({}, {prop: prop,
-		fn: fn},
-		'type' in options ? { type: options.type } : {},
-		'node' in options ? { node: options.node } : {}));
-	if (options.immediate) { this.$emit(prop); }
+Spreax.prototype.$on = function $on (prop, fn, ref) {
+		var type = ref.type;
+		var node = ref.node;
+		var immediate = ref.immediate; if ( immediate === void 0 ) immediate = false;
+	this.$events.push(Object.assign({}, {prop: prop, fn: fn},
+		type ? { type: type } : {},
+		node ? { node: node } : {}));
+	if (immediate) { this.$emit(prop); }
 };
 Spreax.prototype.$emit = function $emit (prop) {
 		var this$1 = this;

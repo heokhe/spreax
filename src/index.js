@@ -110,7 +110,7 @@ class Spreax {
 					this.$on('', () => {
 						callback.updated.call(this, argumentsObject);
 					}, {
-						type: 'DIRECTIVE',
+						type: 'd',
 						node: el
 					});
 				}
@@ -132,14 +132,14 @@ class Spreax {
 				if (itext !== newText) node.textContent = newText;
 			}, {
 				immediate: true,
-				type: 'INTERPOLATION',
+				type: 'i',
 				node
 			});
 		});
 	}
 
 	$observe() {
-		const removeNodeFromEvents = (node, type = 'INTERPOLATION') => {
+		const removeNodeFromEvents = (node, type = 'i') => {
 			const events = this.$events.filter(e => e.type === type && e.node === node).map((_, i) => i);
 			for (const e of events) this.$events.splice(e, 1); 
 		};
@@ -148,21 +148,20 @@ class Spreax {
 			textAdded: this.$interpolation.bind(this),
 			elementAdded: this.$execDirectives.bind(this),
 			textRemoved: removeNodeFromEvents,
-			elementRemoved: n => { removeNodeFromEvents(n, 'DIRECTIVE'); }
+			elementRemoved: n => { removeNodeFromEvents(n, 'd'); }
 		}).observe(this.$el, {
 			childList: true,
 			subtree: true
 		});
 	}
 
-	$on(prop, fn, options = {}) {
+	$on(prop, fn, { type, node, immediate = false }) {
 		this.$events.push({
-			prop,
-			fn,
-			...'type' in options ? { type: options.type } : {},
-			...'node' in options ? { node: options.node } : {},
+			prop, fn,
+			...type ? { type } : {},
+			...node ? { node } : {},
 		});
-		if (options.immediate) this.$emit(prop);
+		if (immediate) this.$emit(prop);
 	}
 
 	$emit(prop) {
