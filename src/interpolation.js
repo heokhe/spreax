@@ -15,27 +15,27 @@
 
 export default function (node, callback) {
 	const RE = /#\[( ?)\w+(?: \w+)*\1\]/gi, // #[property fn1 fn2 fnN...]
-	text = node.textContent;
+	text = node.textContent
 
-	if (!RE.test(text)) return;
+	if (!RE.test(text)) return
 
 	/** @type {{string: string, startIndex: number}[]} */
-	const matches = [];
+	const matches = []
 
 	text.replace(RE, (string, _, index) => {
-		matches.push({ string, startIndex: index });
-		return string;
-	});
+		matches.push({ string, startIndex: index })
+		return string
+	})
 
 	for (const { string, startIndex } of matches) {
-		let [prop, ...formatters] = string.replace(/^#\[ ?/, '')
-			.replace(/ ?\]$/, '').split(' ');
+		const [prop, ...formatters] = string.replace(/^#\[ ?/, '')
+			.replace(/ ?\]$/, '').split(' ')
 
-		callback({
+		return callback({
 			initialText: text,
 			node, formatters,
 			match: { startIndex, string },
 			propertyName: prop
-		});
+		})
 	}
 }

@@ -2,9 +2,9 @@ var Spreax = (function () {
 	var _registry = {};
 	function register(name, callback, options) {
 		if ( options === void 0 ) options = {};
-		if (name in _registry) { throw new Error(("directive \"" + name + "\" already exists")); }
+		if (name in _registry) { throw new Error(("directive \"" + name + "\" already exists")) }
 		if (!/^[a-z]+(?:-[a-z]+)*$/.test(name)){
-			throw new Error(("\"" + name + "\" is not a valid directive name"));
+			throw new Error(("\"" + name + "\" is not a valid directive name"))
 		}
 		_registry[name] = { options: options, callback: callback };
 	}
@@ -16,11 +16,11 @@ var Spreax = (function () {
 		'!1': !1,
 		'false': false,
 		'true': true,
-		'undefined': undefined
+		undefined: undefined
 	};
 	function parse (string) {
 		var match = string.match(/^(.+) = (.+)$/);
-		if (match === null) { throw new SyntaxError(("string \"" + string + "\" is not a valid assignment statement")); }
+		if (match === null) { throw new SyntaxError(("string \"" + string + "\" is not a valid assignment statement")) }
 		var prop = match[1];
 		var value = match[2];
 		var usesProperty = false;
@@ -28,20 +28,20 @@ var Spreax = (function () {
 		else if (!isNaN(+value)) { value = Number(value); }
 		else if (/^(['"`]).*\1$/.test(value)) { value = value.slice(1, -1); }
 		else if (/^!?\w+$/i.test(value)) { usesProperty = true; }
-		else { throw new SyntaxError(("could not find any values matching \"" + value + "\"")); }
+		else { throw new SyntaxError(("could not find any values matching \"" + value + "\"")) }
 		return {
 			prop: prop,
 			getValue: function (o) {
-				if (!usesProperty) { return value; }
-				return value.charAt(0) === '!' ? !o[value.slice(1)] : o[value];
+				if (!usesProperty) { return value }
+				return value.charAt(0) === '!' ? !o[value.slice(1)] : o[value]
 			}
-		};
+		}
 	}
 
 	var list = [];
 	function isValidEvent(event) {
 		if (list.length === 0) { list = Object.keys(window).filter(function (e) { return /^on/.test(e); }).map(function (e) { return e.replace(/^on/, ''); }); }
-		return list.includes(event);
+		return list.includes(event)
 	}
 
 	register('on', function (ref) {
@@ -50,7 +50,7 @@ var Spreax = (function () {
 		var value = ref.attributeValue;
 		var modifiers = ref.modifiers;
 		var eventName = ref.argument;
-		if (!isValidEvent(eventName)) { throw new TypeError(("event \"" + eventName + "\" is not a valid DOM event.")); }
+		if (!isValidEvent(eventName)) { throw new TypeError(("event \"" + eventName + "\" is not a valid DOM event.")) }
 		var hasShortcut = / = .+$/.test(value);
 		el.addEventListener(eventName, function (event) {
 			if (modifiers.prevent) { event.preventDefault(); }
@@ -78,18 +78,18 @@ var Spreax = (function () {
 		pathSections.unshift(root);
 		pathSections = pathSections.map(function (ps) {
 			var selector = ps.tagName.toLowerCase();
-			if (ps.className) { selector += '.' + ps.className.trim().split(' ').join('.'); }
-			if (ps.id) { selector += '#' + ps.id; }
+			if (ps.className) { selector += "." + (ps.className.trim().split(' ').join('.')); }
+			if (ps.id) { selector += "#" + (ps.id); }
 			selector = selector.replace(/^div([^$]+)/, '$1');
-			return selector;
+			return selector
 		});
-		return pathSections.join(' > ');
+		return pathSections.join(' > ')
 	}
 
-	var ErrorInElement =              (function (Error) {
+	var ErrorInElement = (function (Error) {
 		function ErrorInElement(message, el) {
 			Error.call(this, message);
-			this.message = message + '\n error at: ' + generateSelector(el);
+			this.message = message + "\n error at: " + (generateSelector(el));
 		}
 		if ( Error ) ErrorInElement.__proto__ = Error;
 		ErrorInElement.prototype = Object.create( Error && Error.prototype );
@@ -104,7 +104,7 @@ var Spreax = (function () {
 			var propName = ref.attributeValue;
 			var lazy = ref.modifiers.lazy;
 			if (!['select', 'input', 'textarea'].includes(el.tagName.toLowerCase())) {
-				throw new ErrorInElement("model directive only works on input, textarea or select tags", el);
+				throw new ErrorInElement("model directive only works on input, textarea or select tags", el)
 			}
 			if (el.type === 'checkbox') {
 				el.checked = !!this[propName];
@@ -135,7 +135,7 @@ var Spreax = (function () {
 		var className = ref.argument;
 		var propName = ref.attributeValue;
 		this.$on(propName || className, function (v) {
-			el.classList[!!v ? 'add' : 'remove'](className || propName);
+			el.classList[v ? 'add' : 'remove'](className || propName);
 			var attr = el.getAttribute('class');
 			if (attr !== null && !attr.length) { el.removeAttribute('class'); }
 		}, {
@@ -146,7 +146,7 @@ var Spreax = (function () {
 	}, { argumentIsRequired: true });
 
 	function kebabToCamel(str) {
-		return str.replace(/-([a-z])/g, function (_, next) { return next.toUpperCase(); });
+		return str.replace(/-([a-z])/g, function (_, next) { return next.toUpperCase(); })
 	}
 
 	register('style', function (ref) {
@@ -170,15 +170,15 @@ var Spreax = (function () {
 		keys.forEach(function (k) {
 			o[k] = value;
 		});
-		return o;
+		return o
 	}
 
 	function toString(d){
 		var o = "sp-" + (d.name);
-		if (d.arg) { o += ':' + d.arg; }
+		if (d.arg) { o += ":" + (d.arg); }
 		var k = Object.keys(d.modifiers);
-		if (k.length) { o += '.' + k.join('.'); }
-		return o;
+		if (k.length) { o += "." + (k.join('.')); }
+		return o
 	}
 
 	function directivesOf(el) {
@@ -188,7 +188,7 @@ var Spreax = (function () {
 		var loop = function () {
 			var ref$1 = list[i];
 			var attrName = ref$1.name;
-			if (!/^sp-/.test(attrName)) { return; }
+			if (!/^sp-/.test(attrName)) { return }
 			attrName = attrName.replace(/^sp-/, '');
 			var ref = attrName.match(/^([a-z]+(?:-[a-z]+)*)(:[a-z0-9]+(?:-[a-z0-9]+)*)?((?:\.[a-z0-9]+))*$/);
 			var name = ref[1];
@@ -208,26 +208,26 @@ var Spreax = (function () {
 		return directives.filter(function (d, _, arr) {
 			var getFullName = function (e) { return e.arg ? [e.name, e.arg].join(':') : e.name; },
 			withThisName = arr.filter(function (e) { return getFullName(e) === getFullName(d); });
-			return withThisName.length > 1 ? withThisName[0] : d;
-		});
+			return withThisName.length > 1 ? withThisName[0] : d
+		})
 	}
 
 	function makeFormatterFn(formatters, source) {
-		if (!formatters.length) { return function (v) { return v; }; }
+		if (!formatters.length) { return function (v) { return v; } }
 		return formatters.map(function (f) {
-			if (!(f in source)) { throw new Error(("formatter \"" + f + "\" not found")); }
-			else { return source[f]; }
-		}).reduce(function (a, b) { return function (arg) { return b(a(arg)); }; });
+			if (!(f in source)) { throw new Error(("formatter \"" + f + "\" not found")) }
+			else { return source[f] }
+		}).reduce(function (a, b) { return function (arg) { return b(a(arg)); }; })
 	}
 
 	function interpolation (node, callback) {
 		var RE = /#\[( ?)\w+(?: \w+)*\1\]/gi,
 		text = node.textContent;
-		if (!RE.test(text)) { return; }
+		if (!RE.test(text)) { return }
 		var matches = [];
 		text.replace(RE, function (string, _, index) {
 			matches.push({ string: string, startIndex: index });
-			return string;
+			return string
 		});
 		for (var i = 0, list = matches; i < list.length; i += 1) {
 			var ref$1 = list[i];
@@ -237,12 +237,12 @@ var Spreax = (function () {
 				.replace(/ ?\]$/, '').split(' ');
 			var prop = ref[0];
 			var formatters = ref.slice(1);
-			callback({
+			return callback({
 				initialText: text,
 				node: node, formatters: formatters,
 				match: { startIndex: startIndex, string: string },
 				propertyName: prop
-			});
+			})
 		}
 	}
 
@@ -252,13 +252,13 @@ var Spreax = (function () {
 		var ELEMENT_NODE = Node.ELEMENT_NODE;
 		for (var i = 0, list = el.childNodes; i < list.length; i += 1) {
 			var node = list[i];
-			if (!/\S+/g.test(node.textContent)) { continue; }
+			if (!/\S+/g.test(node.textContent)) { continue }
 			var type = node.nodeType;
 			if (type === TEXT_NODE) { n.push(node); }
 			else if (type === ELEMENT_NODE) { n = n.concat( getTextNodes(node)); }
-			else { continue; }
+			else { continue }
 		}
-		return n;
+		return n
 	}
 
 	function makeObserver(events) {
@@ -270,7 +270,7 @@ var Spreax = (function () {
 				for (var i = 0, list = mut.addedNodes; i < list.length; i += 1) {
 					var anode = list[i];
 					if (anode.nodeType === TEXT_NODE) {
-						if (mut.type === 'childList' && mut.target.hasChildNodes(anode)) { continue; }
+						if (mut.type === 'childList' && mut.target.hasChildNodes(anode)) { continue }
 						events.textAdded(anode);
 					} else if (anode.nodeType === ELEMENT_NODE) {
 						getTextNodes(anode).forEach(function (n) { return events.textAdded(n); });
@@ -286,14 +286,14 @@ var Spreax = (function () {
 					}
 				}
 			}
-		});
+		})
 	}
 
 	var Spreax = function Spreax(el, options) {
 		if (typeof el === 'string') { this.$el = document.querySelector(el); }
 		else if (el instanceof HTMLElement) { this.$el = el; }
 		else {
-			throw new TypeError(("wrong selector or element: expected element or string, got \"" + (String(el)) + "\""));
+			throw new TypeError(("wrong selector or element: expected element or string, got \"" + (String(el)) + "\""))
 		}
 		this.$events = [];
 		this.$formatters = {};
@@ -308,71 +308,59 @@ var Spreax = (function () {
 		this.$el.querySelectorAll('*').forEach(this.$execDirectives, this);
 		this.$observe();
 	};
-	Spreax.prototype.$extendWith = function $extendWith (state, actions, computed, formatters) {
+	Spreax.prototype.$extendWith = function $extendWith (state, actions, computed, formatters, watchers) {
 			var this$1 = this;
 		this.$makeProxy(state);
-		Object.keys(state).forEach(function (p) {
+		var loop = function ( p ) {
 			Object.defineProperty(this$1, p, {
 				get: function () { return this$1.$_proxy[p]; },
-				set: function (nv) {
-					this$1.$_proxy[p] = nv;
-				}
+				set: function (nv) { this$1.$_proxy[p] = nv; }
 			});
-		});
-		Object.entries(actions).forEach(function (ref) {
-				var name = ref[0];
-				var fn = ref[1];
-			this$1[name] = fn.bind(this$1);
-		});
-		Object.entries(computed).forEach(function (ref) {
-				var name = ref[0];
-				var fn = ref[1];
-			Object.defineProperty(this$1, name, {
-				get: fn.bind(this$1),
+		};
+			for (var p in state) loop( p );
+		for (var a in actions) { this$1[a] = actions[a].bind(this$1); }
+		for (var c in computed) {
+			Object.defineProperty(this$1, c, {
+				get: computed[c].bind(this$1),
 				set: function () { return false; }
 			});
-		});
-		Object.entries(formatters).forEach(function (ref) {
-				var name = ref[0];
-				var fn = ref[1];
-			this$1.$formatters[name] = fn.bind(this$1);
-		});
+		}
+		for (var f in formatters) { this$1.$formatters[f] = formatters[f].bind(this$1); }
+		for (var w in watchers) { this$1.$on(w, watchers[w].bind(this$1), { type: 'w' }); }
 	};
 	Spreax.prototype.$makeProxy = function $makeProxy (o) {
 			var this$1 = this;
 		this.$_proxy = new Proxy(o, {
 			get: function (obj, key) {
-				if (!obj.hasOwnProperty(key)) { throw new Error(("unknown state property \"" + key + "\"")); }
-				return obj[key];
+				if (!obj.hasOwnProperty(key)) { throw new Error(("unknown state property \"" + key + "\"")) }
+				return obj[key]
 			},
 			set: function (obj, key, value) {
-				if (!obj.hasOwnProperty(key)) { throw new Error(("unknown state property \"" + key + "\"")); }
-				if (value === obj[key]) { return; }
+				if (!obj.hasOwnProperty(key)) { throw new Error(("unknown state property \"" + key + "\"")) }
+				if (value === obj[key]) { return }
 				obj[key] = value;
 				this$1.$emit(key);
 				this$1.$emit();
-				return true;
+				return true
 			},
 			deleteProperty: function () { return false; }
 		});
 	};
 	Spreax.prototype.$pipeFormatters = function $pipeFormatters (formatters) {
-		if (arguments.length > 1) { formatters = Array.prototype.slice.call(arguments); }
-		else if (arguments.length === 1 && typeof formatters === 'string') { formatters = [formatters]; }
-		return makeFormatterFn(formatters, this.$formatters).bind(this);
+		return makeFormatterFn(formatters, this.$formatters).bind(this)
 	};
 	Spreax.prototype.$execDirectives = function $execDirectives (el) {
 			var this$1 = this;
-		if (!el.attributes.length) { return; }
+		if (!el.attributes.length) { return }
 		var dirsOfEl = directivesOf(el);
 		var loop = function () {
 			var di = list[i];
-				if (!all.hasOwnProperty(di.name)) { throw new ErrorInElement(("directive \"" + (di.name) + "\" not found"), el); }
+				if (!all.hasOwnProperty(di.name)) { throw new ErrorInElement(("directive \"" + (di.name) + "\" not found"), el) }
 			var ref = all[di.name];
 				var options = ref.options;
 				var callback = ref.callback;
 			if (options.argumentIsRequired && !di.arg) {
-				throw new ErrorInElement("directive needs an arguments, but there's nothing", el);
+				throw new ErrorInElement("directive needs an arguments, but there's nothing", el)
 			}
 			var argumentsObject = {
 				element: el,
@@ -451,7 +439,7 @@ var Spreax = (function () {
 	Spreax.prototype.$emit = function $emit (prop) {
 			var this$1 = this;
 		this.$events.filter(function (ev) {
-			return prop ? ev.prop === prop : true;
+			return prop ? ev.prop === prop : true
 		}).forEach(function (ev) {
 			var args = ev.prop ? [this$1[ev.prop]] : [];
 			ev.fn.apply(this$1, args);

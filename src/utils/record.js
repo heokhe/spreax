@@ -4,9 +4,9 @@
  * @returns {{[x: string]: any}}
  */
 export default function(keys, value){
-	let o = {};
+	const o = {}
 	keys.forEach(k => {
-		o[k] = value;
-	});
-	return o;
+		o[k] = value
+	})
+	return o
 }

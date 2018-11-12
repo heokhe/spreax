@@ -573,6 +573,11 @@ escape-string-regexp@^1.0.2, escape-string-regexp@^1.0.5:
   version "1.0.5"
   resolved "https://registry.yarnpkg.com/escape-string-regexp/-/escape-string-regexp-1.0.5.tgz#1b61c0562190a8dff6ae3bb2cf0200ca130b86d4"
 
+eslint-config-problems@^1.1.0:
+  version "1.1.0"
+  resolved "https://registry.yarnpkg.com/eslint-config-problems/-/eslint-config-problems-1.1.0.tgz#cf06846764472686203c2f63587036a80c3c3a88"
+  integrity sha512-wYI2F9dHbPBp8QN9GGq/tg1fS4o1Q/zphfqgKFdYvUfg1chQbreFTvsIZH4tYORNZ/MIRgB+r5qNlBLIKopiww==
+
 eslint-scope@^4.0.0:
   version "4.0.0"
   resolved "https://registry.yarnpkg.com/eslint-scope/-/eslint-scope-4.0.0.tgz#50bf3071e9338bcdc43331794a0cb533f0136172"

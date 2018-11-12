@@ -4,7 +4,7 @@
  */
 
 /** @type {{[x: string]: {callback: Callback, options: DirectiveOptions}}} */
-const _registry = {};
+const _registry = {}
 
 /**
  * @typedef {Object} DirectiveCallbackArg
@@ -22,12 +22,12 @@ const _registry = {};
  * @param {DirectiveOptions} [options]
  */
 export function register(name, callback, options = {}) {
-	if (name in _registry) throw new Error(`directive "${name}" already exists`);
+	if (name in _registry) throw new Error(`directive "${name}" already exists`)
 	if (!/^[a-z]+(?:-[a-z]+)*$/.test(name)){
-		throw new Error(`"${name}" is not a valid directive name`);
+		throw new Error(`"${name}" is not a valid directive name`)
 	}	
 
-	_registry[name] = { options, callback };
+	_registry[name] = { options, callback }
 }
 
-export const all = _registry;
+export const all = _registry

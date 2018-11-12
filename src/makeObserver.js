@@ -1,4 +1,4 @@
-import getTextNodes from "./dom/getTextNodes";
+import getTextNodes from './dom/getTextNodes'
 
 /**
  * @typedef {(node: Node) => void} MutationEventCallback
@@ -16,7 +16,7 @@ import getTextNodes from "./dom/getTextNodes";
  */
 
 export default function makeObserver(events) {
-	const { TEXT_NODE, ELEMENT_NODE } = Node;
+	const { TEXT_NODE, ELEMENT_NODE } = Node
 
 	return new MutationObserver(muts => {
 		for (const mut of muts) {
@@ -24,21 +24,21 @@ export default function makeObserver(events) {
 				if (anode.nodeType === TEXT_NODE) {
 					// when changing a node's text with any method like 
 					// `node.innerHTML = "#[someProp]"` it should not have value of `someProp`
-					if (mut.type === 'childList' && mut.target.hasChildNodes(anode)) continue;
-					events.textAdded(anode);
+					if (mut.type === 'childList' && mut.target.hasChildNodes(anode)) continue
+					events.textAdded(anode)
 				} else if (anode.nodeType === ELEMENT_NODE) {
-					getTextNodes(anode).forEach(n => events.textAdded(n));
-					events.elementAdded(anode);
+					getTextNodes(anode).forEach(n => events.textAdded(n))
+					events.elementAdded(anode)
 				}
 			}
 
 			for (const rnode of mut.removedNodes) {
-				if (rnode.nodeType === TEXT_NODE) events.textRemoved(rnode);
+				if (rnode.nodeType === TEXT_NODE) events.textRemoved(rnode)
 				else if (rnode.nodeType === ELEMENT_NODE) {
-					getTextNodes(rnode).forEach(n => events.textRemoved(n));
-					events.elementRemoved(rnode);
+					getTextNodes(rnode).forEach(n => events.textRemoved(n))
+					events.elementRemoved(rnode)
 				}
 			}
 		}
-	});
+	})
 }

@@ -1,4 +1,4 @@
-import generateSelector from './dom/generateSelector';
+import generateSelector from './dom/generateSelector'
 
 export default class ErrorInElement extends Error {
 	/**
@@ -7,7 +7,7 @@ export default class ErrorInElement extends Error {
 	 * @param {Element} el 
 	 */
 	constructor(message, el) {
-		super(message);
-		this.message = message + '\n error at: ' + generateSelector(el);
+		super(message)
+		this.message = `${message  }\n error at: ${  generateSelector(el)}`
 	}
 }

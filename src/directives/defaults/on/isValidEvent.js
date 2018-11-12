@@ -1,4 +1,4 @@
-let list = [];
+let list = []
 
 /**
  * Checks if given event name is a valid one.
@@ -6,6 +6,6 @@ let list = [];
  * @returns {boolean}
  */
 export default function(event) {
-	if (list.length === 0) list = Object.keys(window).filter(e => /^on/.test(e)).map(e => e.replace(/^on/, ''));
-	return list.includes(event);
+	if (list.length === 0) list = Object.keys(window).filter(e => /^on/.test(e)).map(e => e.replace(/^on/, ''))
+	return list.includes(event)
 }
