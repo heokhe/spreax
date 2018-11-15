@@ -56,7 +56,6 @@ export default class Spreax {
 			set: (obj, key, value) => {
 				if (!obj.hasOwnProperty(key)) throw new Error(`unknown state property "${key}"`)
 				if (value === obj[key]) return
-				this.$_snapshot[key] = obj[key]
 				obj[key] = value
 				this.$emit(key)
 				this.$emit()

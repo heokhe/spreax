@@ -352,7 +352,6 @@ Spreax.prototype.$makeProxy = function $makeProxy (o) {
 		set: function (obj, key, value) {
 			if (!obj.hasOwnProperty(key)) { throw new Error(("unknown state property \"" + key + "\"")) }
 			if (value === obj[key]) { return }
-			this$1.$_snapshot[key] = obj[key];
 			obj[key] = value;
 			this$1.$emit(key);
 			this$1.$emit();
