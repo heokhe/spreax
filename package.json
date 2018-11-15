@@ -3,6 +3,7 @@
 	"description": "A new front-end tool to bind UI with app state",
 	"main": "dist/spreax.cjs.js",
 	"browser": "dist/spreax.browser.js",
+	"unpkg": "dist/spreax.browser.js",
 	"module": "dist/spreax.esm.js",
 	"unpkg": "dist/spreax.browser.js",
 	"scripts": {

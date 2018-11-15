@@ -1,166 +1,3 @@
-var _registry = {};
-function register(name, callback, options) {
-	if ( options === void 0 ) options = {};
-	if (name in _registry) { throw new Error(("directive \"" + name + "\" already exists")) }
-	if (!/^[a-z]+(?:-[a-z]+)*$/.test(name)){
-		throw new Error(("\"" + name + "\" is not a valid directive name"))
-	}
-	_registry[name] = { options: options, callback: callback };
-}
-var all = _registry;
-
-var PRIMITIVES = {
-	'null': null,
-	'!0': !0,
-	'!1': !1,
-	'false': false,
-	'true': true,
-	undefined: undefined
-};
-function parse (string) {
-	var match = string.match(/^(.+) = (.+)$/);
-	if (match === null) { throw new SyntaxError(("string \"" + string + "\" is not a valid assignment statement")) }
-	var prop = match[1];
-	var value = match[2];
-	var usesProperty = false;
-	if (value in PRIMITIVES) { value = PRIMITIVES[value]; }
-	else if (!isNaN(+value)) { value = Number(value); }
-	else if (/^(['"`]).*\1$/.test(value)) { value = value.slice(1, -1); }
-	else if (/^!?\w+$/i.test(value)) { usesProperty = true; }
-	else { throw new SyntaxError(("could not find any values matching \"" + value + "\"")) }
-	return {
-		prop: prop,
-		getValue: function (o) {
-			if (!usesProperty) { return value }
-			return value.startsWith('!') ? !o[value.slice(1)] : o[value]
-		}
-	}
-}
-
-var list = [];
-function isValidEvent(event) {
-	if (list.length === 0) { list = Object.keys(window).filter(function (e) { return /^on/.test(e); }).map(function (e) { return e.replace(/^on/, ''); }); }
-	return list.includes(event)
-}
-
-register('on', function (ref) {
-	var this$1 = this;
-	var el = ref.element;
-	var value = ref.attributeValue;
-	var modifiers = ref.modifiers;
-	var eventName = ref.argument;
-	if (!isValidEvent(eventName)) { throw new TypeError(("event \"" + eventName + "\" is not a valid DOM event.")) }
-	var hasShortcut = / = .+$/.test(value);
-	el.addEventListener(eventName, function (event) {
-		if (modifiers.prevent) { event.preventDefault(); }
-		if (hasShortcut) {
-			var pa = parse(value);
-			this$1[pa.prop] = pa.getValue(this$1);
-		} else {
-			this$1[value]();
-		}
-	}, {
-		once: modifiers.once,
-		passive: modifiers.passive,
-		capture: modifiers.capture,
-	});
-}, { argumentIsRequired: true });
-
-function generateSelector(el, root) {
-	if ( root === void 0 ) root = 'body';
-	if (typeof root === 'string') { root = document.querySelector(root); }
-	var pathSections = [];
-	while (el !== root) {
-		pathSections.unshift(el);
-		el = el.parentElement;
-	}
-	pathSections.unshift(root);
-	pathSections = pathSections.map(function (ps) {
-		var selector = ps.tagName.toLowerCase();
-		if (ps.className) { selector += "." + (ps.className.trim().split(' ').join('.')); }
-		if (ps.id) { selector += "#" + (ps.id); }
-		selector = selector.replace(/^div([^$]+)/, '$1');
-		return selector
-	});
-	return pathSections.join(' > ')
-}
-
-var ErrorInElement = (function (Error) {
-	function ErrorInElement(message, el) {
-		Error.call(this, message);
-		this.message = message + "\n error at: " + (generateSelector(el));
-	}
-	if ( Error ) ErrorInElement.__proto__ = Error;
-	ErrorInElement.prototype = Object.create( Error && Error.prototype );
-	ErrorInElement.prototype.constructor = ErrorInElement;
-	return ErrorInElement;
-}(Error));
-
-register('model', {
-	ready: function ready(ref) {
-		var this$1 = this;
-		var el = ref.element;
-		var propName = ref.attributeValue;
-		var lazy = ref.modifiers.lazy;
-		if (!['select', 'input', 'textarea'].includes(el.tagName.toLowerCase())) {
-			throw new ErrorInElement("model directive only works on input, textarea or select tags", el)
-		}
-		if (el.type === 'checkbox') { el.checked = !!this[propName]; }
-		else { el.value = this[propName]; }
-		el.addEventListener('change', function () {
-			this$1[propName] = el.type === 'checkbox' ? el.checked : el.value;
-		});
-		if (el.type === 'text' && !lazy) {
-			el.addEventListener('keydown', function () {
-				setTimeout(function () {
-					this$1[propName] = el.value;
-				}, 0);
-			});
-		}
-	},
-	updated: function updated(ref) {
-		var el = ref.element;
-		var value = ref.attributeValue;
-		var propName = el.type === 'checkbox' ? 'checked' : 'value';
-		el[propName] = this[value];
-	}
-});
-
-register('class', function (ref) {
-	var el = ref.element;
-	var className = ref.argument;
-	var propName = ref.attributeValue;
-	this.$on(propName || className, function (v) {
-		el.classList[v ? 'add' : 'remove'](className || propName);
-		var attr = el.getAttribute('class');
-		if (attr !== null && !attr.length) { el.removeAttribute('class'); }
-	}, {
-		immediate: true,
-		node: el,
-		type: 'd'
-	});
-}, { argumentIsRequired: true });
-
-function kebabToCamel(str) {
-	return str.replace(/-([a-z])/g, function (_, next) { return next.toUpperCase(); })
-}
-
-register('style', function (ref) {
-	var element = ref.element;
-	var cssProp = ref.argument;
-	var attributeValue = ref.attributeValue;
-	cssProp = kebabToCamel(cssProp);
-	var noUnits = 'opacity, z-index, font-weight, line-height'.split(', ');
-	this.$on(attributeValue || cssProp, function (v) {
-		if (!isNaN(+v) && !noUnits.includes(cssProp)) { v = v + "px"; }
-		element.style[cssProp] = v;
-	}, {
-		node: element,
-		type: 'd',
-		immediate: true
-	});
-}, { argumentIsRequired: true });
-
 function makeFormatterFn(formatters, source) {
 	if (!formatters.length) { return function (v) { return v; } }
 	return formatters.map(function (f) {
@@ -254,6 +91,10 @@ function toString(d){
 	return o
 }
 
+function kebabToCamel(str) {
+	return str.replace(/-([a-z])/g, function (_, next) { return next.toUpperCase(); })
+}
+
 function directivesOf(el) {
 	var obj;
 	var attributes = el.attributes;
@@ -284,6 +125,165 @@ function directivesOf(el) {
 		return withThisName.length > 1 ? withThisName[0] : d
 	})
 }
+
+function generateSelector(el, root) {
+	if ( root === void 0 ) root = 'body';
+	if (typeof root === 'string') { root = document.querySelector(root); }
+	var pathSections = [];
+	while (el !== root) {
+		pathSections.unshift(el);
+		el = el.parentElement;
+	}
+	pathSections.unshift(root);
+	pathSections = pathSections.map(function (ps) {
+		var selector = ps.tagName.toLowerCase();
+		if (ps.className) { selector += "." + (ps.className.trim().split(' ').join('.')); }
+		if (ps.id) { selector += "#" + (ps.id); }
+		selector = selector.replace(/^div([^$]+)/, '$1');
+		return selector
+	});
+	return pathSections.join(' > ')
+}
+
+var ErrorInElement = (function (Error) {
+	function ErrorInElement(message, el) {
+		Error.call(this, message);
+		this.message = message + "\n error at: " + (generateSelector(el));
+	}
+	if ( Error ) ErrorInElement.__proto__ = Error;
+	ErrorInElement.prototype = Object.create( Error && Error.prototype );
+	ErrorInElement.prototype.constructor = ErrorInElement;
+	return ErrorInElement;
+}(Error));
+
+var _registry = {};
+function register(name, callback, options) {
+	if ( options === void 0 ) options = {};
+	if (name in _registry) { throw new Error(("directive \"" + name + "\" already exists")) }
+	if (!/^[a-z]+(?:-[a-z]+)*$/.test(name)){
+		throw new Error(("\"" + name + "\" is not a valid directive name"))
+	}
+	_registry[name] = { options: options, callback: callback };
+}
+var all = _registry;
+
+var PRIMITIVES = {
+	'null': null,
+	'!0': !0,
+	'!1': !1,
+	'false': false,
+	'true': true,
+	undefined: undefined
+};
+function parse (string) {
+	var match = string.match(/^(.+) = (.+)$/);
+	if (match === null) { throw new SyntaxError(("string \"" + string + "\" is not a valid assignment statement")) }
+	var prop = match[1];
+	var value = match[2];
+	var usesProperty = false;
+	if (value in PRIMITIVES) { value = PRIMITIVES[value]; }
+	else if (!isNaN(+value)) { value = Number(value); }
+	else if (/^(['"`]).*\1$/.test(value)) { value = value.slice(1, -1); }
+	else if (/^!?\w+$/i.test(value)) { usesProperty = true; }
+	else { throw new SyntaxError(("could not find any values matching \"" + value + "\"")) }
+	return {
+		prop: prop,
+		getValue: function (o) {
+			if (!usesProperty) { return value }
+			return value.startsWith('!') ? !o[value.slice(1)] : o[value]
+		}
+	}
+}
+
+var list = [];
+function isValidEvent(event) {
+	if (list.length === 0) { list = Object.keys(window).filter(function (e) { return /^on/.test(e); }).map(function (e) { return e.replace(/^on/, ''); }); }
+	return list.includes(event)
+}
+
+register('on', function (ref) {
+	var this$1 = this;
+	var el = ref.element;
+	var value = ref.attributeValue;
+	var modifiers = ref.modifiers;
+	var eventName = ref.argument;
+	if (!isValidEvent(eventName)) { throw new TypeError(("event \"" + eventName + "\" is not a valid DOM event.")) }
+	var hasShortcut = / = .+$/.test(value);
+	el.addEventListener(eventName, function (event) {
+		if (modifiers.prevent) { event.preventDefault(); }
+		if (hasShortcut) {
+			var pa = parse(value);
+			this$1[pa.prop] = pa.getValue(this$1);
+		} else {
+			this$1[value]();
+		}
+	}, {
+		once: modifiers.once,
+		passive: modifiers.passive,
+		capture: modifiers.capture,
+	});
+}, { argumentIsRequired: true });
+
+register('model', {
+	ready: function ready(ref) {
+		var this$1 = this;
+		var el = ref.element;
+		var propName = ref.attributeValue;
+		var lazy = ref.modifiers.lazy;
+		if (!['select', 'input', 'textarea'].includes(el.tagName.toLowerCase())) {
+			throw new ErrorInElement("model directive only works on input, textarea or select tags", el)
+		}
+		if (el.type === 'checkbox') { el.checked = !!this[propName]; }
+		else { el.value = this[propName]; }
+		el.addEventListener('change', function () {
+			this$1[propName] = el.type === 'checkbox' ? el.checked : el.value;
+		});
+		if (el.type === 'text' && !lazy) {
+			el.addEventListener('keydown', function () {
+				setTimeout(function () {
+					this$1[propName] = el.value;
+				}, 0);
+			});
+		}
+	},
+	updated: function updated(ref) {
+		var el = ref.element;
+		var value = ref.attributeValue;
+		var propName = el.type === 'checkbox' ? 'checked' : 'value';
+		el[propName] = this[value];
+	}
+});
+
+register('class', function (ref) {
+	var el = ref.element;
+	var className = ref.argument;
+	var propName = ref.attributeValue;
+	this.$on(propName || className, function (v) {
+		el.classList[v ? 'add' : 'remove'](className || propName);
+		var attr = el.getAttribute('class');
+		if (attr !== null && !attr.length) { el.removeAttribute('class'); }
+	}, {
+		immediate: true,
+		node: el,
+		type: 'd'
+	});
+}, { argumentIsRequired: true });
+
+register('style', function (ref) {
+	var element = ref.element;
+	var cssProp = ref.argument;
+	var attributeValue = ref.attributeValue;
+	cssProp = kebabToCamel(cssProp);
+	var noUnits = 'opacity, z-index, font-weight, line-height'.split(', ');
+	this.$on(attributeValue || cssProp, function (v) {
+		if (!isNaN(+v) && !noUnits.includes(cssProp)) { v = v + "px"; }
+		element.style[cssProp] = v;
+	}, {
+		node: element,
+		type: 'd',
+		immediate: true
+	});
+}, { argumentIsRequired: true });
 
 function execDirectives (el, callbackFn) {
 	if (!el.attributes.length) { return }
@@ -352,6 +352,7 @@ Spreax.prototype.$makeProxy = function $makeProxy (o) {
 		set: function (obj, key, value) {
 			if (!obj.hasOwnProperty(key)) { throw new Error(("unknown state property \"" + key + "\"")) }
 			if (value === obj[key]) { return }
+			this$1.$_snapshot[key] = obj[key];
 			obj[key] = value;
 			this$1.$emit(key);
 			this$1.$emit();
@@ -391,14 +392,14 @@ Spreax.prototype.$interpolation = function $interpolation (node) {
 		this$1.$on(propertyName, function (v) {
 			v = String(formatterFn(v));
 			var beforeValue = itext.slice(0, startIndex),
-			afterValue = itext.slice(startIndex + string.length + v.length, itext.length),
-			newText = beforeValue + v + afterValue;
+				afterValue = itext.slice(startIndex + string.length + v.length, itext.length),
+				newText = beforeValue + v + afterValue;
 			if (itext !== newText) { node.textContent = newText; }
 		}, {
-			immediate: true,
-			type: 'i',
-			node: node
-		});
+				immediate: true,
+				type: 'i',
+				node: node
+			});
 	});
 };
 Spreax.prototype.$observe = function $observe () {
@@ -439,6 +440,7 @@ Spreax.prototype.$emit = function $emit (prop) {
 		ev.fn.apply(this$1, args);
 	});
 };
+
 Spreax.directive = register;
 
 export default Spreax;

@@ -54,7 +54,7 @@ now, we should add the directives. update the HTML to this:
 	<button sp-on:click='name = ""'>clear</button>
 	<button sp-on:click='log'>log</button>
 	<hr>
-	<h1>Hello {{ name }}</h1>
+	<h1>Hello #[name]</h1>
 </div>
 ```
 Refresh the page and, boom! 
