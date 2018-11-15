@@ -17,7 +17,7 @@ export default function execDirectives (el, callbackFn) {
 
 		if (options.argumentIsRequired && !di.arg) throw new ErrorInElement(`directive needs an arguments, but there's nothing`, el)
 
-		return callbackFn(callback, {
+		callbackFn(callback, {
 			element: el,
 			attributeValue: el.getAttribute(`${di}`),
 			modifiers: di.modifiers,

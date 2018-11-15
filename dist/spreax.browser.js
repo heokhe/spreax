@@ -33,7 +33,7 @@ var Spreax = (function () {
 			prop: prop,
 			getValue: function (o) {
 				if (!usesProperty) { return value }
-				return value.charAt(0) === '!' ? !o[value.slice(1)] : o[value]
+				return value.startsWith('!') ? !o[value.slice(1)] : o[value]
 			}
 		}
 	}
@@ -296,12 +296,12 @@ var Spreax = (function () {
 			var options = ref.options;
 			var callback = ref.callback;
 			if (options.argumentIsRequired && !di.arg) { throw new ErrorInElement("directive needs an arguments, but there's nothing", el) }
-			return callbackFn(callback, {
+			callbackFn(callback, {
 				element: el,
 				attributeValue: el.getAttribute(("" + di)),
 				modifiers: di.modifiers,
 				argument: di.arg
-			})
+			});
 		}
 	}
 

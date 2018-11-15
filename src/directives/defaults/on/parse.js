@@ -28,7 +28,7 @@ export default function (string) {
 		prop,
 		getValue: o => {
 			if (!usesProperty) return value
-			return value.charAt(0) === '!' ? !o[value.slice(1)] : o[value]
+			return value.startsWith('!') ? !o[value.slice(1)] : o[value]
 		}
 	}
 }

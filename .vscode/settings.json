@@ -1,7 +1,8 @@
 {
 	"eslint.options": {
 		"ignorePattern": [
-			"examples"
+			"examples",
+			"dist"
 		]
 	}
 }

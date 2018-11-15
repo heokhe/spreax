@@ -11,7 +11,7 @@ const _registry = {}
  * @property {Object<string, true>} modifiers
  * @property {Element} element
  * @property {string} attributeValue
- * @property {string} [argument]
+ * @property {string} argument
  * @typedef {(arg: DirectiveCallbackArg) => void} fn
  * @typedef {(fn | { ready?: fn, updated?: fn })} Callback
  */
