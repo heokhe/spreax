@@ -13,6 +13,7 @@ export default function(el) {
 		if (!/^sp-/.test(attrName)) continue
 		attrName = attrName.replace(/^sp-/, '')
 
+		// eslint-disable-next-line prefer-const
 		let [, name, arg, modifiers] = attrName.match(/^([a-z]+(?:-[a-z]+)*)(:[a-z0-9]+(?:-[a-z0-9]+)*)?((?:\.[a-z0-9]+))*$/)
 		if (arg) arg = arg.replace(/^:/, '')
 		const modifierObject = modifiers ? record(modifiers.slice(1).split('.').map(kebabToCamel), true) : {}

@@ -6,12 +6,9 @@ register('model', {
 		if (!['select', 'input', 'textarea'].includes(el.tagName.toLowerCase())) {
 			throw new ErrorInElement(`model directive only works on input, textarea or select tags`, el)
 		}
-
-		if (el.type === 'checkbox') {
-			el.checked = !!this[propName]
-		} else {
-			el.value = this[propName]
-		}
+					
+		if (el.type === 'checkbox') el.checked = !!this[propName]
+		else el.value = this[propName]
 
 		el.addEventListener('change', () => {
 			this[propName] = el.type === 'checkbox' ? el.checked : el.value

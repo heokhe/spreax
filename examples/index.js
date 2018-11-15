@@ -8,15 +8,15 @@ var instance = new Spreax('#app', {
 	},
 	computed: {
 		sentence() {
-			return `My name is ${this.name}`;
+			return `My name is ${this.name}`
 		}
 	},
 	actions: {
 		log() {
-			console.log('Logged :)');
+			console.log('Logged :)')
 		}
 	},
 	formatters: {
 		upper: s => String(s).toUpperCase()
 	}
-});
+})

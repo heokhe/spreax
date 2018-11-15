@@ -14,7 +14,7 @@
  */
 
 export default function (node, callback) {
-	const RE = /#\[( ?)\w+(?: \w+)*\1\]/gi, // #[property fn1 fn2 fnN...]
+	const RE = /#\[( ?)\w+(?: \w+)*\1\]/gi, // #[property fn1 fn2 fnN ...]
 	text = node.textContent
 
 	if (!RE.test(text)) return

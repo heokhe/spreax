@@ -1,10 +1,9 @@
 import * as d from './directives/index'
-import directivesOf from './dom/directivesOf'
 import makeFormatterFn from './makeFormatterFn'
 import interpolation from './interpolation'
 import getTextNodes from './dom/getTextNodes'
 import makeObserver from './makeObserver'
-import ErrorInElement from './domError'
+import execDirectives from './execDirectives'
 
 class Spreax {
 	constructor(el, options) {
@@ -29,7 +28,7 @@ class Spreax {
 		this.$observe()
 	}
 
-	$extendWith(state, actions, computed, formatters, watchers) {
+	$extendWith(state, actions, computed, formatters, /* watchers */) {
 		this.$makeProxy(state)
 
 		for (const p in state) {
@@ -46,7 +45,7 @@ class Spreax {
 			})
 		}
 		for (const f in formatters) this.$formatters[f] = formatters[f].bind(this)
-		for (const w in watchers) this.$on(w, watchers[w].bind(this), { type: 'w' })
+		// for (const w in watchers) this.$on(w, watchers[w].bind(this), { type: 'w' })
 	}
 
 	$makeProxy(o) {
@@ -75,39 +74,17 @@ class Spreax {
 	 * @param {Element} el 
 	 */
 	$execDirectives(el) {
-		if (!el.attributes.length) return
-
-		const dirsOfEl = directivesOf(el)
-
-		for (const di of dirsOfEl) {
-			if (!d.all.hasOwnProperty(di.name)) throw new ErrorInElement(`directive "${di.name}" not found`, el)
-
-			const { options, callback } = d.all[di.name]
-			
-			if (options.argumentIsRequired && !di.arg) {
-				throw new ErrorInElement(`directive needs an arguments, but there's nothing`, el)
-			}
-
-			const argumentsObject = {
-				element: el,
-				attributeValue: el.getAttribute(`${di}`), 
-				modifiers: di.modifiers,
-				argument: di.arg
-			}
-
-			if (typeof callback === 'function') callback.call(this, argumentsObject)
+		execDirectives(el, (callback, args) => {
+			if (typeof callback === 'function') callback.call(this, args)
 			else {
-				if ('ready' in callback) callback.ready.call(this, argumentsObject)
+				if ('ready' in callback) callback.ready.call(this, args)
 				if ('updated' in callback) {
 					this.$on('', () => {
-						callback.updated.call(this, argumentsObject)
-					}, {
-						type: 'd',
-						node: el
-					})
+						callback.updated.call(this, args)
+					}, { type: 'd', node: el })
 				}
 			}
-		}
+		})
 	}
 
 	$interpolation(node) {

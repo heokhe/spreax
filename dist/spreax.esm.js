@@ -105,11 +105,8 @@ register('model', {
 		if (!['select', 'input', 'textarea'].includes(el.tagName.toLowerCase())) {
 			throw new ErrorInElement("model directive only works on input, textarea or select tags", el)
 		}
-		if (el.type === 'checkbox') {
-			el.checked = !!this[propName];
-		} else {
-			el.value = this[propName];
-		}
+		if (el.type === 'checkbox') { el.checked = !!this[propName]; }
+		else { el.value = this[propName]; }
 		el.addEventListener('change', function () {
 			this$1[propName] = el.type === 'checkbox' ? el.checked : el.value;
 		});
@@ -163,53 +160,6 @@ register('style', function (ref) {
 		immediate: true
 	});
 }, { argumentIsRequired: true });
-
-function record(keys, value){
-	var o = {};
-	keys.forEach(function (k) {
-		o[k] = value;
-	});
-	return o
-}
-
-function toString(d){
-	var o = "sp-" + (d.name);
-	if (d.arg) { o += ":" + (d.arg); }
-	var k = Object.keys(d.modifiers);
-	if (k.length) { o += "." + (k.join('.')); }
-	return o
-}
-
-function directivesOf(el) {
-	var obj;
-	var attributes = el.attributes;
-	var directives = [];
-	var loop = function () {
-		var ref$1 = list[i];
-		var attrName = ref$1.name;
-		if (!/^sp-/.test(attrName)) { return }
-		attrName = attrName.replace(/^sp-/, '');
-		var ref = attrName.match(/^([a-z]+(?:-[a-z]+)*)(:[a-z0-9]+(?:-[a-z0-9]+)*)?((?:\.[a-z0-9]+))*$/);
-		var name = ref[1];
-		var arg = ref[2];
-		var modifiers = ref[3];
-		if (arg) { arg = arg.replace(/^:/, ''); }
-		var modifierObject = modifiers ? record(modifiers.slice(1).split('.').map(kebabToCamel), true) : {};
-		var d = {
-			name: name,
-			arg: arg || null,
-			modifiers: modifierObject
-		};
-		directives.push(Object.assign({}, d,
-			( obj = {}, obj[Symbol.toPrimitive] = function (hint) { return hint === 'number' ? NaN : toString(d); }, obj )));
-	};
-	for (var i = 0, list = attributes; i < list.length; i += 1) loop();
-	return directives.filter(function (d, _, arr) {
-		var getFullName = function (e) { return e.arg ? [e.name, e.arg].join(':') : e.name; },
-		withThisName = arr.filter(function (e) { return getFullName(e) === getFullName(d); });
-		return withThisName.length > 1 ? withThisName[0] : d
-	})
-}
 
 function makeFormatterFn(formatters, source) {
 	if (!formatters.length) { return function (v) { return v; } }
@@ -288,6 +238,72 @@ function makeObserver(events) {
 	})
 }
 
+function record(keys, value){
+	var o = {};
+	keys.forEach(function (k) {
+		o[k] = value;
+	});
+	return o
+}
+
+function toString(d){
+	var o = "sp-" + (d.name);
+	if (d.arg) { o += ":" + (d.arg); }
+	var k = Object.keys(d.modifiers);
+	if (k.length) { o += "." + (k.join('.')); }
+	return o
+}
+
+function directivesOf(el) {
+	var obj;
+	var attributes = el.attributes;
+	var directives = [];
+	var loop = function () {
+		var ref$1 = list[i];
+		var attrName = ref$1.name;
+		if (!/^sp-/.test(attrName)) { return }
+		attrName = attrName.replace(/^sp-/, '');
+		var ref = attrName.match(/^([a-z]+(?:-[a-z]+)*)(:[a-z0-9]+(?:-[a-z0-9]+)*)?((?:\.[a-z0-9]+))*$/);
+		var name = ref[1];
+		var arg = ref[2];
+		var modifiers = ref[3];
+		if (arg) { arg = arg.replace(/^:/, ''); }
+		var modifierObject = modifiers ? record(modifiers.slice(1).split('.').map(kebabToCamel), true) : {};
+		var d = {
+			name: name,
+			arg: arg || null,
+			modifiers: modifierObject
+		};
+		directives.push(Object.assign({}, d,
+			( obj = {}, obj[Symbol.toPrimitive] = function (hint) { return hint === 'number' ? NaN : toString(d); }, obj )));
+	};
+	for (var i = 0, list = attributes; i < list.length; i += 1) loop();
+	return directives.filter(function (d, _, arr) {
+		var getFullName = function (e) { return e.arg ? [e.name, e.arg].join(':') : e.name; },
+		withThisName = arr.filter(function (e) { return getFullName(e) === getFullName(d); });
+		return withThisName.length > 1 ? withThisName[0] : d
+	})
+}
+
+function execDirectives (el, callbackFn) {
+	if (!el.attributes.length) { return }
+	var dirsOfEl = directivesOf(el);
+	for (var i = 0, list = dirsOfEl; i < list.length; i += 1) {
+		var di = list[i];
+		if (!all.hasOwnProperty(di.name)) { throw new ErrorInElement(("directive \"" + (di.name) + "\" not found"), el) }
+		var ref = all[di.name];
+		var options = ref.options;
+		var callback = ref.callback;
+		if (options.argumentIsRequired && !di.arg) { throw new ErrorInElement("directive needs an arguments, but there's nothing", el) }
+		return callbackFn(callback, {
+			element: el,
+			attributeValue: el.getAttribute(("" + di)),
+			modifiers: di.modifiers,
+			argument: di.arg
+		})
+	}
+}
+
 var Spreax = function Spreax(el, options) {
 	if (typeof el === 'string') { this.$el = document.querySelector(el); }
 	else if (el instanceof HTMLElement) { this.$el = el; }
@@ -307,7 +323,7 @@ var Spreax = function Spreax(el, options) {
 	this.$el.querySelectorAll('*').forEach(this.$execDirectives, this);
 	this.$observe();
 };
-Spreax.prototype.$extendWith = function $extendWith (state, actions, computed, formatters, watchers) {
+Spreax.prototype.$extendWith = function $extendWith (state, actions, computed, formatters               ) {
 		var this$1 = this;
 	this.$makeProxy(state);
 	var loop = function ( p ) {
@@ -325,7 +341,6 @@ Spreax.prototype.$extendWith = function $extendWith (state, actions, computed, f
 		});
 	}
 	for (var f in formatters) { this$1.$formatters[f] = formatters[f].bind(this$1); }
-	for (var w in watchers) { this$1.$on(w, watchers[w].bind(this$1), { type: 'w' }); }
 };
 Spreax.prototype.$makeProxy = function $makeProxy (o) {
 		var this$1 = this;
@@ -350,37 +365,17 @@ Spreax.prototype.$pipeFormatters = function $pipeFormatters (formatters) {
 };
 Spreax.prototype.$execDirectives = function $execDirectives (el) {
 		var this$1 = this;
-	if (!el.attributes.length) { return }
-	var dirsOfEl = directivesOf(el);
-	var loop = function () {
-		var di = list[i];
-			if (!all.hasOwnProperty(di.name)) { throw new ErrorInElement(("directive \"" + (di.name) + "\" not found"), el) }
-		var ref = all[di.name];
-			var options = ref.options;
-			var callback = ref.callback;
-		if (options.argumentIsRequired && !di.arg) {
-			throw new ErrorInElement("directive needs an arguments, but there's nothing", el)
-		}
-		var argumentsObject = {
-			element: el,
-			attributeValue: el.getAttribute(("" + di)),
-			modifiers: di.modifiers,
-			argument: di.arg
-		};
-		if (typeof callback === 'function') { callback.call(this$1, argumentsObject); }
+	execDirectives(el, function (callback, args) {
+		if (typeof callback === 'function') { callback.call(this$1, args); }
 		else {
-			if ('ready' in callback) { callback.ready.call(this$1, argumentsObject); }
+			if ('ready' in callback) { callback.ready.call(this$1, args); }
 			if ('updated' in callback) {
 				this$1.$on('', function () {
-					callback.updated.call(this$1, argumentsObject);
-				}, {
-					type: 'd',
-					node: el
-				});
+					callback.updated.call(this$1, args);
+				}, { type: 'd', node: el });
 			}
 		}
-	};
-		for (var i = 0, list = dirsOfEl; i < list.length; i += 1) loop();
+	});
 };
 Spreax.prototype.$interpolation = function $interpolation (node) {
 		var this$1 = this;
