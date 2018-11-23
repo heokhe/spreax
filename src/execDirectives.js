@@ -1,6 +1,6 @@
 import directivesOf from './dom/directivesOf'
-import ErrorInElement from './domError'
-import { all as REGISTRY } from './directives/index'
+import SpreaxDOMError from './error'
+import { REGISTRY } from './directives/'
 
 /**
  * @param {Element} el
@@ -11,11 +11,11 @@ export default function execDirectives (el, callbackFn) {
 
 	const dirsOfEl = directivesOf(el)
 	for (const di of dirsOfEl) {
-		if (!REGISTRY.hasOwnProperty(di.name)) throw new ErrorInElement(`directive "${di.name}" not found`, el)
+		if (!REGISTRY.hasOwnProperty(di.name)) throw new SpreaxDOMError(`directive "${di.name}" not found`, el)
 
-		const { options, callback } = REGISTRY[di.name]
+		const { argRequired, callback } = REGISTRY[di.name]
 
-		if (options.argumentIsRequired && !di.arg) throw new ErrorInElement(`directive needs an arguments, but there's nothing`, el)
+		if (argRequired && !di.arg) throw new SpreaxDOMError(`directive needs an arguments, but there's nothing`, el)
 
 		callbackFn(callback, {
 			element: el,

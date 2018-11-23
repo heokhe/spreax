@@ -3,7 +3,7 @@ import commonjs from 'rollup-plugin-commonjs'
 import resolve from 'rollup-plugin-node-resolve'
 import cleanup from 'rollup-plugin-cleanup'
 import { terser } from 'rollup-plugin-terser'
-import { main, module as _module, browser } from './package.json';
+import { main, module as _module, browser } from './package.json'
 const plugins = [
 	resolve(),
 	commonjs(),

@@ -9,7 +9,7 @@ const PRIMITIVES = {
 
 /**
  * @param {string} string
- * @returns {{prop: string, getValue: (o?: any) => any}}
+ * @returns {{prop: string, getValue: (o?: *) => *}}
  */
 export default function (string) {
 	const match = string.match(/^(.+) = (.+)$/)

@@ -12,7 +12,7 @@ export default function getTextNodes(el) {
 
 		const { nodeType: type } = node
 		if (type === TEXT_NODE) n.push(node)
-		else if (type === ELEMENT_NODE) n = [...n, ...getTextNodes(node)]
+		else if (type === ELEMENT_NODE) n = n.concat(getTextNodes(node))
 		else continue
 	}
 	

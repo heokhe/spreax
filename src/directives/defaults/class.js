@@ -1,14 +1,14 @@
 import { register } from '../register'
 
 register('class', function ({ element: el, argument: className, attributeValue: propName }) {
-	this.$on(propName || className, v => {
+	this.$onUpdate(v => {
 		el.classList[v ? 'add' : 'remove'](className || propName)
 		
 		const attr = el.getAttribute('class')
 		if (attr !== null && !attr.length) el.removeAttribute('class')
 	}, {
 		immediate: true,
-		node: el,
-		type: 'd'
+		ownerNode: el,
+		prop: propName || className
 	})
-}, { argumentIsRequired: true })
+}, true)

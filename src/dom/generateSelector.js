@@ -6,20 +6,18 @@
 export default function(el, root = 'body') {
 	if (typeof root === 'string') root = document.querySelector(root)
 
-	let pathSections = []
+	const sections = []
 	while (el !== root) {
-		pathSections.unshift(el)
+		sections.unshift(el)
 		el = el.parentElement
 	}
-	pathSections.unshift(root)
+	sections.unshift(root)
 
-	pathSections = pathSections.map(ps => {
+	return sections.map(ps => {
 		let selector = ps.tagName.toLowerCase()
 		if (ps.className) selector += `.${  ps.className.trim().split(' ').join('.')}`
 		if (ps.id) selector += `#${  ps.id}`
 		selector = selector.replace(/^div([^$]+)/, '$1')
 		return selector
-	})
-
-	return pathSections.join(' > ')
+	}).join(' > ')
 }

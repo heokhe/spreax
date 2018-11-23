@@ -1,13 +1,8 @@
-/**
- * @typedef {Object} DirectiveOptions
- * @property {boolean} [argumentIsRequired]
- */
-
-/** @type {{[x: string]: {callback: Callback, options: DirectiveOptions}}} */
-const _registry = {}
+/** @type {{[x: string]: {callback: Callback, argRequired: boolean}}} */
+export const REGISTRY = {}
 
 /**
- * @typedef {Object} DirectiveCallbackArg
+ * @typedef {object} DirectiveCallbackArg
  * @property {Object<string, true>} modifiers
  * @property {Element} element
  * @property {string} attributeValue
@@ -19,15 +14,13 @@ const _registry = {}
 /**
  * @param {string} name 
  * @param {Callback} callback 
- * @param {DirectiveOptions} [options]
+ * @param {boolean} [argRequired]
  */
-export function register(name, callback, options = {}) {
-	if (name in _registry) throw new Error(`directive "${name}" already exists`)
+export function register(name, callback, argRequired = false) {
+	if (name in REGISTRY) throw new Error(`directive "${name}" already exists`)
 	if (!/^[a-z]+(?:-[a-z]+)*$/.test(name)){
 		throw new Error(`"${name}" is not a valid directive name`)
 	}	
 
-	_registry[name] = { options, callback }
+	REGISTRY[name] = { argRequired, callback }
 }
-
-export const all = _registry

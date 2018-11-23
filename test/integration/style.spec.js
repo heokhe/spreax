@@ -1,13 +1,13 @@
 describe('Style directive', () => {
 	it('works', () => {
 		cy.window().then(({ instance }) => {
-			const selector = '#style > h1'
+			const target = '#style > h1'
 
-			cy.get(selector)
+			cy.get(target)
 				.should('have.css', 'padding-left', `${instance.number}px`)
-				.should('have.css', 'color')
+				.should('have.css', 'color', 'rgb(255, 0, 0)')
 				.then(() => instance.number = 20)
-				.get(selector).should('have.css', 'padding-left', '20px')
+				.get(target).should('have.css', 'padding-left', '20px')
 		})
 	})
 })

@@ -1,67 +1,37 @@
-import makeFormatterFn from './makeFormatterFn'
-import interpolation from './interpolation'
 import getTextNodes from './dom/getTextNodes'
-import makeObserver from './makeObserver'
 import execDirectives from './execDirectives'
+import makeFormatterFn from './makeFormatterFn'
+import createObserver from './createObserver'
+import makeProxy from './proxy'
+import extend from './extend'
 
 export default class Spreax {
 	constructor(el, options) {
 		if (typeof el === 'string') this.$el = document.querySelector(el)
 		else if (el instanceof HTMLElement) this.$el = el
-		else {
-			throw new TypeError(`wrong selector or element: expected element or string, got "${String(el)}"`)
-		}
-
+		else throw new TypeError(`wrong selector or element: expected element or string, got "${String(el)}"`)
+		/** @type {{fn: (arg: *) => void, id: string, prop: string, ownerNode?: Node|Element}[]} */
 		this.$events = []
-		/** @type {Object<string, (args: any) => any>} */
 		this.$formatters = {}
-		this.$_proxy = null
-		this.$extendWith(
-			options.state || {},
-			options.actions || {},
-			options.computed || {},
-			options.formatters || {}
-		)
-		getTextNodes(this.$el).forEach(this.$interpolation, this)
+		this.$makeProxy(options.state)
+		extend(this, {
+			state: options.state, actions: options.actions,
+			computed: options.computed, formatters: options.formatters
+		})
+		getTextNodes(this.$el).forEach(this.$processTemplate, this)
 		this.$el.querySelectorAll('*').forEach(this.$execDirectives, this)
 		this.$observe()
+		this.$diffProp = null
+		this.$diffPropValue = undefined
 	}
-
-	$extendWith(state, actions, computed, formatters, /* watchers */) {
-		this.$makeProxy(state)
-
-		for (const p in state) {
-			Object.defineProperty(this, p, {
-				get: () => this.$_proxy[p],
-				set: nv => { this.$_proxy[p] = nv }
-			})
-		}
-		for (const a in actions) this[a] = actions[a].bind(this)
-		for (const c in computed) {
-			Object.defineProperty(this, c, {
-				get: computed[c].bind(this),
-				set: () => false
-			})
-		}
-		for (const f in formatters) this.$formatters[f] = formatters[f].bind(this)
-		// for (const w in watchers) this.$on(w, watchers[w].bind(this), { type: 'w' })
-	}
-
-	$makeProxy(o) {
-		this.$_proxy = new Proxy(o, {
-			get: (obj, key) => {
-				if (!obj.hasOwnProperty(key)) throw new Error(`unknown state property "${key}"`)
-				return obj[key]
+	
+	$makeProxy(o = {}) {
+		this.$proxy = makeProxy(o, {
+			beforeSet: (obj, key) => {
+				this.$diffProp = key
+				this.$diffPropValue = obj[key]
 			},
-			set: (obj, key, value) => {
-				if (!obj.hasOwnProperty(key)) throw new Error(`unknown state property "${key}"`)
-				if (value === obj[key]) return
-				obj[key] = value
-				this.$emit(key)
-				this.$emit()
-				return true
-			},
-			deleteProperty: () => false
+			setted: () => this.$update()
 		})
 	}
 
@@ -69,75 +39,72 @@ export default class Spreax {
 		return makeFormatterFn(formatters, this.$formatters).bind(this)
 	}
 
-	/**
-	 * @param {Element} el 
-	 */
+	/** @param {Element} el */
 	$execDirectives(el) {
 		execDirectives(el, (callback, args) => {
 			if (typeof callback === 'function') callback.call(this, args)
 			else {
 				if ('ready' in callback) callback.ready.call(this, args)
-				if ('updated' in callback) {
-					this.$on('', () => {
-						callback.updated.call(this, args)
-					}, { type: 'd', node: el })
-				}
+				if ('updated' in callback) this.$onUpdate(() => {
+					callback.updated.call(this, args)
+				}, { ownerNode: el })
 			}
 		})
 	}
 
-	$interpolation(node) {
-		interpolation(node, ({ initialText: itext, node, propertyName, formatters, match: { startIndex, string } }) => {
-			const formatterFn = this.$pipeFormatters(formatters)
-
-			this.$on(propertyName, v => {
-				v = String(formatterFn(v))
-
-				const beforeValue = itext.slice(0, startIndex),
-					afterValue = itext.slice(startIndex + string.length + v.length, itext.length),
-					newText = beforeValue + v + afterValue
-
-				if (itext !== newText) node.textContent = newText
-			}, {
-					immediate: true,
-					type: 'i',
-					node
-				})
+    /** @param {Node} node */
+	$processTemplate(node) {
+		const RE = /#\[\w+(?: \w+)*\]/g,
+		rawText = node.textContent
+		if (!RE.test(rawText)) return
+		const replaceByObject = obj => {
+			return rawText.replace(RE, $1 => {
+				const [prop, ...formatters] = $1.slice(2, -1).split(' ')
+				return this.$pipeFormatters(formatters)(obj[prop])
+			})
+		}
+		this.$onUpdate(() => {
+			const oldText = replaceByObject({
+				...this.$proxy,
+				[this.$diffProp]: this.$diffPropValue
+			}),
+			newText = replaceByObject(this),
+			shouldReplace = !this.$diffProp ? true : (oldText !== newText)
+			if (shouldReplace) node.textContent = newText
+		}, {
+			immediate: true,
+			ownerNode: node
 		})
 	}
 
 	$observe() {
-		const removeNodeFromEvents = (node, type = 'i') => {
-			const events = this.$events.filter(e => e.type === type && e.node === node).map((_, i) => i)
+		const removeNodeFromEvents = ownerNode => {
+			const events = this.$events.filter(e => e.ownerNode === ownerNode).map((_, i) => i)
 			for (const e of events) this.$events.splice(e, 1)
 		}
-
-		makeObserver({
-			textAdded: this.$interpolation.bind(this),
+		createObserver({
+			textAdded: this.$processTemplate.bind(this),
 			elementAdded: this.$execDirectives.bind(this),
 			textRemoved: removeNodeFromEvents,
-			elementRemoved: n => { removeNodeFromEvents(n, 'd') }
-		}).observe(this.$el, {
-			childList: true,
-			subtree: true
-		})
+			elementRemoved: removeNodeFromEvents
+		}).observe(this.$el, { childList: true, subtree: true })
 	}
 
-	$on(prop, fn, { type, node, immediate = false }) {
+	$onUpdate(fn, { prop = '', ownerNode, immediate = false }) {
+		const id = (Math.random() * 1e6 >> 0).toString().padEnd(6, '0')
 		this.$events.push({
-			prop, fn,
-			...type ? { type } : {},
-			...node ? { node } : {},
+			prop, fn, id,
+			...ownerNode ? { ownerNode } : {}
 		})
-		if (immediate) this.$emit(prop)
+		if (immediate) this.$update(id)
 	}
 
-	$emit(prop) {
+	$update(id) {
 		this.$events.filter(ev => {
-			return prop ? ev.prop === prop : true
-		}).forEach(ev => {
-			const args = ev.prop ? [this[ev.prop]] : []
-			ev.fn.apply(this, args)
+			if (id) return ev.id === id
+			return ev.prop ? ev.prop === this.$diffProp : true
+		}).forEach(({prop, fn}) => {
+			fn.call(this, this[prop])
 		})
 	}
 }

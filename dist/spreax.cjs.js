@@ -1,37 +1,3 @@
-function makeFormatterFn(formatters, source) {
-	if (!formatters.length) { return function (v) { return v; } }
-	return formatters.map(function (f) {
-		if (!(f in source)) { throw new Error(("formatter \"" + f + "\" not found")) }
-		else { return source[f] }
-	}).reduce(function (a, b) { return function (arg) { return b(a(arg)); }; })
-}
-
-function interpolation (node, callback) {
-	var RE = /#\[( ?)\w+(?: \w+)*\1\]/gi,
-	text = node.textContent;
-	if (!RE.test(text)) { return }
-	var matches = [];
-	text.replace(RE, function (string, _, index) {
-		matches.push({ string: string, startIndex: index });
-		return string
-	});
-	for (var i = 0, list = matches; i < list.length; i += 1) {
-		var ref$1 = list[i];
-		var string = ref$1.string;
-		var startIndex = ref$1.startIndex;
-		var ref = string.replace(/^#\[ ?/, '')
-			.replace(/ ?\]$/, '').split(' ');
-		var prop = ref[0];
-		var formatters = ref.slice(1);
-		return callback({
-			initialText: text,
-			node: node, formatters: formatters,
-			match: { startIndex: startIndex, string: string },
-			propertyName: prop
-		})
-	}
-}
-
 function getTextNodes(el) {
 	var n = [];
 	var TEXT_NODE = Node.TEXT_NODE;
@@ -41,38 +7,10 @@ function getTextNodes(el) {
 		if (!/\S+/g.test(node.textContent)) { continue }
 		var type = node.nodeType;
 		if (type === TEXT_NODE) { n.push(node); }
-		else if (type === ELEMENT_NODE) { n = n.concat( getTextNodes(node)); }
+		else if (type === ELEMENT_NODE) { n = n.concat(getTextNodes(node)); }
 		else { continue }
 	}
 	return n
-}
-
-function makeObserver(events) {
-	var TEXT_NODE = Node.TEXT_NODE;
-	var ELEMENT_NODE = Node.ELEMENT_NODE;
-	return new MutationObserver(function (muts) {
-		for (var i$2 = 0, list$2 = muts; i$2 < list$2.length; i$2 += 1) {
-			var mut = list$2[i$2];
-			for (var i = 0, list = mut.addedNodes; i < list.length; i += 1) {
-				var anode = list[i];
-				if (anode.nodeType === TEXT_NODE) {
-					if (mut.type === 'childList' && mut.target.hasChildNodes(anode)) { continue }
-					events.textAdded(anode);
-				} else if (anode.nodeType === ELEMENT_NODE) {
-					getTextNodes(anode).forEach(function (n) { return events.textAdded(n); });
-					events.elementAdded(anode);
-				}
-			}
-			for (var i$1 = 0, list$1 = mut.removedNodes; i$1 < list$1.length; i$1 += 1) {
-				var rnode = list$1[i$1];
-				if (rnode.nodeType === TEXT_NODE) { events.textRemoved(rnode); }
-				else if (rnode.nodeType === ELEMENT_NODE) {
-					getTextNodes(rnode).forEach(function (n) { return events.textRemoved(n); });
-					events.elementRemoved(rnode);
-				}
-			}
-		}
-	})
 }
 
 function record(keys, value){
@@ -129,43 +67,40 @@ function directivesOf(el) {
 function generateSelector(el, root) {
 	if ( root === void 0 ) root = 'body';
 	if (typeof root === 'string') { root = document.querySelector(root); }
-	var pathSections = [];
+	var sections = [];
 	while (el !== root) {
-		pathSections.unshift(el);
+		sections.unshift(el);
 		el = el.parentElement;
 	}
-	pathSections.unshift(root);
-	pathSections = pathSections.map(function (ps) {
+	sections.unshift(root);
+	return sections.map(function (ps) {
 		var selector = ps.tagName.toLowerCase();
 		if (ps.className) { selector += "." + (ps.className.trim().split(' ').join('.')); }
 		if (ps.id) { selector += "#" + (ps.id); }
 		selector = selector.replace(/^div([^$]+)/, '$1');
 		return selector
-	});
-	return pathSections.join(' > ')
+	}).join(' > ')
 }
 
-var ErrorInElement = (function (Error) {
-	function ErrorInElement(message, el) {
-		Error.call(this, message);
-		this.message = message + "\n error at: " + (generateSelector(el));
+var SpreaxDOMError = (function (Error) {
+	function SpreaxDOMError(message, el) {
+		Error.call(this, (message + "\nat: " + (generateSelector(el))));
 	}
-	if ( Error ) ErrorInElement.__proto__ = Error;
-	ErrorInElement.prototype = Object.create( Error && Error.prototype );
-	ErrorInElement.prototype.constructor = ErrorInElement;
-	return ErrorInElement;
+	if ( Error ) SpreaxDOMError.__proto__ = Error;
+	SpreaxDOMError.prototype = Object.create( Error && Error.prototype );
+	SpreaxDOMError.prototype.constructor = SpreaxDOMError;
+	return SpreaxDOMError;
 }(Error));
 
-var _registry = {};
-function register(name, callback, options) {
-	if ( options === void 0 ) options = {};
-	if (name in _registry) { throw new Error(("directive \"" + name + "\" already exists")) }
+var REGISTRY = {};
+function register(name, callback, argRequired) {
+	if ( argRequired === void 0 ) argRequired = false;
+	if (name in REGISTRY) { throw new Error(("directive \"" + name + "\" already exists")) }
 	if (!/^[a-z]+(?:-[a-z]+)*$/.test(name)){
 		throw new Error(("\"" + name + "\" is not a valid directive name"))
 	}
-	_registry[name] = { options: options, callback: callback };
+	REGISTRY[name] = { argRequired: argRequired, callback: callback };
 }
-var all = _registry;
 
 var PRIMITIVES = {
 	'null': null,
@@ -222,7 +157,7 @@ register('on', function (ref) {
 		passive: modifiers.passive,
 		capture: modifiers.capture,
 	});
-}, { argumentIsRequired: true });
+}, true);
 
 register('model', {
 	ready: function ready(ref) {
@@ -231,7 +166,7 @@ register('model', {
 		var propName = ref.attributeValue;
 		var lazy = ref.modifiers.lazy;
 		if (!['select', 'input', 'textarea'].includes(el.tagName.toLowerCase())) {
-			throw new ErrorInElement("model directive only works on input, textarea or select tags", el)
+			throw new SpreaxDOMError("model directive only works on input, textarea or select tags", el)
 		}
 		if (el.type === 'checkbox') { el.checked = !!this[propName]; }
 		else { el.value = this[propName]; }
@@ -258,16 +193,16 @@ register('class', function (ref) {
 	var el = ref.element;
 	var className = ref.argument;
 	var propName = ref.attributeValue;
-	this.$on(propName || className, function (v) {
+	this.$onUpdate(function (v) {
 		el.classList[v ? 'add' : 'remove'](className || propName);
 		var attr = el.getAttribute('class');
 		if (attr !== null && !attr.length) { el.removeAttribute('class'); }
 	}, {
 		immediate: true,
-		node: el,
-		type: 'd'
+		ownerNode: el,
+		prop: propName || className
 	});
-}, { argumentIsRequired: true });
+}, true);
 
 register('style', function (ref) {
 	var element = ref.element;
@@ -275,26 +210,26 @@ register('style', function (ref) {
 	var attributeValue = ref.attributeValue;
 	cssProp = kebabToCamel(cssProp);
 	var noUnits = 'opacity, z-index, font-weight, line-height'.split(', ');
-	this.$on(attributeValue || cssProp, function (v) {
+	this.$onUpdate(function (v) {
 		if (!isNaN(+v) && !noUnits.includes(cssProp)) { v = v + "px"; }
 		element.style[cssProp] = v;
 	}, {
-		node: element,
-		type: 'd',
-		immediate: true
+		ownerNode: element,
+		immediate: true,
+		prop: attributeValue || cssProp
 	});
-}, { argumentIsRequired: true });
+}, true);
 
 function execDirectives (el, callbackFn) {
 	if (!el.attributes.length) { return }
 	var dirsOfEl = directivesOf(el);
 	for (var i = 0, list = dirsOfEl; i < list.length; i += 1) {
 		var di = list[i];
-		if (!all.hasOwnProperty(di.name)) { throw new ErrorInElement(("directive \"" + (di.name) + "\" not found"), el) }
-		var ref = all[di.name];
-		var options = ref.options;
+		if (!REGISTRY.hasOwnProperty(di.name)) { throw new SpreaxDOMError(("directive \"" + (di.name) + "\" not found"), el) }
+		var ref = REGISTRY[di.name];
+		var argRequired = ref.argRequired;
 		var callback = ref.callback;
-		if (options.argumentIsRequired && !di.arg) { throw new ErrorInElement("directive needs an arguments, but there's nothing", el) }
+		if (argRequired && !di.arg) { throw new SpreaxDOMError("directive needs an arguments, but there's nothing", el) }
 		callbackFn(callback, {
 			element: el,
 			attributeValue: el.getAttribute(("" + di)),
@@ -304,60 +239,112 @@ function execDirectives (el, callbackFn) {
 	}
 }
 
-var Spreax = function Spreax(el, options) {
-	if (typeof el === 'string') { this.$el = document.querySelector(el); }
-	else if (el instanceof HTMLElement) { this.$el = el; }
-	else {
-		throw new TypeError(("wrong selector or element: expected element or string, got \"" + (String(el)) + "\""))
-	}
-	this.$events = [];
-	this.$formatters = {};
-	this.$_proxy = null;
-	this.$extendWith(
-		options.state || {},
-		options.actions || {},
-		options.computed || {},
-		options.formatters || {}
-	);
-	getTextNodes(this.$el).forEach(this.$interpolation, this);
-	this.$el.querySelectorAll('*').forEach(this.$execDirectives, this);
-	this.$observe();
-};
-Spreax.prototype.$extendWith = function $extendWith (state, actions, computed, formatters               ) {
-		var this$1 = this;
-	this.$makeProxy(state);
-	var loop = function ( p ) {
-		Object.defineProperty(this$1, p, {
-			get: function () { return this$1.$_proxy[p]; },
-			set: function (nv) { this$1.$_proxy[p] = nv; }
-		});
-	};
-		for (var p in state) loop( p );
-	for (var a in actions) { this$1[a] = actions[a].bind(this$1); }
-	for (var c in computed) {
-		Object.defineProperty(this$1, c, {
-			get: computed[c].bind(this$1),
-			set: function () { return false; }
-		});
-	}
-	for (var f in formatters) { this$1.$formatters[f] = formatters[f].bind(this$1); }
-};
-Spreax.prototype.$makeProxy = function $makeProxy (o) {
-		var this$1 = this;
-	this.$_proxy = new Proxy(o, {
-		get: function (obj, key) {
+function makeFormatterFn(formatters, source) {
+	if (!formatters.length) { return function (v) { return v; } }
+	return formatters.map(function (f) {
+		if (!source.hasOwnProperty(f)) { throw new Error(("formatter \"" + f + "\" not found")) }
+		else { return source[f] }
+	}).reduce(function (a, b) { return function (c) { return b(a(c)); }; })
+}
+
+function createObserver(hooks) {
+	var TEXT_NODE = Node.TEXT_NODE;
+	var ELEMENT_NODE = Node.ELEMENT_NODE;
+	return new MutationObserver(function (muts) {
+		for (var i$2 = 0, list$2 = muts; i$2 < list$2.length; i$2 += 1) {
+			var mut = list$2[i$2];
+			for (var i = 0, list = mut.addedNodes; i < list.length; i += 1) {
+				var anode = list[i];
+				if (anode.nodeType === TEXT_NODE) {
+					if (mut.type === 'childList' && mut.target.hasChildNodes(anode)) { continue }
+					hooks.textAdded(anode);
+				} else if (anode.nodeType === ELEMENT_NODE) {
+					getTextNodes(anode).forEach(function (n) { return hooks.textAdded(n); });
+					hooks.elementAdded(anode);
+				}
+			}
+			for (var i$1 = 0, list$1 = mut.removedNodes; i$1 < list$1.length; i$1 += 1) {
+				var rnode = list$1[i$1];
+				if (rnode.nodeType === TEXT_NODE) { hooks.textRemoved(rnode); }
+				else if (rnode.nodeType === ELEMENT_NODE) {
+					getTextNodes(rnode).forEach(function (n) { return hooks.textRemoved(n); });
+					hooks.elementRemoved(rnode);
+				}
+			}
+		}
+	})
+}
+
+function makeProxy(object, hooks) {
+	return new Proxy(object, {
+		get: function get(obj, key) {
 			if (!obj.hasOwnProperty(key)) { throw new Error(("unknown state property \"" + key + "\"")) }
 			return obj[key]
 		},
-		set: function (obj, key, value) {
+		deleteProperty: function () { return false; },
+		set: function set(obj, key, value) {
 			if (!obj.hasOwnProperty(key)) { throw new Error(("unknown state property \"" + key + "\"")) }
-			if (value === obj[key]) { return }
+			if (obj[key] === value) { return false }
+			hooks.beforeSet(obj, key);
 			obj[key] = value;
-			this$1.$emit(key);
-			this$1.$emit();
+			hooks.setted(obj, key);
 			return true
+		}
+	})
+}
+
+function extend(instance, ref) {
+	var state = ref.state; if ( state === void 0 ) state = {};
+	var actions = ref.actions; if ( actions === void 0 ) actions = {};
+	var computed = ref.computed; if ( computed === void 0 ) computed = {};
+	var formatters = ref.formatters; if ( formatters === void 0 ) formatters = {};
+	var define = Object.defineProperty;
+	var loop = function ( p ) {
+		define(instance, p, {
+			get: function () { return instance.$proxy[p]; },
+			set: function (nv) { instance.$proxy[p] = nv; },
+			configurable: false,
+			enumerable: false
+		});
+	};
+	for (var p in state) loop( p );
+	for (var a in actions) { instance[a] = actions[a].bind(instance); }
+	for (var c in computed) {
+		define(instance, c, {
+			get: computed[c].bind(instance),
+			set: function () { return false; },
+			configurable: false
+		});
+	}
+	for (var f in formatters) { instance.$formatters[f] = formatters[f].bind(instance); }
+}
+
+var Spreax = function Spreax(el, options) {
+	if (typeof el === 'string') { this.$el = document.querySelector(el); }
+	else if (el instanceof HTMLElement) { this.$el = el; }
+	else { throw new TypeError(("wrong selector or element: expected element or string, got \"" + (String(el)) + "\"")) }
+	this.$events = [];
+	this.$formatters = {};
+	this.$makeProxy(options.state);
+	extend(this, {
+		state: options.state, actions: options.actions,
+		computed: options.computed, formatters: options.formatters
+	});
+	getTextNodes(this.$el).forEach(this.$processTemplate, this);
+	this.$el.querySelectorAll('*').forEach(this.$execDirectives, this);
+	this.$observe();
+	this.$diffProp = null;
+	this.$diffPropValue = undefined;
+};
+Spreax.prototype.$makeProxy = function $makeProxy (o) {
+		var this$1 = this;
+		if ( o === void 0 ) o = {};
+	this.$proxy = makeProxy(o, {
+		beforeSet: function (obj, key) {
+			this$1.$diffProp = key;
+			this$1.$diffPropValue = obj[key];
 		},
-		deleteProperty: function () { return false; }
+		setted: function () { return this$1.$update(); }
 	});
 };
 Spreax.prototype.$pipeFormatters = function $pipeFormatters (formatters) {
@@ -369,74 +356,71 @@ Spreax.prototype.$execDirectives = function $execDirectives (el) {
 		if (typeof callback === 'function') { callback.call(this$1, args); }
 		else {
 			if ('ready' in callback) { callback.ready.call(this$1, args); }
-			if ('updated' in callback) {
-				this$1.$on('', function () {
-					callback.updated.call(this$1, args);
-				}, { type: 'd', node: el });
-			}
+			if ('updated' in callback) { this$1.$onUpdate(function () {
+				callback.updated.call(this$1, args);
+			}, { ownerNode: el }); }
 		}
 	});
 };
-Spreax.prototype.$interpolation = function $interpolation (node) {
+Spreax.prototype.$processTemplate = function $processTemplate (node) {
 		var this$1 = this;
-	interpolation(node, function (ref) {
-			var itext = ref.initialText;
-			var node = ref.node;
-			var propertyName = ref.propertyName;
-			var formatters = ref.formatters;
-			var ref_match = ref.match;
-			var startIndex = ref_match.startIndex;
-			var string = ref_match.string;
-		var formatterFn = this$1.$pipeFormatters(formatters);
-		this$1.$on(propertyName, function (v) {
-			v = String(formatterFn(v));
-			var beforeValue = itext.slice(0, startIndex),
-				afterValue = itext.slice(startIndex + string.length + v.length, itext.length),
-				newText = beforeValue + v + afterValue;
-			if (itext !== newText) { node.textContent = newText; }
-		}, {
-				immediate: true,
-				type: 'i',
-				node: node
-			});
+	var RE = /#\[\w+(?: \w+)*\]/g,
+	rawText = node.textContent;
+	if (!RE.test(rawText)) { return }
+	var replaceByObject = function (obj) {
+		return rawText.replace(RE, function ($1) {
+			var ref = $1.slice(2, -1).split(' ');
+				var prop = ref[0];
+				var formatters = ref.slice(1);
+			return this$1.$pipeFormatters(formatters)(obj[prop])
+		})
+	};
+	this.$onUpdate(function () {
+			var obj;
+		var oldText = replaceByObject(Object.assign({}, this$1.$proxy,
+			( obj = {}, obj[this$1.$diffProp] = this$1.$diffPropValue, obj ))),
+		newText = replaceByObject(this$1),
+		shouldReplace = !this$1.$diffProp ? true : (oldText !== newText);
+		if (shouldReplace) { node.textContent = newText; }
+	}, {
+		immediate: true,
+		ownerNode: node
 	});
 };
 Spreax.prototype.$observe = function $observe () {
 		var this$1 = this;
-	var removeNodeFromEvents = function (node, type) {
-			if ( type === void 0 ) type = 'i';
-		var events = this$1.$events.filter(function (e) { return e.type === type && e.node === node; }).map(function (_, i) { return i; });
+	var removeNodeFromEvents = function (ownerNode) {
+		var events = this$1.$events.filter(function (e) { return e.ownerNode === ownerNode; }).map(function (_, i) { return i; });
 		for (var i = 0, list = events; i < list.length; i += 1) {
 				var e = list[i];
 				this$1.$events.splice(e, 1);
 			}
 	};
-	makeObserver({
-		textAdded: this.$interpolation.bind(this),
+	createObserver({
+		textAdded: this.$processTemplate.bind(this),
 		elementAdded: this.$execDirectives.bind(this),
 		textRemoved: removeNodeFromEvents,
-		elementRemoved: function (n) { removeNodeFromEvents(n, 'd'); }
-	}).observe(this.$el, {
-		childList: true,
-		subtree: true
-	});
+		elementRemoved: removeNodeFromEvents
+	}).observe(this.$el, { childList: true, subtree: true });
 };
-Spreax.prototype.$on = function $on (prop, fn, ref) {
-		var type = ref.type;
-		var node = ref.node;
+Spreax.prototype.$onUpdate = function $onUpdate (fn, ref) {
+		var prop = ref.prop; if ( prop === void 0 ) prop = '';
+		var ownerNode = ref.ownerNode;
 		var immediate = ref.immediate; if ( immediate === void 0 ) immediate = false;
-	this.$events.push(Object.assign({}, {prop: prop, fn: fn},
-		type ? { type: type } : {},
-		node ? { node: node } : {}));
-	if (immediate) { this.$emit(prop); }
+	var id = (Math.random() * 1e6 >> 0).toString().padEnd(6, '0');
+	this.$events.push(Object.assign({}, {prop: prop, fn: fn, id: id},
+		ownerNode ? { ownerNode: ownerNode } : {}));
+	if (immediate) { this.$update(id); }
 };
-Spreax.prototype.$emit = function $emit (prop) {
+Spreax.prototype.$update = function $update (id) {
 		var this$1 = this;
 	this.$events.filter(function (ev) {
-		return prop ? ev.prop === prop : true
-	}).forEach(function (ev) {
-		var args = ev.prop ? [this$1[ev.prop]] : [];
-		ev.fn.apply(this$1, args);
+		if (id) { return ev.id === id }
+		return ev.prop ? ev.prop === this$1.$diffProp : true
+	}).forEach(function (ref) {
+			var prop = ref.prop;
+			var fn = ref.fn;
+		fn.call(this$1, this$1[prop]);
 	});
 };
 

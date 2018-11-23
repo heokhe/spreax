@@ -20,4 +20,4 @@ register('on', function ({ element: el, attributeValue: value, modifiers, argume
 		passive: modifiers.passive,
 		capture: modifiers.capture,
 	})
-}, { argumentIsRequired: true })
+}, true)

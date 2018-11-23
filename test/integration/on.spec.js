@@ -2,15 +2,17 @@ describe('On directive', () => {
 	it('works', () => {
 		cy.window().then(({ instance }) => {
 			cy.stub(instance, 'log')
-			cy.get('#on button').click()
-			cy.wrap(instance).its('log').should('be.calledOnce')
+			cy
+				.get('#on button').click()
+				.wrap(instance).its('log').should('be.called')
 		})
 	})
 	it('works once when using .once', () => {
 		cy.window().then(({ instance }) => {
 			cy.stub(instance, 'log')
-			cy.get('#on button').click()
-			cy.wrap(instance).its('log').should('not.be.called')
+			cy
+				.get('#on button').click()
+				.wrap(instance).its('log').should('not.be.called')
 		})
 	})
 	it('works when using shortcuts', () => {

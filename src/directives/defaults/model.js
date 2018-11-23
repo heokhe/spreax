@@ -1,10 +1,10 @@
 import { register } from '../register'
-import ErrorInElement from '../../domError'
+import SpreaxDOMError from '../../error'
 
 register('model', {
 	ready({ element: el, attributeValue: propName, modifiers: { lazy } }) {
 		if (!['select', 'input', 'textarea'].includes(el.tagName.toLowerCase())) {
-			throw new ErrorInElement(`model directive only works on input, textarea or select tags`, el)
+			throw new SpreaxDOMError(`model directive only works on input, textarea or select tags`, el)
 		}
 					
 		if (el.type === 'checkbox') el.checked = !!this[propName]

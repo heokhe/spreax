@@ -1,7 +1,7 @@
 /**
  * @param {string[]} keys 
  * @param {any} value 
- * @returns {{[x: string]: any}}
+ * @returns {{[x: string]: *}}
  */
 export default function(keys, value){
 	const o = {}
