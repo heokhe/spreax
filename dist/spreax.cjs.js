@@ -320,6 +320,7 @@ function extend(instance, ref) {
 }
 
 var Spreax = function Spreax(el, options) {
+	var this$1 = this;
 	if (typeof el === 'string') { this.$el = document.querySelector(el); }
 	else if (el instanceof HTMLElement) { this.$el = el; }
 	else { throw new TypeError(("wrong selector or element: expected element or string, got \"" + (String(el)) + "\"")) }
@@ -335,6 +336,13 @@ var Spreax = function Spreax(el, options) {
 	this.$observe();
 	this.$diffProp = null;
 	this.$diffPropValue = undefined;
+	var watch = options.watch || {};
+	var loop = function ( w ) {
+		this$1.$onUpdate(function (nv) {
+		watch[w].call(this$1, nv, this$1.$diffPropValue);
+	}, { prop: w });
+	};
+	for (var w in watch) loop( w );
 };
 Spreax.prototype.$makeProxy = function $makeProxy (o) {
 		var this$1 = this;

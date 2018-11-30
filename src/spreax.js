@@ -23,6 +23,11 @@ export default class Spreax {
 		this.$observe()
 		this.$diffProp = null
 		this.$diffPropValue = undefined
+
+		const watch = options.watch || {}
+		for (const w in watch) this.$onUpdate(nv => {
+			watch[w].call(this, nv, this.$diffPropValue)
+		}, { prop: w })
 	}
 	
 	$makeProxy(o = {}) {

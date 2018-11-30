@@ -18,5 +18,10 @@ var instance = new Spreax('#app', {
 	},
 	formatters: {
 		upper: s => String(s).toUpperCase()
+	},
+	watch: {
+		name: (n, o) => {
+			console.log(n, o)
+		}
 	}
 })

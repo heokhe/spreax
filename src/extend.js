@@ -2,7 +2,7 @@ export default function extend(instance, {
 	state = {},
 	actions = {},
 	computed = {},
-	formatters = {}
+	formatters = {},
 }) {
 	const define = Object.defineProperty // just for ease of use
 
