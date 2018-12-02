@@ -22,14 +22,14 @@ You can use multiple events for one element, of course:
 <button sp-on:click='doSomeThing' sp-on:mouseover='doSomeThingElse'>click or hover over me</button>
 ```
 ### Shortcuts
-Defining actions for just a mutation is hard, so you can use shortcuts:
+You can use shortcuts as a handy way:
 ```html
 <button sp-on:click='dialogIsOpen = false'>close</button>
 ```
-Currently you can assign primitive values (numbers, strings, `null`, `undefined` and booleans) to properties. in addition to that, you can assign the value of another property.
+You can assign primitive values (numbers, strings, `null`, `undefined` and booleans) to properties. in addition to that, you can assign the value of another property.
 ```html
-<button sp-on:click='prop = !0'>true</button> <!-- !0 is just equal to `true` -->
-<button sp-on:click='prop = !1'>false</button> <!-- and !1 equal to `false` -->
+<button sp-on:click='prop = !0'>true</button> <!-- !0 is equal to `true` -->
+<button sp-on:click='prop = !1'>false</button> <!-- and !1 is equal to `false` -->
 <button sp-on:click='prop = "something"'>string</button>
 <button sp-on:click='prop = 123.45'>number</button>
 <button sp-on:click='prop = null'>null</button>

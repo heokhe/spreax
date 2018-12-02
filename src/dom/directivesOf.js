@@ -1,4 +1,4 @@
-import record from '../utils/record'
+import { record } from '../utils/utils'
 import toString from '../directives/toString'
 import { kebabToCamel } from '../utils/case'
 

@@ -15,8 +15,8 @@ export default function(el, root = 'body') {
 
 	return sections.map(ps => {
 		let selector = ps.tagName.toLowerCase()
-		if (ps.className) selector += `.${  ps.className.trim().split(' ').join('.')}`
-		if (ps.id) selector += `#${  ps.id}`
+		if (ps.className) selector += '.' + ps.className.trim().split(' ').join('.')
+		if (ps.id) selector += '#' + ps.id
 		selector = selector.replace(/^div([^$]+)/, '$1')
 		return selector
 	}).join(' > ')

@@ -3,7 +3,7 @@
  * @param {any} value 
  * @returns {{[x: string]: *}}
  */
-export default function(keys, value){
+export function record(keys, value) {
 	const o = {}
 	keys.forEach(k => {
 		o[k] = value

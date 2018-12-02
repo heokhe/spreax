@@ -22,6 +22,7 @@
 		"quotes": ["error", "single", {
 			"allowTemplateLiterals": true
 		}],
-		"prefer-template": "off"
+		"prefer-template": "off",
+		"nonblock-statement-body-position": ["error", "beside"]
 	}
 }
