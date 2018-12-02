@@ -13,7 +13,7 @@ function getTextNodes(el) {
 	return n
 }
 
-function record(keys, value){
+function record(keys, value) {
 	var o = {};
 	keys.forEach(function (k) {
 		o[k] = value;
@@ -75,8 +75,8 @@ function generateSelector(el, root) {
 	sections.unshift(root);
 	return sections.map(function (ps) {
 		var selector = ps.tagName.toLowerCase();
-		if (ps.className) { selector += "." + (ps.className.trim().split(' ').join('.')); }
-		if (ps.id) { selector += "#" + (ps.id); }
+		if (ps.className) { selector += '.' + ps.className.trim().split(' ').join('.'); }
+		if (ps.id) { selector += '#' + ps.id; }
 		selector = selector.replace(/^div([^$]+)/, '$1');
 		return selector
 	}).join(' > ')
