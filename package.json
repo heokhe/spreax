@@ -1,0 +1,38 @@
+{
+	"name": "spreax",
+	"description": "A new front-end tool to bind UI with app state",
+	"main": "dist/spreax.cjs.js",
+	"browser": "dist/spreax.browser.js",
+	"unpkg": "dist/spreax.browser.js",
+	"module": "dist/spreax.esm.js",
+	"scripts": {
+		"build": "rollup -c --no-strict",
+		"build:prod": "yarn build --environment NODE_ENV:production",
+		"serve": "http-server . -p 5656",
+		"test": "node scripts/test.js",
+		"test:headless": "cypress run",
+		"test:gui": "cypress open",
+		"lint": "eslint --fix src"
+	},
+	"devDependencies": {
+		"cypress": "^3.0.3",
+		"eslint": "5.3.0",
+		"eslint-config-airbnb-base": "13.1.0",
+		"eslint-plugin-import": "^2.14.0",
+		"http-server": "^0.11.1",
+		"rollup": "^0.63.5",
+		"rollup-plugin-buble": "^0.19.2",
+		"rollup-plugin-cleanup": "2",
+		"rollup-plugin-commonjs": "^9.1.4",
+		"rollup-plugin-node-resolve": "^3.3.0",
+		"rollup-plugin-terser": "^1.0.1"
+	},
+	"repository": "git@github.com:Hkh12/spreax.git",
+	"bugs": {
+		"url": "https://github.com/Hkh12/spreax/issues"
+	},
+	"homepage": "https://github.com/Hkh12/spreax#readme",
+	"author": "Hosein Khansari <hrk.x11@gmail.com>",
+	"license": "MIT",
+	"version": "0.5.0"
+}

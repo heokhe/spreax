@@ -1,0 +1,28 @@
+{
+	"root": true,
+	"env": {
+		"browser": true,
+		"es6": true,
+		"node": true,
+		"mocha": true,
+		"jasmine": true
+	},
+	"globals": {
+		"cy": true,
+		"Cypress": true
+	},
+	"extends": "airbnb-base",
+	"parserOptions": {
+		"ecmaVersion": 2018,
+		"sourceType": "module"
+	},
+	"rules": {
+		"func-names": "off",
+		"no-param-reassign": "off",
+		"no-restricted-syntax": "off",
+		"no-plusplus": "off",
+		"no-underscore-dangle": "off",
+		"import/prefer-default-export": "off",
+		"arrow-parens": "off"
+	}
+}
