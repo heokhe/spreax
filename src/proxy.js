@@ -23,15 +23,21 @@ export default function proxy(object, callback, pathPrefix = []) {
       const path = [...pathPrefix, key],
         keyMap = path.join('.');
 
+      if (!(key in o)) {
+        throw new Error(`unknown key "${keyMap}"`);
+      }
+
       if (keyMap in map) {
         map[keyMap] = proxy(value, callback, path);
       }
 
       const oldValue = o[key];
-      if (oldValue === value) return false;
-      o[key] = value;
-      callback(path, oldValue, value);
+      if (oldValue !== value) {
+        o[key] = value;
+        callback(path, oldValue, value);
+      }
       return true;
-    }
+    },
+    deleteProperty: () => false
   });
 }
