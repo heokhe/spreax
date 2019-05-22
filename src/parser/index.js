@@ -24,7 +24,7 @@ export function parseExpression(expr) {
     if (parsed.type === 'action' && !parsed.isMethod) return null;
     return {
       type: 'literal',
-      fn: ctx => !parsed.fn(ctx),
+      fn: ctx => !parsed.fn(ctx)
     };
   }
 
@@ -32,7 +32,7 @@ export function parseExpression(expr) {
   if (lit.done) {
     return {
       type: 'literal',
-      fn: () => lit.value,
+      fn: () => lit.value
     };
   }
 
@@ -43,7 +43,7 @@ export function parseExpression(expr) {
       type: 'property',
       property,
       path,
-      fn: ctx => getDeep(ctx, path),
+      fn: ctx => getDeep(ctx, path)
     };
   }
 
@@ -52,7 +52,7 @@ export function parseExpression(expr) {
     return {
       type: 'action',
       isMethod: true,
-      fn: ctx => ctx[method](),
+      fn: ctx => ctx[method]()
     };
   }
 
@@ -72,7 +72,7 @@ export function parseExpression(expr) {
       rightHand,
       fn: (ctx) => {
         setDeep(ctx, leftHand.path, rightHand.fn(ctx));
-      },
+      }
     };
   }
 

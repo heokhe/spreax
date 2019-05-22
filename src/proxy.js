@@ -9,10 +9,8 @@ export default function proxy(object, callback, pathPrefix = []) {
     get(o, key) {
       const value = o[key];
       if (typeof value === 'object') {
-        const path = [...pathPrefix, key];
-
-
-        const keyMap = path.join('.');
+        const path = [...pathPrefix, key],
+          keyMap = path.join('.');
 
         if (!(keyMap in map)) {
           map[keyMap] = proxy(value, callback, path);
@@ -22,10 +20,8 @@ export default function proxy(object, callback, pathPrefix = []) {
       return value;
     },
     set(o, key, value) {
-      const path = [...pathPrefix, key];
-
-
-      const keyMap = path.join('.');
+      const path = [...pathPrefix, key],
+        keyMap = path.join('.');
 
       if (keyMap in map) {
         map[keyMap] = proxy(value, callback, path);
@@ -36,6 +32,6 @@ export default function proxy(object, callback, pathPrefix = []) {
       o[key] = value;
       callback(path, oldValue, value);
       return true;
-    },
+    }
   });
 }

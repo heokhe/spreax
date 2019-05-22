@@ -23,6 +23,12 @@
 		"no-plusplus": "off",
 		"no-underscore-dangle": "off",
 		"import/prefer-default-export": "off",
-		"arrow-parens": "off"
+		"arrow-parens": "off",
+		"one-var": "off",
+		"comma-dangle": [
+			"error",
+			"never"
+		],
+		"arrow-body-style": "off"
 	}
 }

@@ -47,7 +47,7 @@ export class Directive {
       element: el,
       param,
       rawValue: value,
-      value: value ? parseExpression(value) : undefined,
+      value: value ? parseExpression(value) : undefined
     });
   }
 }
