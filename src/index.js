@@ -1,6 +1,6 @@
-import { getAllNodes } from './nodes';
+import { getAllNodes, getDirectives } from './dom';
 import createTemplate from './template';
-import { getDirectives, DIRECTIVES } from './directives';
+import { DIRECTIVES } from './directives';
 import proxy from './proxy';
 import './directives/builtins';
 
@@ -64,9 +64,11 @@ export default class Spreax {
         }, { immediate: true });
       }
     } else {
-      for (const { value, name, param } of getDirectives(target)) {
+      for (const {
+        name, options, param, value
+      } of getDirectives(target)) {
         if (name in DIRECTIVES) {
-          DIRECTIVES[name].execute(this, target, param, value);
+          DIRECTIVES[name].execute(this, target, param, value, options);
         }
       }
     }
