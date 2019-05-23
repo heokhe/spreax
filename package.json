@@ -7,15 +7,12 @@
 	"module": "dist/spreax.esm.js",
 	"scripts": {
 		"build": "rollup -c",
-		"build:prod": "yarn build --environment NODE_ENV:production",
+		"build:prod": "npm run build -- --environment NODE_ENV:production",
+		"prepublish": "npm run build:prod",
 		"serve": "http-server . -p 5656",
-		"test": "node scripts/test.js",
-		"test:headless": "cypress run",
-		"test:gui": "cypress open",
 		"lint": "eslint --fix src"
 	},
 	"devDependencies": {
-		"cypress": "^3.0.3",
 		"eslint": "5.3.0",
 		"eslint-config-airbnb-base": "13.1.0",
 		"eslint-plugin-import": "^2.14.0",
