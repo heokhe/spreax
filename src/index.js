@@ -16,7 +16,7 @@ import './directives/builtins';
  * @property {Object<string, Formatter>} [formatters]
  */
 
-export default class Spreax {
+class Spreax {
   /** @param {ConstructorOptions} options */
   constructor({
     el, state, methods = {}, getters = {}, formatters = {}
@@ -91,3 +91,6 @@ export default class Spreax {
     });
   }
 }
+
+export { Directive, register } from './directives';
+export default Spreax;

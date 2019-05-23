@@ -13,8 +13,8 @@ export function makeFormatterFunction(names, source) {
  * @param {Object<string, import(".").Formatter} fmtSource
  */
 export default function createTemplate(text, fmtSource) {
-  const reg = /\[\[ (?:\w+\.)*\w+(?: \| [a-z]+)* \]\]/gi,
-    matches = (text.match(reg) || []).map(e => e.slice(3, -3)).map(match => {
+  const reg = /@\( *(?:\w+\.)*\w+(?: \| [a-z]+)* *\)/gi,
+    matches = (text.match(reg) || []).map(e => e.slice(2, -1).trim()).map(match => {
       const [variable, ...formatters] = match.split(' | ');
       return { variable, formatters };
     }),

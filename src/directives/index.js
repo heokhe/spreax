@@ -1,6 +1,6 @@
 import { parseExpression } from '../parser';
 
-export const DIRECTIVE_REGEX = /^\[([a-z]+)(?::([a-z]+))?(\.[a-z]+)*\]$/i;
+export const DIRECTIVE_REGEX = /^@([a-z]+)(?::([a-z]+))?(\.[a-z]+)*$/i;
 /** @type {Object<string, Directive>} */
 export const DIRECTIVES = {};
 

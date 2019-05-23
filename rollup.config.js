@@ -12,7 +12,8 @@ const input = 'src/index.js',
       strict: false,
       file,
       format,
-      name: 'Spreax'
+      name: 'Spreax',
+      exports: 'named'
     },
     plugins: [
       resolve(),
