@@ -6,7 +6,7 @@
 	"unpkg": "dist/spreax.browser.js",
 	"module": "dist/spreax.esm.js",
 	"scripts": {
-		"build": "rollup -c --no-strict",
+		"build": "rollup -c",
 		"build:prod": "yarn build --environment NODE_ENV:production",
 		"serve": "http-server . -p 5656",
 		"test": "node scripts/test.js",

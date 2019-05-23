@@ -4,54 +4,37 @@ import resolve from 'rollup-plugin-node-resolve';
 import cleanup from 'rollup-plugin-cleanup';
 import { terser } from 'rollup-plugin-terser';
 import { main, module as _module, browser } from './package.json';
-const plugins = [
-	resolve(),
-	commonjs(),
-	buble({
-		objectAssign: 'Object.assign',
-		transforms: {
-			dangerousForOf: true
-		}
-	}),
-	cleanup({
-		comments: 'none',
-		normalizeEols: 'unix'
-	})
-];
+
+const input = 'src/index.js',
+  createOutput = (format, file, shouldCleanup, comments = 'none') => ({
+    input,
+    strict: false,
+    output: {
+      file,
+      format,
+      name: 'Spreax'
+    },
+    plugins: [
+      resolve(),
+      commonjs(),
+      buble({
+        objectAssign: 'Object.assign',
+        transforms: {
+          dangerousForOf: true
+        }
+      }),
+      shouldCleanup ? cleanup({
+        comments,
+        normalizeEols: 'unix'
+      }) : terser()
+    ]
+  });
 
 export default [
-	{
-		input: 'src/index.js',
-		output: {
-			file: browser,
-			format: 'iife',
-			name: 'Spreax'
-		},
-		plugins
-	},
-	...process.env.NODE_ENV === 'production' ? [{
-		input: 'src/index.js',
-		output: {
-			file: browser.replace(/\.js/, '.min.js'),
-			format: 'iife',
-			name: 'Spreax'
-		},
-		plugins: [...plugins.slice(0, -1), terser()]
-	},
-	{
-		input: 'src/index.js',
-		output: {
-			file: main,
-			format: 'cjs',
-		},
-		plugins
-	},
-	{
-		input: 'src/index.js',
-		output: {
-			file: _module,
-			format: 'es',
-		},
-		plugins
-	}] : []
+  createOutput('iife', browser, true),
+  ...process.env.NODE_ENV === 'production' && [
+    createOutput('iife', browser.replace(/\.js/, '.min.js'), false),
+    createOutput('cjs', main, true, 'jsdoc'),
+    createOutput('es', _module, true, 'jsdoc')
+  ]
 ];
