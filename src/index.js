@@ -1,4 +1,6 @@
-import { getAllNodes, getDirectives } from './dom';
+import {
+  getAllNodes, getDirectives, isText, isElement
+} from './dom';
 import createTemplate from './template';
 import { DIRECTIVES } from './directives';
 import proxy from './proxy';
@@ -53,7 +55,7 @@ export default class Spreax {
 
   /** @param {Node|Element} target */
   $handleNode(target) {
-    if (target.nodeName === '#text') {
+    if (isText(target)) {
       const text = target.textContent;
       if (/^\s*$/.test(text)) return;
 
@@ -63,7 +65,7 @@ export default class Spreax {
           target.textContent = template.render(this.$state);
         }, { immediate: true });
       }
-    } else {
+    } else if (isElement(target)) {
       for (const {
         name, options, param, value
       } of getDirectives(target)) {

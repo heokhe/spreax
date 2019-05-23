@@ -2,7 +2,7 @@ import { Directive } from '..';
 
 export default new Directive('if', function ({ element, value }) {
   const parent = element.parentElement,
-    comment = document.createComment(element.tagName.toLowerCase() + +new Date());
+    comment = document.createComment('');
 
   element.before(comment);
   this.$on('*', () => {

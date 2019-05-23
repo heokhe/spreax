@@ -1,6 +1,8 @@
 import { DIRECTIVE_REGEX } from './directives';
 
 export const { ELEMENT_NODE, TEXT_NODE } = Node;
+export const isText = node => node.nodeType === TEXT_NODE;
+export const isElement = node => node.nodeType === ELEMENT_NODE;
 
 /**
  * @param {Element} el
