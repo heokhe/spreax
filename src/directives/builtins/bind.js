@@ -1,7 +1,7 @@
 import { Directive } from '..';
 import { setDeep } from '../../utils';
 
-export default new Directive('bind', function ({ element, value }) {
+export default new Directive('bind', function ({ element, value, options: { trim } }) {
   if (value.type !== 'property') return;
 
   const isNumber = element.type === 'number',
@@ -9,6 +9,7 @@ export default new Directive('bind', function ({ element, value }) {
 
   this.$on(value.property, () => {
     const val = value.fn(this);
+
     if (isCheckbox) {
       element.checked = !!val;
     } else {
@@ -17,7 +18,10 @@ export default new Directive('bind', function ({ element, value }) {
   }, { immediate: true });
 
   const handleChange = () => {
-    const val = isCheckbox ? element.checked : element.value;
+    let val = isCheckbox ? element.checked : element.value;
+    if (!isCheckbox && trim && typeof val === 'string') {
+      val = val.trim();
+    }
     setDeep(this, value.path, isNumber ? +val : val);
   };
 
