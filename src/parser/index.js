@@ -2,11 +2,10 @@ import { getDeep, setDeep } from '../utils';
 import parseLiteral from './literals';
 
 /**
- * @typedef {'property'|'action'|'literal'} ExpressionType
+ * @typedef {'property'|'action'|'literal'|'statement'} ExpressionType
  * @typedef {Object} ParsedExpression
  * @property {ExpressionType} type
  * @property {(ctx: any) => any} fn
- * @property {boolean} [isMethod]
  * @property {string[]} [path]
  * @property {string} [property]
  * @property {ParsedExpression} [rightHand]
@@ -21,10 +20,18 @@ export function parseExpression(expr) {
 
   if (expr[0] === '!') {
     const parsed = parseExpression(expr.slice(1));
-    if (parsed.type === 'action' && !parsed.isMethod) return null;
+    if (parsed.type === 'statement') return null;
+
     return {
       type: 'literal',
-      fn: ctx => !parsed.fn(ctx)
+      fn: ctx => {
+        const val = parsed.fn(ctx);
+        switch (prefix) {
+          case '!': return !val;
+          case '-': return -val;
+          default: return null;
+        }
+      }
     };
   }
 
@@ -36,7 +43,7 @@ export function parseExpression(expr) {
     };
   }
 
-  const [property] = expr.match(/^(?:[a-z_]+\.)*[a-z_]+$/i) || []; // TODO
+  const [property] = expr.match(/^(?:[a-z_]\w*\.)*\w+$/i) || [];
   if (property) {
     const path = property.split('.');
     return {
@@ -51,30 +58,43 @@ export function parseExpression(expr) {
   if (method) {
     return {
       type: 'action',
-      isMethod: true,
       fn: ctx => ctx[method]()
     };
   }
 
-  const stmt = expr.match(/^(.+) ?= ?(.+)$/) || [];
-  if (stmt.length) {
-    const [leftHand, rightHand] = stmt.slice(1).map(e => parseExpression(e.trim()));
+  const twoHands = expr.match(/^([^ ]+) *([-+]|[=!]?)?= *([^ ]+)$/) || [];
+  if (twoHands.length) {
+    const [, rawLeft, operator, rawRight] = twoHands,
+      [leftHand, rightHand] = [rawLeft, rawRight].map(h => parseExpression(h.trim()));
 
-    if (
-      leftHand.type !== 'property' || (
-        rightHand.type === 'action' && !rightHand.isMethod
-      )
-    ) throw new Error('da fuck');
-
-    return {
-      type: 'action',
-      isMethod: false,
+    if (operator === '!' || operator === '=') { // comparing
+      if (leftHand.type === 'statement' || rightHand.type === 'statement') throw new Error();
+      return {
+        ...leftHand,
+        fn: ctx => {
+          const [lv, rv] = [leftHand, rightHand].map(({ fn }) => fn(ctx));
+          return operator === '=' ? lv === rv : lv !== rv;
+        }
+      };
+    }
+    if (leftHand.type !== 'property' || rightHand.type === 'statement') throw new Error();
+    return { // assigning values
+      type: 'statement',
       rightHand,
-      fn: (ctx) => {
-        setDeep(ctx, leftHand.path, rightHand.fn(ctx));
+      fn: ctx => {
+        const value = rightHand.fn(ctx),
+          prevValue = leftHand.fn(ctx);
+
+        switch (operator) {
+          case '+':
+            return setDeep(ctx, leftHand.path, prevValue + value);
+          case '-':
+            return setDeep(ctx, leftHand.path, prevValue - value);
+          default:
+            return setDeep(ctx, leftHand.path, prevValue);
+        }
       }
     };
   }
-
   throw new Error(`unexpected expression "${expr}"`);
 }

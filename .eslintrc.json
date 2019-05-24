@@ -23,12 +23,13 @@
 		"no-plusplus": "off",
 		"no-underscore-dangle": "off",
 		"import/prefer-default-export": "off",
-		"arrow-parens": "off",
+		"arrow-parens": ["error", "as-needed"],
 		"one-var": "off",
 		"comma-dangle": [
 			"error",
 			"never"
 		],
-		"arrow-body-style": "off"
+		"arrow-body-style": "off",
+		"no-nested-ternary": "off"
 	}
 }

@@ -8,7 +8,7 @@ export default function proxy(object, callback, pathPrefix = []) {
   return new Proxy(object, {
     get(o, key) {
       const value = o[key];
-      if (typeof value === 'object') {
+      if (typeof value === 'object' && value !== null) {
         const path = [...pathPrefix, key],
           keyMap = path.join('.');
 
