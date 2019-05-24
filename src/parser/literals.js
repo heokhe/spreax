@@ -1,7 +1,10 @@
-/** @param {string} lit */
+/**
+ * @param {string} lit
+ * @returns {{done: boolean, value?: string|number|boolean|null|void}}
+ */
 export default function (lit) {
   const done = v => ({ done: true, value: v });
-  if (/^\d+(?:\.\d*)?$/.test(lit)) {
+  if (/^[-+]?\d+(?:\.\d*)?$/.test(lit)) {
     return done(+lit);
   } if (/^(['"`]).*\1$/.test(lit)) {
     return done(lit.slice(1, -1));

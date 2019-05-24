@@ -5,7 +5,7 @@ export default new Directive('if', function ({ element, value }) {
     comment = document.createComment('');
 
   element.before(comment);
-  this.$on('*', () => {
+  this.$on(value.property || '*', () => {
     if (value.fn(this)) {
       if (!parent.contains(element)) {
         comment.after(element);

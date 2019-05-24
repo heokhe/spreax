@@ -6,7 +6,7 @@ export default new Directive('on', function ({
   element.addEventListener(param, event => {
     if (prevent) event.preventDefault();
 
-    if (value.type === 'action') {
+    if (value.type === 'action' || value.type === 'statement') {
       value.fn(this);
     }
   });

@@ -16,40 +16,47 @@
 </head>
 <body>
     <div id="app">
-        <h1>Spreax demo: greeting app</h1>
-        <input type="text" [bind.trim]="name">
-        <button [on:click]="name = :">&times;</button>
-        <input type="number" [bind]="age">
-        <br>
-        <input type="checkbox" [bind]="status.available">
-        <label>Available: [[ status.available ]]</label>
-        <br>
-        <output [if]='name'>
-            [[ name | upper ]], [[ age ]]
-        </output>
+        <form @on:submit.prevent="handleSubmit()">
+            <input type="number" @bind="seconds" @attr:disabled="!form" min="1" max="250">
+            <button type="submit">Start</button>
+        </form>
+        <div @if="!form">
+            <h1>@(left | prettytime) left (@(percentage)%)</h1>
+        </div>
     </div>
 </body>
 <script src='dist/spreax.browser.js'></script>
 <script>
-const app = new Spreax({
+const app = new Spreax.default({
     el: document.querySelector('#app'),
     state: {
-        name: 'hosein',
-        age: 15,
-        status: {
-            available: false
-        }
+        timer: null,
+        left: 0,
+        seconds: 0
     },
     methods: {
-        log() {
-            console.log(this.name)
+        handleSubmit() {
+            if (!this.form) return;
+
+            this.left = this.seconds;
+            this.timer = setInterval(() => {
+                this.left--
+                if (this.left <= 0) this.reset()
+            }, 1000)
+        },
+        reset() {
+            clearInterval(this.timer)
+            this.timer = null
         }
     },
     getters: {
-        getter: ({ name, age }) => `${name} ${age}`
+        form: ({ timer }) => timer === null,
+        percentage: ({ seconds, left }) => (left / seconds * 100).toFixed(2)
     },
     formatters: {
-        upper: s => s.toUpperCase()
+        prettytime: sec => {
+            return [sec / 60 | 0, sec % 60].map(e => e.toString().padStart(2, '0')).join(':')
+        }
     }
 })
 </script>
