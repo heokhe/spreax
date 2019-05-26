@@ -83,17 +83,22 @@ export function parseExpression(expr) {
       type: 'statement',
       rightHand,
       fn: ctx => {
-        const value = rightHand.fn(ctx),
-          prevValue = leftHand.fn(ctx);
+        const rv = rightHand.fn(ctx),
+          lv = leftHand.fn(ctx);
+        let value;
 
         switch (operator) {
           case '+':
-            return setDeep(ctx, leftHand.path, prevValue + value);
+            value = lv + rv;
+            break;
           case '-':
-            return setDeep(ctx, leftHand.path, prevValue - value);
+            value = lv - rv;
+            break;
           default:
-            return setDeep(ctx, leftHand.path, prevValue);
+            value = lv;
         }
+
+        return setDeep(ctx, leftHand.path, value);
       }
     };
   }
