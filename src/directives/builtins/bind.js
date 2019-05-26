@@ -2,7 +2,7 @@ import { Directive } from '..';
 import { setDeep } from '../../utils';
 
 export default new Directive('bind', function ({ element, value, options: { trim } }) {
-  if (value.type !== 'property') return;
+  if (value.type !== 'property' || !value.isPropertyName) return;
 
   const isNumber = element.type === 'number',
     isCheckbox = element.type === 'checkbox';

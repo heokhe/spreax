@@ -2,12 +2,13 @@ import { getDeep, setDeep } from '../utils';
 import parseLiteral from './literals';
 
 /**
- * @typedef {'property'|'action'|'literal'|'statement'} ExpressionType
+ * @typedef {'property'|'action'|'value'|'statement'} ExpressionType
  * @typedef {Object} ParsedExpression
  * @property {ExpressionType} type
  * @property {(ctx: any) => any} fn
  * @property {string[]} [path]
  * @property {string} [property]
+ * @property {boolean} [isPropertyName]
  * @property {ParsedExpression} [rightHand]
  */
 
@@ -19,26 +20,21 @@ export function parseExpression(expr) {
   expr = expr.trim();
 
   if (expr[0] === '!') {
-    const parsed = parseExpression(expr.slice(1));
-    if (parsed.type === 'statement') return null;
+    const parsed = parseExpression(expr.slice(1)),
+      { type } = parsed;
 
+    if (type === 'statement') return null;
     return {
-      type: 'literal',
-      fn: ctx => {
-        const val = parsed.fn(ctx);
-        switch (prefix) {
-          case '!': return !val;
-          case '-': return -val;
-          default: return null;
-        }
-      }
+      ...parsed,
+      ...parsed.type === 'property' ? { isPropertyName: false } : { type: 'value' },
+      fn: c => !parsed.fn(c)
     };
   }
 
   const lit = parseLiteral(expr);
   if (lit.done) {
     return {
-      type: 'literal',
+      type: 'value',
       fn: () => lit.value
     };
   }
@@ -69,6 +65,7 @@ export function parseExpression(expr) {
 
     if (operator === '!' || operator === '=') { // comparing
       if (leftHand.type === 'statement' || rightHand.type === 'statement') throw new Error();
+
       return {
         ...leftHand,
         fn: ctx => {
@@ -77,7 +74,10 @@ export function parseExpression(expr) {
         }
       };
     }
-    if (leftHand.type !== 'property' || rightHand.type === 'statement') throw new Error();
+    if (leftHand.type !== 'property'
+      || !leftHand.isPropertyName
+      || rightHand.type === 'statement') throw new Error();
+
     return { // assigning values
       type: 'statement',
       rightHand,
