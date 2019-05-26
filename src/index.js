@@ -9,12 +9,12 @@ import observe from './observer';
 
 /**
  * @typedef {(value: string) => string} Formatter
- * @typedef {{ key: string, fn: (this: Spreax) => void, node?: Node, enabled: boolean }} SpreaxEvent
+ * @typedef {{ key: string, fn: (this: Spreax) => void }} SpreaxEvent
  * @typedef {Object} ConstructorOptions
  * @property {Element} el
  * @property {Object} state
  * @property {Object<string, () => void>} [methods]
- * @property {Object<string, (state: Object) => any} [getters]
+ * @property {Object<string, (this: Spreax, state: Object) => any} [getters]
  * @property {Object<string, Formatter>} [formatters]
  */
 
@@ -42,7 +42,7 @@ class Spreax {
     for (const key of Object.keys(methods)) this[key] = methods[key].bind(this);
     for (const [name, fn] of Object.entries(getters)) {
       Object.defineProperty(this, name, {
-        get: () => fn(this.$state),
+        get: () => fn.call(this, this.$state),
         set: () => false
       });
     }
@@ -50,14 +50,7 @@ class Spreax {
 
     getAllNodes(el).forEach(n => this.$handleNode(n));
 
-    observe(el, (node, isRemoved) => {
-      const relatedEvents = this.$events.map((ev, i) => (node === ev.node ? i : null))
-        .filter(i => i !== null);
-
-      if (relatedEvents.length) {
-        for (const i of relatedEvents) this.$events[i].enabled = !isRemoved;
-      } else if (!isRemoved) this.$handleNode(node);
-    });
+    observe(el, this.$handleNode.bind(this));
   }
 
   /** @param {Node|Element} target */
@@ -70,7 +63,7 @@ class Spreax {
       for (const v of template.vars) {
         this.$on(v, () => {
           target.textContent = template.render(this);
-        }, { immediate: true, node: target });
+        }, { immediate: true });
       }
     } else if (isElement(target)) {
       for (const {
@@ -83,25 +76,20 @@ class Spreax {
     }
   }
 
-  $on(key, callback, { immediate = false, node } = {}) {
-    const id = this.$events.push({
-      key,
-      fn: callback.bind(this),
-      node,
-      enabled: true
-    }) - 1;
-    if (immediate) this.$emit(id);
+  $on(key, callback, { immediate = false } = {}) {
+    this.$events.push({ key, fn: callback.bind(this) });
+    if (immediate) this.$emit(this.$events.length - 1);
   }
 
   $emit(keyOrId) {
-    const events = this.$events;
-    events.filter((ev, i) => {
-      if (!ev.enabled) return false;
-      if (keyOrId === '*') return true;
-      return (typeof keyOrId === 'number' ? i : ev.key) === keyOrId;
-    }).forEach(event => {
-      event.fn();
-    });
+    const events = this.$events,
+      isId = typeof keyOrId === 'number';
+    for (let i = 0; i < events.length; i++) {
+      const ev = events[i];
+      if (keyOrId === '*' || keyOrId === (isId ? i : ev.key)) {
+        ev.fn();
+      }
+    }
   }
 }
 
