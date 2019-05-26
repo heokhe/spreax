@@ -13,12 +13,12 @@ export default new Directive('bind', function ({ element, data, options: { trim 
     if (isCheckbox) {
       element.checked = !!val;
     } else {
-      element.data = val;
+      element.value = val;
     }
   }, { immediate: true });
 
   const handleChange = () => {
-    let val = isCheckbox ? element.checked : element.data;
+    let val = isCheckbox ? element.checked : element.value;
     if (!isCheckbox && trim && typeof val === 'string') {
       val = val.trim();
     }
