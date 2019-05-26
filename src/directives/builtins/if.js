@@ -1,12 +1,12 @@
 import { Directive } from '..';
 
-export default new Directive('if', function ({ element, value }) {
+export default new Directive('if', function ({ element, data }) {
   const parent = element.parentElement,
     comment = document.createComment('');
 
   element.before(comment);
-  this.$on(value.property || '*', () => {
-    if (value.fn(this)) {
+  this.$on(data.property || '*', () => {
+    if (data.fn(this)) {
       if (!parent.contains(element)) {
         comment.after(element);
       }

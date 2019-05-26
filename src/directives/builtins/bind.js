@@ -1,28 +1,28 @@
 import { Directive } from '..';
 import { setDeep } from '../../utils';
 
-export default new Directive('bind', function ({ element, value, options: { trim } }) {
-  if (value.type !== 'property' || !value.isPropertyName) return;
+export default new Directive('bind', function ({ element, data, options: { trim } }) {
+  if (data.type !== 'property' || !data.isPropertyName) return;
 
   const isNumber = element.type === 'number',
     isCheckbox = element.type === 'checkbox';
 
-  this.$on(value.property, () => {
-    const val = value.fn(this);
+  this.$on(data.property, () => {
+    const val = data.fn(this);
 
     if (isCheckbox) {
       element.checked = !!val;
     } else {
-      element.value = val;
+      element.data = val;
     }
   }, { immediate: true });
 
   const handleChange = () => {
-    let val = isCheckbox ? element.checked : element.value;
+    let val = isCheckbox ? element.checked : element.data;
     if (!isCheckbox && trim && typeof val === 'string') {
       val = val.trim();
     }
-    setDeep(this, value.path, isNumber ? +val : val);
+    setDeep(this, data.path, isNumber ? +val : val);
   };
 
   element.addEventListener('change', handleChange);
