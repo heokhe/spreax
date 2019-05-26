@@ -46,6 +46,7 @@ export function parseExpression(expr) {
       type: 'property',
       property,
       path,
+      isPropertyName: true,
       fn: ctx => getDeep(ctx, path)
     };
   }
