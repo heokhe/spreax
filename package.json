@@ -3,7 +3,7 @@
 	"description": "Tiny library for making reactive views, without virtual DOM",
 	"main": "dist/spreax.cjs.js",
 	"browser": "dist/spreax.browser.js",
-	"unpkg": "dist/spreax.browser.js",
+	"unpkg": "dist/spreax.browser.min.js",
 	"module": "dist/spreax.esm.js",
 	"scripts": {
 		"build": "rollup -c",
