@@ -21,7 +21,10 @@
             <button type="submit">Start</button>
         </form>
         <div @if="!form">
-            <h1>@(left | prettytime) left (@(percentage)%)</h1>
+            <h1>
+                @(left | prettytime) left &ndash;
+                <span @style:color="color">@(percentage)%</span>
+            </h1>
         </div>
     </div>
 </body>
@@ -51,7 +54,11 @@ const app = new Spreax.default({
     },
     getters: {
         form: ({ timer }) => timer === null,
-        percentage: ({ seconds, left }) => (left / seconds * 100).toFixed(2)
+        percentage: ({ seconds, left }) => (left / seconds * 100).toFixed(2),
+        color() {
+            const p = this.percentage * 2.55;
+            return `rgb(${255 - p}, ${p}, 0)`
+        }
     },
     formatters: {
         prettytime: sec => {
