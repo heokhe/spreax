@@ -1,6 +1,6 @@
 {
 	"name": "spreax",
-	"description": "A new front-end tool to bind UI with app state",
+	"description": "Tiny library for making reactive views, without virtual DOM",
 	"main": "dist/spreax.cjs.js",
 	"browser": "dist/spreax.browser.js",
 	"unpkg": "dist/spreax.browser.js",
