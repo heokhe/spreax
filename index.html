@@ -17,14 +17,16 @@
 <body>
     <div id="app">
         <form @on:submit.prevent="handleSubmit()">
-            <input type="number" @bind="seconds" @attr:disabled="!form" min="1" max="250">
+            <input type="number" min="1" max="250" @bind="seconds" @attr:disabled="!form">
             <button type="submit">Start</button>
+            <button type="button" @if="!form" @on:click="reset()">Reset</button>
         </form>
         <div @if="!form">
             <h1>
                 @(left | prettytime) left &ndash;
-                <span @style:color="color">@(percentage)%</span>
+                <span @style:color="color">@(percentage | toFixed)%</span>
             </h1>
+            <progress @attr:value="progressValue"></progress>
         </div>
     </div>
 </body>
@@ -54,16 +56,19 @@ const app = new Spreax.default({
     },
     getters: {
         form: ({ timer }) => timer === null,
-        percentage: ({ seconds, left }) => (left / seconds * 100).toFixed(2),
+        percentage: ({ seconds, left }) => left / seconds * 100,
+        progressValue() {
+            return 1 - (this.percentage / 100)
+        },
         color() {
             const p = this.percentage * 2.55;
             return `rgb(${255 - p}, ${p}, 0)`
         }
     },
     formatters: {
-        prettytime: sec => {
-            return [sec / 60 | 0, sec % 60].map(e => e.toString().padStart(2, '0')).join(':')
-        }
+        prettytime: sec => [Math.floor(sec / 60), sec % 60]
+            .map(e => e.toString().padStart(2, '0')).join(':'),
+        toFixed: str => (+str).toFixed(2)
     }
 })
 </script>

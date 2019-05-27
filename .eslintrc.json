@@ -30,6 +30,7 @@
 			"never"
 		],
 		"arrow-body-style": "off",
-		"no-nested-ternary": "off"
+		"no-nested-ternary": "off",
+		"guard-for-in": ["off"]
 	}
 }
