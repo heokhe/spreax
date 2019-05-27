@@ -29,23 +29,32 @@ class Spreax {
     /** @type {SpreaxEvent[]} */
     this.$events = [];
 
+    const setGetters = () => {
+      for (const key in getters) {
+        const value = getters[key].call(this, this.$state);
+        if (!(key in this) || value !== this[key]) {
+          Object.defineProperty(this, key, {
+            writable: false,
+            configurable: true,
+            value
+          });
+          this.$emit(key);
+        }
+      }
+    };
     this.$state = proxy(state, path => {
-      this.$emit('*');
       this.$emit(path.join('.'));
+      setGetters();
     });
-    for (const key of Object.keys(this.$state)) {
+    setGetters();
+
+    for (const key in this.$state) {
       Object.defineProperty(this, key, {
         get: () => this.$state[key],
         set: v => { this.$state[key] = v; }
       });
     }
-    for (const key of Object.keys(methods)) this[key] = methods[key].bind(this);
-    for (const [name, fn] of Object.entries(getters)) {
-      Object.defineProperty(this, name, {
-        get: () => fn.call(this, this.$state),
-        set: () => false
-      });
-    }
+    for (const key in methods) this[key] = methods[key].bind(this);
     this.$formatters = formatters;
 
     getAllNodes(el).forEach(n => this.$handleNode(n));
@@ -85,10 +94,8 @@ class Spreax {
     const events = this.$events,
       isId = typeof keyOrId === 'number';
     for (let i = 0; i < events.length; i++) {
-      const ev = events[i];
-      if (keyOrId === '*' || keyOrId === (isId ? i : ev.key)) {
-        ev.fn();
-      }
+      const { key, fn } = events[i];
+      if (keyOrId === (isId ? i : key)) fn();
     }
   }
 }
