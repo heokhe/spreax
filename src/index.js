@@ -1,11 +1,11 @@
 import {
-  getAllNodes, getDirectives, isText, isElement
+  getDirectives, getAllNodes, isText, isElement
 } from './dom';
 import createTemplate from './template';
 import { DIRECTIVES } from './directives';
-import proxy from './proxy';
 import './directives/builtins';
 import observe from './observer';
+import createContext from './context';
 
 /**
  * @typedef {(value: string) => string} Formatter
@@ -18,7 +18,7 @@ import observe from './observer';
  * @property {Object<string, Formatter>} [formatters]
  */
 
-class Spreax {
+export class Spreax {
   /** @param {ConstructorOptions} options */
   constructor({
     el, state, methods = {}, getters = {}, formatters = {}
@@ -28,37 +28,16 @@ class Spreax {
 
     /** @type {SpreaxEvent[]} */
     this.$events = [];
-
-    const setGetters = () => {
-      for (const key in getters) {
-        const value = getters[key].call(this, this.$state);
-        if (!(key in this) || value !== this[key]) {
-          Object.defineProperty(this, key, {
-            writable: false,
-            configurable: true,
-            value
-          });
-          this.$emit(key);
-        }
-      }
-    };
-    this.$state = proxy(state, path => {
-      this.$emit(path.join('.'));
-      setGetters();
+    this.$ctx = createContext({
+      state,
+      methods,
+      getters,
+      thisArg: this,
+      onChange: this.$emit.bind(this)
     });
-    setGetters();
-
-    for (const key in this.$state) {
-      Object.defineProperty(this, key, {
-        get: () => this.$state[key],
-        set: v => { this.$state[key] = v; }
-      });
-    }
-    for (const key in methods) this[key] = methods[key].bind(this);
     this.$formatters = formatters;
 
     getAllNodes(el).forEach(n => this.$handleNode(n));
-
     observe(el, this.$handleNode.bind(this));
   }
 
@@ -71,7 +50,7 @@ class Spreax {
       const template = createTemplate(text, this.$formatters);
       for (const v of template.vars) {
         this.$on(v, () => {
-          target.textContent = template.render(this);
+          target.textContent = template.render(this.$ctx);
         }, { immediate: true });
       }
     } else if (isElement(target)) {
@@ -80,7 +59,7 @@ class Spreax {
       } of getDirectives(target)) {
         if (name in DIRECTIVES) {
           DIRECTIVES[name].execute(this, target, param, value, options);
-        }
+        } else throw new Error(`@${name} not found`);
       }
     }
   }
@@ -101,4 +80,3 @@ class Spreax {
 }
 
 export { Directive, register } from './directives';
-export default Spreax;

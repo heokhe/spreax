@@ -5,14 +5,15 @@ export const isText = node => node.nodeType === TEXT_NODE;
 export const isElement = node => node.nodeType === ELEMENT_NODE;
 
 /**
- * @param {Element} el
+ * @param {Element} root
  * @returns {Node[]}
  */
-export function getAllNodes(el) {
-  return Array.from(el.childNodes)
-    .filter(node => [ELEMENT_NODE, TEXT_NODE].includes(node.nodeType))
+export const getAllNodes = root => {
+  const isPre = isElement(root) && root.hasAttribute('data-sp-pre');
+  return Array.from(root.childNodes)
+    .filter(node => [ELEMENT_NODE, ...!isPre ? [TEXT_NODE] : []].includes(node.nodeType))
     .map(node => [node, ...getAllNodes(node)]).flat(Infinity);
-}
+};
 
 /** @param {Element} el */
 export const getDirectives = el => Array.from(el.attributes)
@@ -23,6 +24,6 @@ export const getDirectives = el => Array.from(el.attributes)
       param,
       value,
       name: dname,
-      options: Object.assign({}, ...options.slice(1).split('.').map(k => ({ [k]: true })))
+      options: Object.assign(...options.slice(1).split('.').map(k => ({ [k]: true })))
     };
   });

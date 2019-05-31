@@ -17,11 +17,11 @@
 <body>
     <div id="app">
         <form @on:submit.prevent="handleSubmit()">
-            <input type="number" min="1" max="250" @bind="seconds" @attr:disabled="!form">
+            <input type="number" min="1" max="250" @bind="seconds" @attr:disabled="isActive">
             <button type="submit">Start</button>
-            <button type="button" @if="!form" @on:click="reset()">Reset</button>
+            <button type="button" @if="isActive" @on:click="reset()">Reset</button>
         </form>
-        <div @if="!form">
+        <div @if="isActive">
             <h1>
                 @(left | prettytime) left &ndash;
                 <span @style:color="color">@(percentage | toFixed)%</span>
@@ -32,7 +32,7 @@
 </body>
 <script src='dist/spreax.browser.js'></script>
 <script>
-const app = new Spreax.default({
+const app = new sp.Spreax({
     el: document.querySelector('#app'),
     state: {
         timer: null,
@@ -41,7 +41,7 @@ const app = new Spreax.default({
     },
     methods: {
         handleSubmit() {
-            if (!this.form) return;
+            if (this.isActive) return;
 
             this.left = this.seconds;
             this.timer = setInterval(() => {
@@ -55,8 +55,8 @@ const app = new Spreax.default({
         }
     },
     getters: {
-        form: ({ timer }) => timer === null,
-        percentage: ({ seconds, left }) => left / seconds * 100,
+        isActive: ({ timer }) => timer !== null,
+        percentage: ({ seconds, left }) => seconds ? (left / seconds * 100) : 0,
         progressValue() {
             return 1 - (this.percentage / 100)
         },

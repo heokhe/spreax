@@ -1,6 +1,6 @@
 /**
  * @param {*} object
- * @param {(path: string[]) => void} callback
+ * @param {(key: string) => void} callback
  * @param {string[]} [pathPrefix]
  */
 export default function proxy(object, callback, pathPrefix = []) {
@@ -34,7 +34,7 @@ export default function proxy(object, callback, pathPrefix = []) {
       const oldValue = o[key];
       if (oldValue !== value) {
         o[key] = value;
-        callback(path, oldValue, value);
+        callback(keyMap, oldValue, value);
       }
       return true;
     },

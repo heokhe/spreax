@@ -17,7 +17,7 @@ export const DIRECTIVES = {};
 export class Directive {
   /**
    * @param {string} name
-   * @param {(this: import("..").default, payload: DirectiveCallbackPayload) => void} callback
+   * @param {(this: import("..").Spreax, payload: DirectiveCallbackPayload) => void} callback
    * @param {{ paramRequired?: boolean, allowStatements?: boolean }} [options]
    */
   constructor(name, callback, {
@@ -30,7 +30,7 @@ export class Directive {
   }
 
   /**
-   * @param {import("..").default} instance
+   * @param {import("..").Spreax} instance
    * @param {Element} el
    * @param {string} param
    * @param {string} value
@@ -44,13 +44,17 @@ export class Directive {
     if (this.allowStatements && parsed && parsed.type === 'statement') {
       throw new Error(`assigning to values is not allowed for @${this.name}`);
     }
-    this.fn.call(instance, {
-      element: el,
-      param,
-      options,
-      rawValue: value,
-      data: parsed
-    });
+    try {
+      this.fn.call(instance, {
+        element: el,
+        param,
+        options,
+        rawValue: value,
+        data: parsed
+      });
+    } catch (e) {
+      throw new Error(`error from @${this.name} directive: ${e.message}`);
+    }
   }
 }
 

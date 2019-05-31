@@ -8,7 +8,7 @@ export default new Directive('bind', function ({ element, data, options: { trim 
     isCheckbox = element.type === 'checkbox';
 
   this.$on(data.property, () => {
-    const val = data.fn(this);
+    const val = data.fn(this.$ctx);
 
     if (isCheckbox) {
       element.checked = !!val;

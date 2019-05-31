@@ -7,7 +7,7 @@ export default new Directive('on', function ({
     if (prevent) event.preventDefault();
 
     if (data.type === 'action' || data.type === 'statement') {
-      data.fn(this);
+      data.fn(this.$ctx);
     }
   });
 }, {

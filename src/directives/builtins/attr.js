@@ -2,7 +2,7 @@ import { Directive } from '..';
 
 export default new Directive('attr', function ({ element, data, param }) {
   this.$on(data.property, () => {
-    const val = data.fn(this);
+    const val = data.fn(this.$ctx);
     if (val === false) element.removeAttribute(param);
     else element.setAttribute(param, val);
   }, { immediate: true });
