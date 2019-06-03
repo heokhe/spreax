@@ -24,3 +24,6 @@ npm run serve
 Most importantly, **Performance**. Vue and React do their job very well, but they force you to deliver large JavaScript payloads, Because everything is rendered by JavaScript code. 
 
 Spreax may not be used in large apps, but it's useful for small projects.
+
+# Documentation
+See [docs folder](docs/README.md).
