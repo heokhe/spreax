@@ -1,7 +1,9 @@
 import { Directive } from '..';
 import { setDeep } from '../../utils';
 
-export default new Directive('bind', function ({ element, data, options: { trim } }) {
+export default new Directive('bind', function ({
+  element, data, options: { trim, lazy }
+}) {
   if (data.type !== 'property' || !data.isPropertyName) return;
 
   const isNumber = element.type === 'number',
@@ -26,7 +28,7 @@ export default new Directive('bind', function ({ element, data, options: { trim 
   };
 
   element.addEventListener('change', handleChange);
-  if (!isCheckbox) {
+  if (!lazy && !isCheckbox) {
     element.addEventListener('keydown', () => {
       setTimeout(handleChange, 0);
     });
