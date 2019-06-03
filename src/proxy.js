@@ -23,7 +23,7 @@ export default function proxy(object, callback, pathPrefix = []) {
       const path = [...pathPrefix, key],
         keyMap = path.join('.');
 
-      if (!(key in o)) {
+      if (path.length === 1 && !(key in o)) {
         throw new Error(`unknown key "${keyMap}"`);
       }
 
@@ -38,6 +38,8 @@ export default function proxy(object, callback, pathPrefix = []) {
       }
       return true;
     },
-    deleteProperty: () => false
+    deleteProperty: (_, k) => {
+      return [...pathPrefix, k].length > 1;
+    }
   });
 }

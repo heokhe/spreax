@@ -59,7 +59,7 @@ export function parseExpression(expr) {
     };
   }
 
-  const twoHands = expr.match(/^([^ ]+) *([-+]|[=!]?)?= *([^ ]+)$/) || [];
+  const twoHands = expr.match(/^([^ ]+) *([-+]|[=!])?= *([^ ]+)$/) || [];
   if (twoHands.length) {
     const [, rawLeft, operator, rawRight] = twoHands,
       [leftHand, rightHand] = [rawLeft, rawRight].map(h => parseExpression(h.trim()));

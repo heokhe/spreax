@@ -24,6 +24,9 @@ export const getDirectives = el => Array.from(el.attributes)
       param,
       value,
       name: dname,
-      options: Object.assign(...options.slice(1).split('.').map(k => ({ [k]: true })))
+      options: Object.assign(...options
+        .slice(1)
+        .split('.')
+        .map(k => ({ [k]: true })))
     };
   });

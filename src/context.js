@@ -13,7 +13,10 @@ export default function createContext({
 }) {
   const ctx = {},
     proxifiedState = proxy(state, key => {
-      onChange(key);
+      const sections = key.split('.');
+      for (let i = 1; i <= sections.length; i++) {
+        onChange(sections.slice(0, i).join('.'));
+      }
       for (const gkey in getters) {
         // eslint-disable-next-line no-use-before-define
         updateGetter(gkey);
