@@ -36,7 +36,7 @@ And, you can do `event.preventDefault()`:
 Using `@if` directive, you can toggle the existence of an element:
 ```html
 <div @if='isVisible'>Now you see me!</div>
-<div @if='!isVisible'>you can use the ! operator</div>
+<div @if='!isVisible'>You can use the ! operator</div>
 <div @if='x == 0'>
   Also you can compare values (if x === any value except 0, it won't render)
 </div>
@@ -49,3 +49,4 @@ The `@bind` directive makes two-way binding between form input and app state a b
 ```html
 <input type='text' placeholder='your name' @bind='name'>
 ```
+As you type in the input, value of `name` property name will be updated.
