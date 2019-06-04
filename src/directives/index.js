@@ -28,34 +28,6 @@ export class Directive {
     this.paramRequired = paramRequired;
     this.allowStatements = allowStatements;
   }
-
-  /**
-   * @param {import("..").Spreax} instance
-   * @param {Element} el
-   * @param {string} param
-   * @param {string} value
-   * @param {DirectiveOptions} options
-   */
-  execute(instance, el, param, value, options) {
-    const parsed = value ? parseExpression(value) : undefined;
-    if (this.paramRequired && !param) {
-      throw new Error(`a parameter is required for @${this.name}`);
-    }
-    if (this.allowStatements && parsed && parsed.type === 'statement') {
-      throw new Error(`assigning to values is not allowed for @${this.name}`);
-    }
-    try {
-      this.fn.call(instance, {
-        element: el,
-        param,
-        options,
-        rawValue: value,
-        data: parsed
-      });
-    } catch (e) {
-      throw new Error(`error from @${this.name} directive: ${e.message}`);
-    }
-  }
 }
 
 /** @param {Directive} directive */
@@ -66,4 +38,28 @@ export function register(directive) {
   if (!/^[a-z]+$/i.test(name)) throw new Error(`${name} is not a valid directive name`);
 
   DIRECTIVES[name] = directive;
+}
+
+/** @param {string} name */
+export function execute(name, {
+  element, value, param, options, instance
+}) {
+  if (name in DIRECTIVES) {
+    const { [name]: { allowStatements, paramRequired, fn } } = DIRECTIVES,
+      parsedData = parseExpression(value);
+    if (!allowStatements && parsedData.type === 'statement') {
+      throw new Error(`@${name} doesn't accept statements`);
+    }
+    if (paramRequired && !param) {
+      throw new Error(`a parameter is required for @${name}`);
+    }
+
+    fn.call(instance, {
+      data: parsedData,
+      rawValue: value,
+      element,
+      options,
+      param
+    });
+  } else throw new Error(`@${name} not found!`);
 }

@@ -2,10 +2,11 @@ import {
   getDirectives, getAllNodes, isText, isElement
 } from './dom';
 import createTemplate from './template';
-import { DIRECTIVES } from './directives';
+import { execute } from './directives';
 import './directives/builtins';
 import observe from './observer';
 import createContext from './context';
+import findSelector from './findSelector';
 
 /**
  * @typedef {(value: string) => string} Formatter
@@ -54,12 +55,22 @@ export class Spreax {
         }, { immediate: true });
       }
     } else if (isElement(target)) {
+      const selector = findSelector(target, this.$el);
+
       for (const {
         name, options, param, value
       } of getDirectives(target)) {
-        if (name in DIRECTIVES) {
-          DIRECTIVES[name].execute(this, target, param, value, options);
-        } else throw new Error(`@${name} not found`);
+        try {
+          execute(name, {
+            element: target,
+            instance: this,
+            param,
+            options,
+            value
+          });
+        } catch ({ message }) {
+          throw new Error(`Error from @${name}: ${message}\n found at: ${selector}`);
+        }
       }
     }
   }
