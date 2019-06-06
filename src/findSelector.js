@@ -23,7 +23,7 @@ export default function findSelector(element, root) {
     if (el.id) string += `#${el.id}`;
     for (const c of el.classList) string += `.${c}`;
 
-    if (/^div[.#]/.test(string)) string = string.slice(3);
+    string = string.replace(/^div([#.])/i, '$1');
 
     return string;
   }).join(' > ');

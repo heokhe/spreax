@@ -2,7 +2,7 @@ import { getDeep, setDeep } from '../utils';
 import parseLiteral from './literals';
 
 /**
- * @typedef {'property'|'action'|'value'|'statement'} ExpressionType
+ * @typedef {'property'|'action'|'value'|'statement'|'loop'} ExpressionType
  * @typedef {Object} ParsedExpression
  * @property {ExpressionType} type
  * @property {(ctx: any) => any} fn
@@ -10,6 +10,7 @@ import parseLiteral from './literals';
  * @property {string} [property]
  * @property {boolean} [isPropertyName]
  * @property {ParsedExpression} [rightHand]
+ * @property {string} [item]
  */
 
 /**
@@ -29,6 +30,22 @@ export function parseExpression(expr) {
       ...parsed.type === 'property' ? { isPropertyName: false } : { type: 'value' },
       fn: c => !parsed.fn(c)
     };
+  }
+
+  const loop = expr.match(/^(.+) of (.+)$/);
+  if (loop) {
+    const [, left, right] = loop,
+      parsedLeft = parseExpression(left),
+      parsedRight = parseExpression(right);
+
+    if (parsedLeft.isPropertyName && parsedRight.type !== 'statement') {
+      return {
+        type: 'loop',
+        item: left,
+        property: parsedRight.property,
+        fn: parsedRight.fn
+      };
+    }
   }
 
   const lit = parseLiteral(expr);
@@ -65,7 +82,7 @@ export function parseExpression(expr) {
       [leftHand, rightHand] = [rawLeft, rawRight].map(h => parseExpression(h.trim()));
 
     if (operator === '!' || operator === '=') { // comparing
-      if (leftHand.type === 'statement' || rightHand.type === 'statement') throw new Error();
+      if (leftHand.type === 'statement' || rightHand.type === 'statement') throw new Error('cannot compare statements');
 
       return {
         ...leftHand,
@@ -75,11 +92,12 @@ export function parseExpression(expr) {
         }
       };
     }
-    if (leftHand.type !== 'property'
-      || !leftHand.isPropertyName
-      || rightHand.type === 'statement') throw new Error();
+    // assigning values
 
-    return { // assigning values
+    if (!leftHand.isPropertyName) throw new Error(`"${rawLeft}" is not a property name`);
+    if (rightHand.type === 'statement') throw new Error(`${rawRight} is a statement, not an expression`);
+
+    return {
       type: 'statement',
       rightHand,
       fn: ctx => {

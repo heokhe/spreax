@@ -29,7 +29,7 @@ export default function createTemplate(text, fmtSource) {
         const format = makeFormatterFunction(m.formatters, fmtSource),
           value = getDeep(ctx, m.variable.split('.'));
 
-        return format(toString(value));
+        return toString(format(toString(value)));
       }));
     }
   };

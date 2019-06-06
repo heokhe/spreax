@@ -13,9 +13,13 @@ export const joinTwo = (a, b) => {
   return s;
 };
 
-export const getDeep = (object, path) => path.reduce((a, b) => a[b], object);
+export const getDeep = (object, path) => {
+  if (typeof path === 'string') path = path.split('.');
+  return path.reduce((a, b) => a[b], object);
+};
 
 export const setDeep = (object, path, value) => {
+  if (typeof path === 'string') path = path.split('.');
   const last = path[path.length - 1];
   getDeep(object, path.slice(0, -1))[last] = value;
 };

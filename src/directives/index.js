@@ -9,6 +9,7 @@ export const DIRECTIVES = {};
  * @typedef {Object} DirectiveCallbackPayload
  * @property {Element} element
  * @property {DirectiveOptions} options
+ * @property {object} context
  * @property {string} [param]
  * @property {string} [rawValue]
  * @property {import("../parser/index").ParsedExpression} [data]
@@ -42,7 +43,7 @@ export function register(directive) {
 
 /** @param {string} name */
 export function execute(name, {
-  element, value, param, options, instance
+  element, value, param, options, instance, context
 }) {
   if (name in DIRECTIVES) {
     const { [name]: { allowStatements, paramRequired, fn } } = DIRECTIVES,
@@ -59,7 +60,8 @@ export function execute(name, {
       rawValue: value,
       element,
       options,
-      param
+      param,
+      context
     });
   } else throw new Error(`@${name} not found!`);
 }

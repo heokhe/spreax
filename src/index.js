@@ -8,6 +8,8 @@ import observe from './observer';
 import createContext from './context';
 import findSelector from './findSelector';
 
+export { Directive, register } from './directives';
+
 /**
  * @typedef {(value: string) => string} Formatter
  * @typedef {{ key: string, fn: (this: Spreax) => void }} SpreaxEvent
@@ -57,16 +59,16 @@ export class Spreax {
     } else if (isElement(target)) {
       const selector = findSelector(target, this.$el);
 
-      for (const {
-        name, options, param, value
-      } of getDirectives(target)) {
+      for (const di of getDirectives(target)) {
+        const { name } = di;
         try {
           execute(name, {
             element: target,
             instance: this,
-            param,
-            options,
-            value
+            param: di.param,
+            options: di.options,
+            value: di.value,
+            context: this.$ctx
           });
         } catch ({ message }) {
           throw new Error(`Error from @${name}: ${message}\n found at: ${selector}`);
@@ -89,5 +91,3 @@ export class Spreax {
     }
   }
 }
-
-export { Directive, register } from './directives';

@@ -15,18 +15,24 @@ export const getAllNodes = root => {
     .map(node => [node, ...getAllNodes(node)]).flat(Infinity);
 };
 
+export const stringifyDirective = ({ name, param, options }) => `@${name}${param ? `:${param}` : ''}${Object.keys(options).map(k => `.${k}`).join()}`;
+
 /** @param {Element} el */
 export const getDirectives = el => Array.from(el.attributes)
   .filter(({ name }) => DIRECTIVE_REGEX.test(name))
-  .map(({ name, value }) => {
-    const [, dname, param, options = ''] = DIRECTIVE_REGEX.exec(name);
+  .map(({ name: rawName, value }) => {
+    const [, name, param, optionsString = ''] = DIRECTIVE_REGEX.exec(rawName),
+      options = Object.assign(...optionsString
+        .slice(1)
+        .split('.')
+        .map(k => ({ [k]: true }))),
+      attributeName = stringifyDirective({ name, param, options });
+
     return {
       param,
       value,
-      name: dname,
-      options: Object.assign(...options
-        .slice(1)
-        .split('.')
-        .map(k => ({ [k]: true })))
+      options,
+      name,
+      attributeName
     };
   });
