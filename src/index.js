@@ -36,7 +36,7 @@ export class Spreax {
       state,
       getters,
       methods,
-      thisArg: this
+      instance: this
     });
     this.$ctx = context;
     for (const key of context.$keys) createAlias(key, context, this);

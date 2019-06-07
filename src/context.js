@@ -33,7 +33,6 @@ export default class Context {
       }
       for (const gkey in getters) {
         this.$setGetter(gkey);
-        this.$emit(gkey);
       }
     });
     this.$state = state;
@@ -67,17 +66,19 @@ export default class Context {
    * @param {string} name
    */
   $setGetter(name) {
-    const inner = this.$inner;
-    const value = this.$getterFunctions[name].call(this.$instance, this.$state);
+    const inner = this.$inner,
+      value = this.$getterFunctions[name].call(this.$instance, this.$state),
+      exists = name in inner;
 
-    if (!(name in inner) || value !== inner[name]) {
-      Object.defineProperty(this.$inner, name, {
+    if (!exists || value !== inner[name]) {
+      Object.defineProperty(inner, name, {
         writable: false,
         configurable: true,
         value,
         enumerable: true
       });
     }
+    if (exists) this.$emit(name);
   }
 
   /** @param {string|string[]} path */
