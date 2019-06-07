@@ -2,7 +2,7 @@ import { getDeep, setDeep } from '../utils';
 import parseLiteral from './literals';
 
 /**
- * @typedef {'property'|'action'|'value'|'statement'|'loop'} ExpressionType
+ * @typedef {'property'|'method'|'value'|'statement'|'loop'} ExpressionType
  * @typedef {Object} ParsedExpression
  * @property {ExpressionType} type
  * @property {(ctx: any) => any} fn
@@ -71,7 +71,7 @@ export function parseExpression(expr) {
   const [, method] = expr.match(/^([a-z_]\w+)\(\)$/i) || [];
   if (method) {
     return {
-      type: 'action',
+      type: 'method',
       fn: ctx => ctx[method]()
     };
   }

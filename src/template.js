@@ -1,4 +1,4 @@
-import { joinTwo, getDeep } from './utils';
+import { joinTwo, getDeep, isObject } from './utils';
 
 /**
  * @param {string[]} names
@@ -8,7 +8,7 @@ export function makeFormatterFunction(names, source) {
   return names.map(n => source[n]).reduce((a, b) => c => b(a(c)), _ => _);
 }
 
-export const toString = x => (typeof x === 'object' ? JSON.stringify(x) : String(x));
+export const toString = x => (isObject(x, true) ? JSON.stringify(x) : String(x));
 
 /**
  * @param {string} text

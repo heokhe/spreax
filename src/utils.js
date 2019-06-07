@@ -23,3 +23,5 @@ export const setDeep = (object, path, value) => {
   const last = path[path.length - 1];
   getDeep(object, path.slice(0, -1))[last] = value;
 };
+
+export const isObject = (o, acceptArrays = false) => typeof o === 'object' && o !== null && (!acceptArrays ? !Array.isArray(o) : true);

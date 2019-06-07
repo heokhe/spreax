@@ -1,3 +1,5 @@
+import { isObject } from './utils';
+
 /**
  * @param {*} object
  * @param {(key: string) => void} callback
@@ -8,7 +10,7 @@ export default function proxy(object, callback, pathPrefix = []) {
   return new Proxy(object, {
     get(o, key) {
       const value = o[key];
-      if (typeof value === 'object' && value !== null) {
+      if (isObject(value, true)) {
         const path = [...pathPrefix, key],
           keyMap = path.join('.');
 

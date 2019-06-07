@@ -6,9 +6,9 @@ export default new Directive('on', ({
   element.addEventListener(param, event => {
     if (prevent) event.preventDefault();
 
-    if (data.type === 'action' || data.type === 'statement') {
+    if (data.type === 'method' || data.type === 'statement') {
       data.fn(ctx);
-    }
+    } else throw new Error(`expected method or statement, got ${data.type}`);
   });
 }, {
   paramRequired: true,
