@@ -9,7 +9,7 @@ export const DIRECTIVES = {};
  * @typedef {Object} DirectiveCallbackPayload
  * @property {Element} element
  * @property {DirectiveOptions} options
- * @property {object} context
+ * @property {import("../context").default} context
  * @property {string} [param]
  * @property {string} [rawValue]
  * @property {import("../parser/index").ParsedExpression} [data]

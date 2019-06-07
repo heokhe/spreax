@@ -10,7 +10,7 @@ import parseLiteral from './literals';
  * @property {string} [property]
  * @property {boolean} [isPropertyName]
  * @property {ParsedExpression} [rightHand]
- * @property {string} [item]
+ * @property {string} [itemName]
  */
 
 /**
@@ -41,7 +41,7 @@ export function parseExpression(expr) {
     if (parsedLeft.isPropertyName && parsedRight.type !== 'statement') {
       return {
         type: 'loop',
-        item: left,
+        itemName: left,
         property: parsedRight.property,
         fn: parsedRight.fn
       };

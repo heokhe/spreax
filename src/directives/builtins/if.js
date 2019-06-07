@@ -1,17 +1,15 @@
 import { Directive } from '..';
 
-export default new Directive('if', function ({ element, data }) {
+export default new Directive('if', (({ element, data, context: ctx }) => {
   const parent = element.parentElement,
     comment = document.createComment(element.tagName.toLowerCase());
 
   element.before(comment);
-  this.$on(data.property, () => {
-    if (data.fn(this.$ctx)) {
+  ctx.$on(data.property, () => {
+    if (data.fn(ctx)) {
       if (!parent.contains(element)) {
         comment.after(element);
       }
-    } else {
-      element.remove();
-    }
-  }, { immediate: true });
-});
+    } else element.remove();
+  }, true);
+}));

@@ -5,7 +5,7 @@ import createTemplate from './template';
 import { execute } from './directives';
 import './directives/builtins';
 import observe from './observer';
-import createContext from './context';
+import Context, { createAlias } from './context';
 import findSelector from './findSelector';
 
 export { Directive, register } from './directives';
@@ -31,13 +31,16 @@ export class Spreax {
 
     /** @type {SpreaxEvent[]} */
     this.$events = [];
-    this.$ctx = createContext({
+
+    const context = new Context({
       state,
-      methods,
       getters,
-      thisArg: this,
-      onChange: this.$emit.bind(this)
+      methods,
+      thisArg: this
     });
+    this.$ctx = context;
+    for (const key of context.$keys) createAlias(key, context, this);
+
     this.$formatters = formatters;
 
     getAllNodes(el).forEach(n => this.$handleNode(n));
@@ -46,15 +49,17 @@ export class Spreax {
 
   /** @param {Node|Element} target */
   $handleNode(target) {
+    const ctx = this.$ctx;
+
     if (isText(target)) {
       const text = target.textContent;
       if (/^\s*$/.test(text)) return;
 
       const template = createTemplate(text, this.$formatters);
       for (const v of template.vars) {
-        this.$on(v, () => {
-          target.textContent = template.render(this.$ctx);
-        }, { immediate: true });
+        ctx.$on(v, () => {
+          target.textContent = template.render(ctx);
+        }, true);
       }
     } else if (isElement(target)) {
       const selector = findSelector(target, this.$el);
@@ -68,26 +73,12 @@ export class Spreax {
             param: di.param,
             options: di.options,
             value: di.value,
-            context: this.$ctx
+            context: ctx
           });
         } catch ({ message }) {
-          throw new Error(`Error from @${name}: ${message}\n found at: ${selector}`);
+          throw new Error(`[@${name}] ${message}\n  found at: ${selector}`);
         }
       }
-    }
-  }
-
-  $on(key, callback, { immediate = false } = {}) {
-    this.$events.push({ key, fn: callback.bind(this) });
-    if (immediate) this.$emit(this.$events.length - 1);
-  }
-
-  $emit(keyOrId) {
-    const events = this.$events,
-      isId = typeof keyOrId === 'number';
-    for (let i = 0; i < events.length; i++) {
-      const { key, fn } = events[i];
-      if (keyOrId === (isId ? i : key)) fn();
     }
   }
 }

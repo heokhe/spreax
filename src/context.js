@@ -1,57 +1,134 @@
 import proxy from './proxy';
+import { getDeep, setDeep } from './utils';
 
-function createAlias(key, target, source, enumerable = false) {
+export function createAlias(key, source, target, writable = true) {
+  if (key in target) throw new Error(`cannot create alias "${key}": this property already exists`);
+
   Object.defineProperty(target, key, {
     get: () => source[key],
-    set: v => { source[key] = v; },
-    enumerable
+    set: v => {
+      if (writable) source[key] = v;
+      return writable;
+    }
   });
 }
 
-export default function createContext({
-  state, methods, getters, onChange, thisArg
-}) {
-  const ctx = {},
-    proxifiedState = proxy(state, key => {
+export default class Context {
+  constructor({
+    state: rawState = {}, methods = {}, getters = {},
+    instance, staticData = {}
+  }) {
+    /** @type {Listener[]} */
+    this.$listeners = [];
+    this.$instance = instance;
+    this.$rawState = rawState;
+
+    const inner = {};
+    this.$inner = inner;
+
+    const state = proxy(rawState, key => {
       const sections = key.split('.');
       for (let i = 1; i <= sections.length; i++) {
-        onChange(sections.slice(0, i).join('.'));
+        this.$emit(sections.slice(0, i).join('.'));
       }
       for (const gkey in getters) {
-        // eslint-disable-next-line no-use-before-define
-        updateGetter(gkey);
-        onChange(gkey);
+        this.$setGetter(gkey);
+        this.$emit(gkey);
       }
-    }),
-    updateGetter = name => {
-      const value = getters[name].call(thisArg, proxifiedState);
-      if (!(name in ctx) || value !== ctx[name]) {
-        Object.defineProperty(ctx, name, {
-          writable: false,
-          configurable: true,
-          value
-        });
-      }
-    };
+    });
+    this.$state = state;
+    for (const k in state) {
+      createAlias(k, state, this.$inner);
+      createAlias(k, this.$inner, this);
+    }
 
-  for (const key in proxifiedState) {
-    createAlias(key, ctx, proxifiedState, true);
-    createAlias(key, thisArg, ctx);
-  }
+    this.$getterFunctions = getters;
+    for (const key in getters) {
+      this.$setGetter(key);
+      createAlias(key, this.$inner, this);
+    }
 
-  for (const object of [methods, getters]) {
-    for (const key in object) {
-      if (object === methods) {
-        Object.defineProperty(ctx, key, {
-          value: object[key].bind(thisArg),
-          writable: false,
-          configurable: false,
-          enumerable: false
-        });
-      } else updateGetter(key);
-      createAlias(key, thisArg, ctx);
+    const newMethods = {};
+    for (const key in methods) {
+      newMethods[key] = methods[key].bind(instance);
+      createAlias(key, newMethods, this.$inner);
+      createAlias(key, this.$inner, this);
+    }
+    this.$methods = newMethods;
+
+    for (const key in staticData) {
+      createAlias(key, staticData, this.$inner, false);
+      createAlias(key, staticData, this, false);
     }
   }
 
-  return ctx;
+  /**
+   * Re-computes the value of a getter.
+   * @param {string} name
+   */
+  $setGetter(name) {
+    const inner = this.$inner;
+    const value = this.$getterFunctions[name].call(this.$instance, this.$state);
+
+    if (!(name in inner) || value !== inner[name]) {
+      Object.defineProperty(this.$inner, name, {
+        writable: false,
+        configurable: true,
+        value,
+        enumerable: true
+      });
+    }
+  }
+
+  /** @param {string|string[]} path */
+  $get(path) {
+    return getDeep(this.$inner, path);
+  }
+
+  /**
+   * @param {string|string[]} path
+   * @param {*} value
+   */
+  $set(path, value) {
+    setDeep(this.$inner, path, value);
+  }
+
+  /**
+   * @typedef {{ type: string, value: * }} SpreaxEvent
+   * @typedef {(event: SpreaxEvent) => void} SpreaxEventCallback
+   * @typedef {{ key: string, fn: SpreaxEventCallback }} Listener
+   * @param {string} key
+   * @param {(event: SpreaxEvent) => void} callback
+   * @param {boolean} [immediate]
+   */
+  $on(key, callback, immediate = false) {
+    const id = this.$listeners.push({
+      key, fn: callback.bind(this.$instance)
+    }) - 1;
+    if (immediate) this.$emit(id);
+  }
+
+  /** @param {string|number} keyOrId */
+  $emit(keyOrId) {
+    const listeners = this.$listeners,
+      { length } = listeners,
+      isId = typeof keyOrId === 'number';
+
+    for (let i = 0; i < length; i++) {
+      const { key, fn } = listeners[i];
+      if (keyOrId === (isId ? i : key)) {
+        fn({
+          type: key,
+          value: this.$get(key)
+        });
+      }
+    }
+  }
+
+  /** @returns {string[]} */
+  get $keys() {
+    return Object.keys(
+      Object.getOwnPropertyDescriptors(this.$inner)
+    );
+  }
 }

@@ -1,9 +1,11 @@
 import { Directive } from '..';
 
-export default new Directive('class', function ({ data, element, param }) {
-  this.$on(data.property, () => {
+export default new Directive('class', ({
+  data, element, param, context: ctx
+}) => {
+  ctx.$on(data.property, () => {
     const { classList: list } = element,
-      value = data.fn(this.$ctx);
+      value = data.fn(ctx);
 
     if (param) {
       if (value) list.add(param);
@@ -14,5 +16,5 @@ export default new Directive('class', function ({ data, element, param }) {
         else list.remove(key);
       }
     } else throw new Error('expected string or object');
-  }, { immediate: true });
+  }, true);
 });
