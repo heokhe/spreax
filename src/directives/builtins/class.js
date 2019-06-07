@@ -18,4 +18,6 @@ export default new Directive('class', ({
       }
     } else throw new Error('expected string or object');
   }, true);
+}, {
+  disallow: ['statement', 'loop']
 });

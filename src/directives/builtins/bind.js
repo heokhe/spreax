@@ -26,4 +26,6 @@ export default new Directive('bind', (({
 
   element.addEventListener('change', handleChange);
   if (!lazy) element.addEventListener('input', handleChange);
-}));
+}), {
+  allow: ['property']
+});

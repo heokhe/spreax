@@ -9,5 +9,6 @@ export default new Directive('attr', (({
     else element.setAttribute(param, val);
   }, true);
 }), {
-  paramRequired: true
+  paramRequired: true,
+  disallow: ['statement', 'loop']
 });

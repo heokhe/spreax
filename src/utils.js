@@ -25,3 +25,8 @@ export const setDeep = (object, path, value) => {
 };
 
 export const isObject = (o, acceptArrays = false) => typeof o === 'object' && o !== null && (!acceptArrays ? !Array.isArray(o) : true);
+
+export const isEmptyObject = o => {
+  for (const _ in o) return false;
+  return true;
+};

@@ -12,4 +12,6 @@ export default new Directive('if', (({ element, data, context: ctx }) => {
       }
     } else element.remove();
   }, true);
-}));
+}), {
+  disallow: ['statement', 'loop']
+});

@@ -9,5 +9,6 @@ export default new Directive('style', function ({
     element.style[param] = val;
   }, true);
 }, {
-  paramRequired: true
+  paramRequired: true,
+  disallow: ['statement', 'loop']
 });
