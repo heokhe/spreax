@@ -8,10 +8,8 @@ export const DIRECTIVES = {};
 /** @param {Directive} directive */
 export function register(directive) {
   const { name } = directive;
-
   if (name in DIRECTIVES) throw new Error(`already registered ${name}`);
   if (!/^[a-z]+$/i.test(name)) throw new Error(`${name} is not a valid directive name`);
-
   DIRECTIVES[name] = directive;
 }
 
@@ -37,7 +35,8 @@ export class Directive {
    */
   constructor(name, callback, {
     paramRequired = false,
-    allow, disallow
+    allow = ['loop', 'method', 'property', 'statement', 'value'],
+    disallow = []
   } = {}) {
     this.name = name;
     this.fn = callback;
@@ -47,10 +46,7 @@ export class Directive {
 
   isValidType(t) {
     const { allow, disallow } = this.types;
-
-    let b = !allow || allow.includes(t);
-    if (b && disallow && disallow.includes(t)) b = false;
-    return b;
+    return allow.includes(t) && !disallow.includes(t);
   }
 }
 
@@ -62,10 +58,10 @@ export function execute(name, {
   if (name in DIRECTIVES) {
     const { [name]: di } = DIRECTIVES,
       parsedData = parseExpression(value),
-      { type: dataType } = parsedData;
+      { type } = parsedData;
 
     if (di.paramRequired && !param) throw new Error('this directive requires a parameter');
-    if (!di.isValidType(dataType)) throw new Error(`"${dataType}" type is not allowed`);
+    if (!di.isValidType(type)) throw new Error(`"${type}" type is not allowed`);
 
     di.fn.call(instance, {
       data: parsedData,

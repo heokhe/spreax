@@ -3,7 +3,6 @@ import { getDeep, setDeep } from './utils';
 
 export function createAlias(key, source, target, writable = true) {
   if (key in target) throw new Error(`cannot create alias "${key}": this property already exists`);
-
   Object.defineProperty(target, key, {
     get: () => source[key],
     set: v => {
@@ -22,6 +21,10 @@ export default class Context {
     this.$listeners = [];
     this.$instance = instance;
     this.$rawState = rawState;
+    /** @type {Context} */
+    this.$parent = null;
+    /** @type {Context[]} */
+    this.$children = [];
 
     const inner = {};
     this.$inner = inner;
@@ -112,10 +115,8 @@ export default class Context {
   /** @param {string|number} keyOrId */
   $emit(keyOrId) {
     const listeners = this.$listeners,
-      { length } = listeners,
       isId = typeof keyOrId === 'number';
-
-    for (let i = 0; i < length; i++) {
+    for (let i = 0; i < listeners.length; i++) {
       const { key, fn } = listeners[i];
       if (keyOrId === (isId ? i : key)) {
         fn({
@@ -128,8 +129,6 @@ export default class Context {
 
   /** @returns {string[]} */
   get $keys() {
-    return Object.keys(
-      Object.getOwnPropertyDescriptors(this.$inner)
-    );
+    return Object.keys(Object.getOwnPropertyDescriptors(this.$inner));
   }
 }
