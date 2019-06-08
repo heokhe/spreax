@@ -119,7 +119,7 @@ export default class Context {
     for (let i = 0; i < listeners.length; i++) {
       const { key, fn } = listeners[i];
       if (keyOrId === (isId ? i : key)) {
-        fn({
+        fn.call(this.$instance, {
           type: key,
           value: this.$get(key)
         });
