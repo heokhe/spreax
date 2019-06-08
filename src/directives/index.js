@@ -65,9 +65,7 @@ export function execute(name, {
       { type: dataType } = parsedData;
 
     if (di.paramRequired && !param) throw new Error('this directive requires a parameter');
-    if (di.isValidType(dataType)) {
-      throw new Error(`${dataType} type is not allowed`);
-    }
+    if (!di.isValidType(dataType)) throw new Error(`"${dataType}" type is not allowed`);
 
     di.fn.call(instance, {
       data: parsedData,
