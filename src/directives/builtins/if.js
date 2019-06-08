@@ -6,10 +6,11 @@ export default new Directive('if', (({ element, data, context: ctx }) => {
 
   element.before(comment);
   ctx.$on(data.property, () => {
+    if (!parent.contains(comment)) {
+      throw new Error('dynamically created comment node is moved or removed.');
+    }
     if (data.fn(ctx)) {
-      if (!parent.contains(element)) {
-        comment.after(element);
-      }
+      if (!parent.contains(element)) comment.after(element);
     } else element.remove();
   }, true);
 }), {
