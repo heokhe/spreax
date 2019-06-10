@@ -14,17 +14,12 @@ export function createAlias(key, source, target, writable = true) {
 
 export default class Context {
   constructor({
-    state: rawState = {}, methods = {}, getters = {},
-    instance, staticData = {}
+    state: rawState = {}, methods = {}, getters = {}, instance
   }) {
     /** @type {Listener[]} */
     this.$listeners = [];
     this.$instance = instance;
     this.$rawState = rawState;
-    /** @type {Context} */
-    this.$parent = null;
-    /** @type {Context[]} */
-    this.$children = [];
 
     const inner = {};
     this.$inner = inner;
@@ -57,11 +52,6 @@ export default class Context {
       createAlias(key, this.$inner, this);
     }
     this.$methods = newMethods;
-
-    for (const key in staticData) {
-      createAlias(key, staticData, this.$inner, false);
-      createAlias(key, staticData, this, false);
-    }
   }
 
   /**
@@ -71,9 +61,10 @@ export default class Context {
   $setGetter(name) {
     const inner = this.$inner,
       value = this.$getterFunctions[name].call(this.$instance, this.$state),
-      exists = name in inner;
+      exists = name in inner,
+      hasChanged = value !== inner[name];
 
-    if (!exists || value !== inner[name]) {
+    if (!exists || hasChanged) {
       Object.defineProperty(inner, name, {
         writable: false,
         configurable: true,
@@ -81,7 +72,7 @@ export default class Context {
         enumerable: true
       });
     }
-    if (exists) this.$emit(name);
+    if (exists && hasChanged) this.$emit(name);
   }
 
   /** @param {string|string[]} path */
@@ -116,8 +107,9 @@ export default class Context {
   $emit(keyOrId) {
     const listeners = this.$listeners,
       isId = typeof keyOrId === 'number';
+
     for (let i = 0; i < listeners.length; i++) {
-      const { key, fn } = listeners[i];
+      const { [i]: { fn, key } } = listeners;
       if (keyOrId === (isId ? i : key)) {
         fn.call(this.$instance, {
           type: key,
