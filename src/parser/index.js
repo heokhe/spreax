@@ -1,11 +1,10 @@
-import { getDeep, setDeep } from '../utils';
 import parseLiteral from './literals';
 
 /**
  * @typedef {'property'|'method'|'value'|'statement'|'loop'} ExpressionType
  * @typedef {Object} ParsedExpression
  * @property {ExpressionType} type
- * @property {(ctx: any) => any} fn
+ * @property {(ctx: import('../context').default) => any} fn
  * @property {string[]} [path]
  * @property {string} [property]
  * @property {boolean} [isPropertyName]
@@ -64,7 +63,7 @@ export function parseExpression(expr) {
       property,
       path,
       isPropertyName: true,
-      fn: ctx => getDeep(ctx, path)
+      fn: ctx => ctx.$get(path)
     };
   }
 
@@ -72,7 +71,7 @@ export function parseExpression(expr) {
   if (method) {
     return {
       type: 'method',
-      fn: ctx => ctx[method]()
+      fn: ctx => ctx.$methods[method]()
     };
   }
 
@@ -116,7 +115,7 @@ export function parseExpression(expr) {
             value = lv;
         }
 
-        return setDeep(ctx, leftHand.path, value);
+        return ctx.$set(leftHand.path, value);
       }
     };
   }

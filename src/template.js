@@ -1,4 +1,4 @@
-import { joinTwo, getDeep, isObject } from './utils';
+import { joinTwo, isObject } from './utils';
 
 /**
  * @param {string[]} names
@@ -24,10 +24,11 @@ export default function createTemplate(text, fmtSource) {
 
   return {
     vars: matches.map(m => m.variable),
+    /** @param {import('./context').default} ctx */
     render: ctx => {
       return joinTwo(others, matches.map(m => {
         const format = makeFormatterFunction(m.formatters, fmtSource),
-          value = getDeep(ctx, m.variable.split('.'));
+          value = ctx.$get(m.variable);
 
         return toString(format(toString(value)));
       }));
