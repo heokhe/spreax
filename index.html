@@ -56,7 +56,10 @@ const app = new sp.Spreax({
     },
     getters: {
         isActive: ({ timer }) => timer !== null,
-        percentage: ({ seconds, left }) => seconds ? (left / seconds * 100) : 0,
+        percentage({ seconds, left }) {
+            if (!this.isActive || !seconds) return 0
+            return left / seconds * 100
+        },
         progressValue() {
             return 1 - (this.percentage / 100)
         },
