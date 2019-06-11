@@ -49,4 +49,46 @@ The `@bind` directive makes two-way binding between form input and app state a b
 ```html
 <input type='text' placeholder='your name' @bind='name'>
 ```
-As you type in the input, value of `name` property name will be updated.
+As you type in the input, value of `name` property name will be updated and vice-versa.
+
+## Controlling the `class` attribute
+`@class` directive can toggle the classnames of an element:
+```html
+<div @class:is-red="isRed">Using parameters</div>
+<div @class="objectClass">Using objects</div>
+<script>
+new Spreax({
+  state: {
+    isRed: false
+  },
+  getters: {
+    objectClass() {
+      const { isRed } = this;
+      // every property with truthy value will be added to `el.classList`
+      return {
+        'is-red': isRed,
+        'is-primary': !isRed,
+        'another-one': anotherFunction() // will return true
+      }
+      // assuming "!!isRed === true", result is: "is-red another-one"
+    }
+  }
+})
+```
+
+## Styling Elements
+```html
+<script>
+new Spreax({
+  state: {
+    colors: {
+      bg: 'red',
+      fg: 'white'
+    }
+  }
+})
+</script>
+<p @style:color="colors.fg" @style:background-color="colors.bg">
+  Red background + white text
+</p>
+```
