@@ -3,12 +3,12 @@
  * @returns {{done: boolean, value?: string|number|boolean|null|void}}
  */
 export default function parseLiteral(lit) {
-  const done = v => ({ done: true, value: v });
+  const done = value => ({ done: true, value });
   if (/^[-+]?\d+(?:\.\d*)?$/.test(lit)) {
     return done(+lit);
   } if (/^(['"`]).*\1$/.test(lit)) {
     return done(lit.slice(1, -1));
-  } if (/^:[a-z]*$/.test(lit)) {
+  } if (/^:[a-z0-9-_]*$/.test(lit)) {
     return done(lit.slice(1));
   }
   if (lit === 'true') return done(true);

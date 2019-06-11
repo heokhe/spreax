@@ -16,7 +16,7 @@ import parseLiteral from './literals';
  * @param {string} expr
  * @returns {ParsedExpression}
  */
-export function parseExpression(expr) {
+export default function parseExpression(expr) {
   expr = expr.trim();
 
   if (expr[0] === '!') {
@@ -80,9 +80,9 @@ export function parseExpression(expr) {
     const [, rawLeft, operator, rawRight] = twoHands,
       [leftHand, rightHand] = [rawLeft, rawRight].map(h => parseExpression(h.trim()));
 
-    if (operator === '!' || operator === '=') { // comparing
-      if (leftHand.type === 'statement' || rightHand.type === 'statement') throw new Error('cannot compare statements');
-
+    if (leftHand.type !== 'statement'
+      && rightHand.type !== 'statement'
+      && ['!', '='].includes(operator)) { // comparing
       return {
         ...leftHand,
         fn: ctx => {
@@ -90,34 +90,23 @@ export function parseExpression(expr) {
           return operator === '=' ? lv === rv : lv !== rv;
         }
       };
-    }
-    // assigning values
+    } if (rightHand.type !== 'statement') { // assigning values
+      if (!leftHand.isPropertyName) throw new Error(`"${rawLeft}" is not a property name`);
 
-    if (!leftHand.isPropertyName) throw new Error(`"${rawLeft}" is not a property name`);
-    if (rightHand.type === 'statement') throw new Error(`${rawRight} is a statement, not an expression`);
+      return {
+        type: 'statement',
+        rightHand,
+        fn: ctx => {
+          const rv = rightHand.fn(ctx),
+            lv = leftHand.fn(ctx),
+            value = operator === '+' ? lv + rv
+              : operator === '-' ? lv - rv
+                : lv;
 
-    return {
-      type: 'statement',
-      rightHand,
-      fn: ctx => {
-        const rv = rightHand.fn(ctx),
-          lv = leftHand.fn(ctx);
-        let value;
-
-        switch (operator) {
-          case '+':
-            value = lv + rv;
-            break;
-          case '-':
-            value = lv - rv;
-            break;
-          default:
-            value = lv;
+          ctx.$set(leftHand.path, value);
         }
-
-        return ctx.$set(leftHand.path, value);
-      }
-    };
+      };
+    }
   }
   throw new Error(`unexpected expression "${expr}"`);
 }

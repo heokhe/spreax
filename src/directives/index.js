@@ -1,4 +1,4 @@
-import { parseExpression } from '../parser';
+import parseExpression from '../parser';
 
 export const DIRECTIVE_REGEX = /^@([a-z]+)(?::((?:[a-z]+-)*[a-z]+))?(\.[a-z]+)*$/i;
 
