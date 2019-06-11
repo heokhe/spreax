@@ -31,6 +31,9 @@
 		],
 		"arrow-body-style": "off",
 		"no-nested-ternary": "off",
-		"guard-for-in": ["off"]
+		"guard-for-in": ["off"],
+		"no-else-return": ["error", {
+			"allowElseIf": true
+		}]
 	}
 }
