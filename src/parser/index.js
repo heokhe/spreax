@@ -23,12 +23,13 @@ export default function parseExpression(expr) {
     const parsed = parseExpression(expr.slice(1)),
       { type } = parsed;
 
-    if (type === 'statement') return null;
-    return {
-      ...parsed,
-      ...parsed.type === 'property' ? { isPropertyName: false } : { type: 'value' },
-      fn: c => !parsed.fn(c)
-    };
+    if (type !== 'statement') {
+      return {
+        ...parsed,
+        ...type === 'property' ? { isPropertyName: false } : { type: 'value' },
+        fn: c => !parsed.fn(c)
+      };
+    }
   }
 
   const loop = expr.match(/^(.+) of (.+)$/);
@@ -75,34 +76,37 @@ export default function parseExpression(expr) {
     };
   }
 
-  const twoHands = expr.match(/^([^ ]+) *([-+]|[=!])?= *([^ ]+)$/) || [];
+  const twoHands = expr.match(/^([^ ]+) *((?:[=!]?=)|(?:[+/*-]=?)) *([^ ]+)$/) || [];
   if (twoHands.length) {
     const [, rawLeft, operator, rawRight] = twoHands,
-      [leftHand, rightHand] = [rawLeft, rawRight].map(h => parseExpression(h.trim()));
+      [leftHand, rightHand] = [rawLeft, rawRight].map(parseExpression);
 
     if (leftHand.type !== 'statement'
       && rightHand.type !== 'statement'
-      && ['!', '='].includes(operator)) { // comparing
+      && ['!=', '=='].includes(operator)) { // comparing
       return {
         ...leftHand,
         fn: ctx => {
           const [lv, rv] = [leftHand, rightHand].map(({ fn }) => fn(ctx));
-          return operator === '=' ? lv === rv : lv !== rv;
+          return operator === '==' ? lv === rv : lv !== rv;
         }
       };
-    } if (rightHand.type !== 'statement') { // assigning values
-      if (!leftHand.isPropertyName) throw new Error(`"${rawLeft}" is not a property name`);
+    } else if ((operator.length === 2 || operator === '=')
+      && rightHand.type !== 'statement') { // assigning values
+      if (!leftHand.isPropertyName) throw new Error(`"${rawLeft}" is not a valid property name`);
 
       return {
         type: 'statement',
         rightHand,
         fn: ctx => {
-          const rv = rightHand.fn(ctx),
-            lv = leftHand.fn(ctx),
-            value = operator === '+' ? lv + rv
-              : operator === '-' ? lv - rv
-                : lv;
-
+          const r = rightHand.fn(ctx),
+            l = leftHand.fn(ctx),
+            [o] = operator, // the character before =
+            value = o === '+' ? l + r
+              : o === '-' ? l - r
+                : o === '*' ? l * r
+                  : o === '/' ? l / r
+                    : r;
           ctx.$set(leftHand.path, value);
         }
       };
