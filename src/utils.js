@@ -30,3 +30,11 @@ export const isEmptyObject = o => {
   for (const _ in o) return false;
   return true;
 };
+
+/**
+ * @param {Array} arr
+ * @example duplicateIndexes([1,2,2,3,3,3]) // [2,4,5]
+ */
+export const duplicateIndexes = arr => arr
+  .map((x, i) => (i !== arr.indexOf(x) ? i : null))
+  .filter(e => e !== null);

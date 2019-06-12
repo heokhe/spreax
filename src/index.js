@@ -28,7 +28,6 @@ export class Spreax {
   }) {
     el._sp = this;
     this.$el = el;
-
     /** @type {SpreaxEvent[]} */
     this.$events = [];
 
@@ -63,7 +62,6 @@ export class Spreax {
       }
     } else if (isElement(target)) {
       const selector = findSelector(target, this.$el);
-
       for (const di of getDirectives(target)) {
         const { name } = di;
         try {
