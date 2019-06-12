@@ -1,5 +1,5 @@
 import { DIRECTIVE_REGEX } from './directives';
-import { duplicateIndexes } from './utils';
+import { getDuplicateIndexes } from './utils';
 
 export const { ELEMENT_NODE, TEXT_NODE } = Node;
 export const isText = node => node.nodeType === TEXT_NODE;
@@ -43,7 +43,7 @@ export function getDirectives(el) {
         };
       }),
     strings = drctvs.map(({ name, param }) => stringifyDirective(name, param)),
-    dups = duplicateIndexes(strings);
+    dups = getDuplicateIndexes(strings);
 
   return drctvs.map((d, i) => {
     if (dups.includes(i)) {
