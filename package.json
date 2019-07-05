@@ -13,6 +13,7 @@
 		"lint": "eslint --fix src"
 	},
 	"devDependencies": {
+		"@hkh12/eslint-config": "^1.0.1",
 		"eslint": "5.3.0",
 		"eslint-config-airbnb-base": "13.1.0",
 		"eslint-plugin-import": "^2.14.0",
