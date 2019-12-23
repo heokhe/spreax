@@ -1,10 +1,12 @@
-import buble from 'rollup-plugin-buble';
-import resolve from 'rollup-plugin-node-resolve';
-import cleanup from 'rollup-plugin-cleanup';
-import { terser } from 'rollup-plugin-terser';
+// import buble from 'rollup-plugin-buble';
+import resolve from '@rollup/plugin-node-resolve';
+// import cleanup from 'rollup-plugin-cleanup';
+// import commonjs from 'rollup-plugin-commonjs';
+// import { terser } from 'rollup-plugin-terser';
+import ts from '@rollup/plugin-typescript';
 import { main, module as _module, browser } from './package.json';
 
-const input = 'src/index.js',
+const input = 'src/index.ts',
   createOutput = (format, file, plugins) => ({
     input,
     output: {
@@ -17,26 +19,31 @@ const input = 'src/index.js',
     plugins
   });
 
-const browserBuble = buble({
-  objectAssign: 'Object.assign',
-  transforms: {
-    dangerousForOf: true
-  }
-});
+// const browserBuble = buble({
+//   objectAssign: 'Object.assign',
+//   transforms: {
+//     dangerousForOf: true
+//   }
+// });
 
 export default [
   createOutput('iife', browser, [
-    resolve(),
-    browserBuble,
-    cleanup({ comments: 'none' })
+    ts(),
+    resolve({
+      extensions: ['.ts', '.js']
+    }),
+    // resolve(),
+    // common
+    // browserBuble,
+    // cleanup({ comments: 'none' })
   ]),
-  ...process.env.NODE_ENV === 'production' ? [
-    createOutput('iife', browser.replace(/\.js/, '.min.js'), [
-      resolve(),
-      browserBuble,
-      terser()
-    ]),
-    createOutput('cjs', main, [resolve()]),
-    createOutput('es', _module, [resolve()])
-  ] : []
+  // ...process.env.NODE_ENV === 'production' ? [
+  //   createOutput('iife', browser.replace(/\.ts/, '.min.js'), [
+  //     resolve(),
+  //     browserBuble,
+  //     terser()
+  //   ]),
+  //   createOutput('cjs', main, [resolve()]),
+  //   createOutput('es', _module, [resolve()])
+  // ] : []
 ];

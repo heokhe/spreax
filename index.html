@@ -16,63 +16,23 @@
 </head>
 <body>
     <div id="app">
-        <form @on:submit.prevent="handleSubmit()">
-            <input type="number" min="1" max="250" @bind="seconds" @attr:disabled="isActive">
-            <button type="submit">Start</button>
-            <button type="button" @if="isActive" @on:click="reset()">Reset</button>
-        </form>
-        <div @if="isActive">
-            <h1>
-                @(left | prettytime) left &ndash;
-                <span @style:color="color">@(percentage | toFixed)%</span>
-            </h1>
-            <progress @attr:value="progressValue"></progress>
-        </div>
+        <span @text="a"></span>
     </div>
 </body>
 <script src='dist/spreax.browser.js'></script>
 <script>
-const app = new sp.Spreax({
-    el: document.querySelector('#app'),
-    state: {
-        timer: null,
-        left: 0,
-        seconds: 0
-    },
-    methods: {
-        handleSubmit() {
-            if (this.isActive) return;
-
-            this.left = this.seconds;
-            this.timer = setInterval(() => {
-                this.left--
-                if (this.left <= 0) this.reset()
-            }, 1000)
-        },
-        reset() {
-            clearInterval(this.timer)
-            this.timer = null
+    const app = new sp.Spreax({
+        el: document.getElementById('app'),
+        state: {
+            a: 2,
+            b: 8,
+            c: 0,
         }
-    },
-    getters: {
-        isActive: ({ timer }) => timer !== null,
-        percentage({ seconds, left }) {
-            if (!this.isActive || !seconds) return 0
-            return left / seconds * 100
-        },
-        progressValue() {
-            return 1 - (this.percentage / 100)
-        },
-        color() {
-            const p = this.percentage * 2.55;
-            return `rgb(${255 - p}, ${p}, 0)`
-        }
-    },
-    formatters: {
-        prettytime: sec => [Math.floor(sec / 60), sec % 60]
-            .map(e => e.toString().padStart(2, '0')).join(':'),
-        toFixed: str => (+str).toFixed(2)
-    }
-})
+    });
+    app.$ctx.on('c', () => {
+        console.log('c = ' + app.$ctx.state.c);
+    }, true)
+    app.$ctx.state.c++;
+    window.app = app;
 </script>
 </html>
