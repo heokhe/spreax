@@ -1,16 +1,17 @@
 import { proxify } from './proxy';
-import { Object } from './types';
+import { Dict } from './types';
+import { isElement } from './dom';
 
 interface Listener {
-  name: string,
-  callback: VoidFunction
+  name: string;
+  callback: VoidFunction;
 }
 
 export class Context<
-  T extends Object = Object,
-  P extends Object = Object,
-  G extends Object = Object,
-  C extends Object = {}
+  T extends Dict = Dict,
+  P extends Dict = Dict,
+  G extends Dict = Dict,
+  C extends Dict = {}
 > {
   state: T;
   listeners: Listener[];
@@ -28,7 +29,7 @@ export class Context<
     this.constants = constants;
   }
 
-  on(key: string, callback: VoidFunction, immediate: boolean = false) {
+  on(key: string, callback: VoidFunction, immediate = false) {
     this.listeners.push({
       name: key,
       callback
@@ -48,6 +49,12 @@ export class Context<
       : this.parent?.get(key);
   }
 
+  set(key: string, value: any): void {
+    key in this.state
+      ? this.state[key] = value
+      : this.parent?.set(key, value);
+  }
+
   emit(key: string) {
     for (const l of this.allListeners) {
       if (l.name === key) {
@@ -55,4 +62,14 @@ export class Context<
       }
     }
   }
+}
+
+export function findContext(node: Node): Context | undefined {
+  if (isElement(node)) {
+    let current = node;
+    while (!current._ctx)
+      current = current.parentElement;
+    return current._ctx;
+  }
+  return findContext(node.parentElement);
 }

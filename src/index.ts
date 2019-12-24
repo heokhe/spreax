@@ -1,48 +1,60 @@
-import { Context } from "./context";
-import { getAllNodes, ElementOrNode, getDirectives, getAllElements } from "./dom";
-import { Object } from "./types";
+import { Context, findContext } from './context';
+import {
+  getAllTextNodes, getDirectives, getAllElements, isElement
+} from './dom';
+import { Dict, SpreaxOptions } from './types';
+import createTemplate from './template';
 
-type Options<T extends Object> = {
-  el: Element,
-  state: T
-}
-
-declare global {
-  interface Node {
-    _spreax: Spreax
-    _ctx: Context
-  }
-}
-
-export class Spreax<T extends Object = Object> {
+export class Spreax<T extends Dict> {
   $el: Element;
   $ctx: Context<T>;
-  constructor(options: Options<T>) {
+
+  constructor(options: SpreaxOptions<T>) {
     const { el, state } = options;
     this.$el = el;
     this.$ctx = new Context(state);
 
     this.setupElement(el);
-    for (const elm of getAllElements(el)) {
+    for (const elm of getAllElements(el))
       this.setupElement(elm);
-    }
   }
 
-  setupElement(el: Element) {
-    el._spreax = this;
+  setupElement(el: Element): void {
     el._ctx = new Context({}, this.$ctx);
-    const directives = getDirectives(el);
-    for (const directive of directives) {
-      switch (directive.name) {
-        case 'text':
-          el._ctx.on(directive.value, () => {
-            el.textContent = el._ctx.get(directive.value)
-          }, true)
-          break
+    for (const { name, value } of getDirectives(el)) {
+      switch (name) {
+        case 'bind':
+          // const input = (el as HTMLInputElement);
+          // input._ctx.on(value, () => 
+          //   input.value = input._ctx.get(value)
+          // , true);
+          // input.addEventListener('keydown', () => {
+          //   setTimeout(() => {
+          //     el._ctx.set(value, input.value);
+          //   }, 0);
+          // })
+          break;
         default:
           break;
       }
     }
+    for (const textNode of getAllTextNodes(el))
+      this.setupTextNode(textNode)
+  }
+
+  setupTextNode(node: Node): void {
+    const { variables, render } = createTemplate(node.textContent);
+    if (!variables.length) return;
+    const ctx = this.findContext(node);
+    for (const variable of variables) {
+      ctx.on(variable, () => {
+        node.textContent = render(ctx);
+      }, true)
+    }
+  }
+
+  findContext(node: Node) {
+    return findContext(node);
   }
 
   // $handleNode(target) {

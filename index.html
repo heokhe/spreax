@@ -16,7 +16,9 @@
 </head>
 <body>
     <div id="app">
-        <span @text="a"></span>
+        <input @bind="name">
+        <br>
+        <span><i>@@(name)</i>: @(a), @(b), @(c), <b>@(c)</b></span>
     </div>
 </body>
 <script src='dist/spreax.browser.js'></script>
@@ -27,6 +29,7 @@
             a: 2,
             b: 8,
             c: 0,
+            name: 'hkh12'
         }
     });
     app.$ctx.on('c', () => {

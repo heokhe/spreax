@@ -6,19 +6,19 @@ export const isTextNode = (n: Node) => n.nodeType === TEXT_NODE;
 export const isElement = (n: Node): n is Element => n.nodeType === ELEMENT_NODE;
 export type ElementOrNode = Element | Node;
 
-export function getAllNodes(root: Node): ElementOrNode[] {
-  const array = [];
+export function getAllTextNodes(root: Element): Node[] {
+  const nodes = [];
   for (const childNode of root.childNodes)
-    if (isTextNode(childNode) || isElement(childNode))
-      array.push(childNode, ...getAllNodes(childNode));
-  return array;
-};
+    if (isTextNode(childNode))
+      nodes.push(childNode);
+  return nodes;
+}
 
 export function getAllElements(root: Element): Element[] {
-  const array = [];
+  const elements = [];
   for (const child of root.children)
-    array.push(child, ...getAllElements(child));
-  return array;
+    elements.push(child, ...getAllElements(child));
+  return elements;
 }
 
 export function getDirectives(element: Element) {
