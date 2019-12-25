@@ -12,9 +12,9 @@ export class Spreax<T extends Dict> {
   constructor(options: SpreaxOptions<T>) {
     const { el: rootEl, state } = options;
     this.$el = rootEl;
-    this.$ctx = new Context(state);
+    this.$ctx = new Context({ state, methods: {} });
 
-    rootEl._ctx = new Context({}, this.$ctx);
+    rootEl._ctx = new Context({ state: {}, methods: {}, parent: this.$ctx });
     this.setupElement(rootEl);
     for (const el of getAllElements(rootEl))
       this.setupElement(el);

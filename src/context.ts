@@ -1,24 +1,15 @@
 import { proxify } from './proxy';
-import { Dict } from './types';
+import { Dict, Listener, Methods, ContextOptions } from './types';
 import { isElement } from './dom';
 
-interface Listener {
-  name: string;
-  callback: VoidFunction;
-}
-
-export class Context<
-  T extends Dict = Dict,
-  P extends Dict = Dict,
-  G extends Dict = Dict,
-  C extends Dict = {}
-> {
+export class Context<T extends Dict = Dict, M extends Methods = Dict, C extends Dict = {}> {
   state: T;
   listeners: Listener[];
-  parent?: Context<P, G>;
+  parent?: Context;
   constants?: C;
+  methods: M;
   childs: Context[];
-  constructor(state: T, parent?: Context<P, G>, constants?: C) {
+  constructor({ state, parent, constants }: ContextOptions<T, M, C>) {
     this.state = proxify(state, key => this.emit(key));
     this.listeners = [];
     this.childs = [];
