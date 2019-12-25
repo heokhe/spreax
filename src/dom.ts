@@ -22,15 +22,12 @@ export function getAllElements(root: Element): Element[] {
 }
 
 export function getDirectives(element: Element) {
-  const directives = isElement(element) ?
-    [...element.attributes]
-      .filter(({ name }) => name.startsWith('@'))
-      .map(({ name, value }) => ({
-        name: name.slice(1),
-        value
-      }))
-    : [];
-  return directives
+  return [...element.attributes]
+    .filter(({ name }) => name.startsWith('@'))
+    .map(({ name: fullName, value }) => {
+      const [name, param] = fullName.slice(1).split(':', 2);
+      return { name, param, value }
+    });
 }
 
 // export const stringifyDirective = (name, param, options = {}) => {
