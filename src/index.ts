@@ -1,6 +1,6 @@
 import { Context, findContext } from './context';
 import {
-  getAllTextNodes, getDirectives, getAllElements, isElement
+  getAllTextNodes, getDirectives, getAllElements
 } from './dom';
 import { Dict, SpreaxOptions } from './types';
 import createTemplate from './template';
@@ -20,23 +20,13 @@ export class Spreax<T extends Dict> {
   }
 
   setupElement(el: Element): void {
-    el._ctx = new Context({}, this.$ctx);
+    if (el === this.$el)
+      el._ctx = new Context({}, this.$ctx);
     for (const { name, value } of getDirectives(el)) {
-      switch (name) {
-        case 'bind':
-          // const input = (el as HTMLInputElement);
-          // input._ctx.on(value, () => 
-          //   input.value = input._ctx.get(value)
-          // , true);
-          // input.addEventListener('keydown', () => {
-          //   setTimeout(() => {
-          //     el._ctx.set(value, input.value);
-          //   }, 0);
-          // })
-          break;
-        default:
-          break;
-      }
+      if (name === 'bind')
+        this.handleInput(el as HTMLInputElement, value);
+      // else if (name === 'for')
+      //   this.handleLoop
     }
     for (const textNode of getAllTextNodes(el))
       this.setupTextNode(textNode)
@@ -51,6 +41,18 @@ export class Spreax<T extends Dict> {
         node.textContent = render(ctx);
       }, true)
     }
+  }
+
+  handleInput(input: HTMLInputElement, prop: string): void {
+    const ctx = this.findContext(input);
+    ctx.on(prop, () => 
+      input.value = ctx.get(prop)
+    , true);
+    input.addEventListener('keydown', () => {
+      setTimeout(() => {
+        ctx.set(prop, input.value);
+      }, 0);
+    })
   }
 
   findContext(node: Node) {
