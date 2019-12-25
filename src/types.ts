@@ -14,6 +14,6 @@ export type SpreaxOptions<T extends Dict> = {
 
 declare global {
   interface Element {
-    _ctx: Context;
+    _ctx: Context | undefined;
   }
 }
