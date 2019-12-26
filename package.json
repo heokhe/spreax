@@ -9,7 +9,7 @@
 		"build": "rollup -c",
 		"build:prod": "npm run build -- --environment NODE_ENV:production",
 		"prepublish": "npm run build:prod",
-		"serve": "http-server . -p 5656 -c-1",
+		"serve": "http-server example -p 5656 -c-1",
 		"lint": "eslint --fix --ext ts src"
 	},
 	"devDependencies": {

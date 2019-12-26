@@ -25,16 +25,21 @@ const input = 'src/index.ts',
     ]
   });
 
-export default [
-  createOutput('iife', browser, [
+export default process.env.NODE_ENV === 'production' ? [
+  createOutput('iife', browser, []),
+  createOutput('iife', browser.replace(/\.js/, '.min.js'), [terser()]),
+  createOutput('cjs', main, []),
+  createOutput('es', _module, [])
+] : {
+  input: 'example/app.ts',
+  output: {
+    file: 'example/app.js',
+    format: 'iife'
+  },
+  plugins: [
     ts(),
     resolve({
       extensions: ['.ts', '.js']
     })
-  ]),
-  ...process.env.NODE_ENV === 'production' ? [
-    createOutput('iife', browser.replace(/\.js/, '.min.js'), [terser()]),
-    createOutput('cjs', main, []),
-    createOutput('es', _module, [])
-  ] : []
-];
+  ]
+};

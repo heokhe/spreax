@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Spreax</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div id="app">
+        <input @bind="name">
+        <br>
+        <span>
+            <i>@@(name)</i>: @(a), @(b), @(c), <b>@(c)</b>
+            <button @on:click="log">bruh @(a)x</button>
+        </span>
+        <br>
+        <div @each:x="arr">
+            <div>@(i). @(x)</div>
+        </div>
+    </div>
+</body>
+<script src='app.js'></script>
+</html>
