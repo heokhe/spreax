@@ -1,61 +1,34 @@
 import { isObject } from './utils';
 
-/**
- * @param {*} object
- * @param {(key: string) => void} callback
- * @param {string[]} [pathPrefix]
- */
-// export default function proxy(object, callback, pathPrefix = []) {
-//   const map = {};
-//   return new Proxy(object, {
-//     get(o, key) {
-//       const value = o[key];
-//       if (isObject(value, true)) {
-//         const path = [...pathPrefix, key],
-//           keyMap = path.join('.');
+type ProxyCallback = (key: string, value: any) => any;
 
-//         if (!(keyMap in map)) {
-//           map[keyMap] = proxy(value, callback, path);
-//         }
-//         return map[keyMap];
-//       }
-//       return value;
-//     },
-//     set(o, key, value) {
-//       const path = [...pathPrefix, key],
-//         keyMap = path.join('.');
-
-//       if (path.length === 1 && !(key in o)) {
-//         throw new Error(`unknown key "${keyMap}"`);
-//       }
-
-//       if (keyMap in map) {
-//         map[keyMap] = proxy(value, callback, path);
-//       }
-
-//       const oldValue = o[key];
-//       if (oldValue !== value) {
-//         o[key] = value;
-//         callback(keyMap, oldValue, value);
-//       }
-//       return true;
-//     },
-//     deleteProperty: (_, k) => {
-//       return [...pathPrefix, k].length > 1;
-//     }
-//   });
-// }
-
-export function proxify<T extends object>(object: T, onSet: (key: string, value: any) => any): T {
+export function proxify<T extends object>(object: T, onSet: ProxyCallback, pathPrefix: string[] = []): T {
+  const map = new WeakMap<string[], object>();
   return new Proxy(object, {
-    get: (obj, key) => obj[key],
-    set(obj, key, newValue) {
-      if (!(key in obj)) return false;
-      const oldValue = obj[key];
-      if (oldValue === newValue) return false;
-      obj[key] = newValue;
-      onSet(key.toString(), newValue)
+    get(obj: T, key: string) {
+      const value = obj[key];
+      if (isObject(value)) {
+        const path = [...pathPrefix, key];
+        if (!map.has(path))
+          map.set(path, proxify(value, onSet, [key]));
+        return map.get(path);
+      }
+      return value;
     },
-    deleteProperty: () => false
+    set(obj: T, key: string, newValue) {
+      const path = [...pathPrefix, key];
+      const oldValue = obj[key];
+      if (!(key in obj) && pathPrefix.length === 0) return false;
+      if (oldValue === newValue) return false;
+      if (isObject(oldValue)) {
+        map.set(path, proxify(newValue, onSet, [key]));
+        onSet(path.join('.'), newValue);
+      } else {
+        obj[key] = newValue;
+      }
+      onSet(path.join('.'), newValue);
+      return true;
+    },
+    deleteProperty: () => pathPrefix.length > 0
   })
 }

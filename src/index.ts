@@ -1,6 +1,6 @@
 import { Context, findContext } from './context';
 import {
-  getAllTextNodes, getDirectives, getAllElements
+  getAllTextNodes, getDirectives, getAllElements, isElement
 } from './dom';
 import { Dict, SpreaxOptions, Methods } from './types';
 import createTemplate from './template';
@@ -14,18 +14,24 @@ export class Spreax<T extends Dict, M extends Methods> {
     this.$el = rootEl;
     this.$ctx = new Context({ state, methods });
 
-    rootEl._ctx = new Context({ state: {}, methods: {}, parent: this.$ctx });
-    this.setupElement(rootEl);
+    this.setupElement(rootEl, new Context({
+      state: {}, methods: {}, parent: this.$ctx
+    }));
     for (const el of getAllElements(rootEl))
       this.setupElement(el);
   }
 
-  setupElement(el: Element): void {
+  setupElement(el: Element, context?: Context): void {
+    if (!el.parentElement) return;
+    if (context)
+      el._ctx = context;
     for (const { name, value, param } of getDirectives(el)) {
       if (name === 'bind')
         this.handleInput(el as HTMLInputElement, value);
       else if (name === 'on')
         this.handleAction(el, param, value);
+      else if (name === 'each')
+        this.handleEach(el, value, param);
     }
     for (const textNode of getAllTextNodes(el))
       this.setupTextNode(textNode)
@@ -57,5 +63,26 @@ export class Spreax<T extends Dict, M extends Methods> {
     el.addEventListener(eventName, event => {
       ctx.getMethod(methodName)?.call(this)
     })
+  }
+
+  handleEach<T>(el: Element, prop: string, variableName: string): void {
+    const array: T[] = findContext(el).get(prop);
+    const child = el.firstElementChild;
+    for (let i = 0; i < array.length; i++) {
+      const item = array[i];
+      const newChild = child.cloneNode(true);
+      if (isElement(newChild)) {
+        el.appendChild(newChild);
+        this.setupElement(newChild, new Context({
+          state: {}, methods: {},
+          parent: findContext(newChild),
+          constants: {
+            i,
+            [variableName]: item
+          }
+        }));
+      }
+    }
+    el.removeChild(child);
   }
 }

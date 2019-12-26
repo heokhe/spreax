@@ -18,7 +18,14 @@
     <div id="app">
         <input @bind="name">
         <br>
-        <span><i>@@(name)</i>: @(a), @(b), @(c), <b>@(c)</b></span>
+        <span>
+            <i>@@(name)</i>: @(a), @(b), @(c), <b>@(c)</b>
+            <button @on:click="log">bruh @(a)x</button>
+        </span>
+        <br>
+        <div @each:x="arr">
+            <div>@(i). @(x)</div>
+        </div>
     </div>
 </body>
 <script src='dist/spreax.browser.js'></script>
@@ -29,7 +36,13 @@
             a: 2,
             b: 8,
             c: 0,
-            name: 'hkh12'
+            name: 'hkh12',
+            arr: [4,5,2,6,3,7,8]
+        },
+        methods: {
+            log() {
+                this.$ctx.state.a **= 2;
+            }
         }
     });
     app.$ctx.on('c', () => {

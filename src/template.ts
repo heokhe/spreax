@@ -1,9 +1,9 @@
 import { joinTwo, isObject } from './utils';
 import { Context } from './context';
 
-export const toString = x => (isObject(x, true) ? JSON.stringify(x) : String(x));
+export const toString = x => (isObject(x) ? JSON.stringify(x) : String(x));
 
-const TEMPLATE_REGEX = /@\( *(?:[a-z_]\w*\.)*\w+(?: \| [a-z]+)* *\)/gi;
+const TEMPLATE_REGEX = /@\( *(?:[a-z_]\w*\.)*\w+ *\)/gi;
 
 export default function createTemplate(text: string) {
   const variables = (text.match(TEMPLATE_REGEX) || [])
