@@ -9,10 +9,11 @@ export class Context<T extends Dict = Dict, M extends Methods = Dict, C extends 
   constants?: C;
   methods: M;
   childs: Context[];
-  constructor({ state, parent, constants }: ContextOptions<T, M, C>) {
+  constructor({ state, parent, constants, methods }: ContextOptions<T, M, C>) {
     this.state = proxify(state, key => this.emit(key));
     this.listeners = [];
     this.childs = [];
+    this.methods = methods;
     if (parent) {
       this.parent = parent;
       parent.childs.push(this);
@@ -20,7 +21,7 @@ export class Context<T extends Dict = Dict, M extends Methods = Dict, C extends 
     this.constants = constants;
   }
 
-  on(key: string, callback: VoidFunction, immediate = false) {
+  on(key: string, callback: VoidFunction, immediate = false): void {
     this.listeners.push({
       name: key,
       callback
@@ -40,8 +41,14 @@ export class Context<T extends Dict = Dict, M extends Methods = Dict, C extends 
       : this.parent?.get(key);
   }
 
+  getMethod(method: string): Function | undefined {
+    return method in this.methods
+      ? this.methods[method]
+      : this.parent?.getMethod(method);
+  }
+
   set(key: string, value: any): void {
-    key in this.state
+    return key in this.state
       ? this.state[key] = value
       : this.parent?.set(key, value);
   }

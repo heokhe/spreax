@@ -2,17 +2,17 @@ import { Context, findContext } from './context';
 import {
   getAllTextNodes, getDirectives, getAllElements
 } from './dom';
-import { Dict, SpreaxOptions } from './types';
+import { Dict, SpreaxOptions, Methods } from './types';
 import createTemplate from './template';
 
-export class Spreax<T extends Dict> {
+export class Spreax<T extends Dict, M extends Methods> {
   $el: Element;
   $ctx: Context<T>;
 
-  constructor(options: SpreaxOptions<T>) {
-    const { el: rootEl, state } = options;
+  constructor(options: SpreaxOptions<T, M>) {
+    const { el: rootEl, state, methods } = options;
     this.$el = rootEl;
-    this.$ctx = new Context({ state, methods: {} });
+    this.$ctx = new Context({ state, methods });
 
     rootEl._ctx = new Context({ state: {}, methods: {}, parent: this.$ctx });
     this.setupElement(rootEl);
@@ -25,7 +25,7 @@ export class Spreax<T extends Dict> {
       if (name === 'bind')
         this.handleInput(el as HTMLInputElement, value);
       else if (name === 'on')
-        this.handleAction(el, param);
+        this.handleAction(el, param, value);
     }
     for (const textNode of getAllTextNodes(el))
       this.setupTextNode(textNode)
@@ -52,8 +52,10 @@ export class Spreax<T extends Dict> {
     })
   }
 
-  handleAction(el: Element, eventName: string): void {
-    el.addEventListener(eventName, event =>
-      console.log(`${eventName} fired: `, event))
+  handleAction(el: Element, eventName: string, methodName: string): void {
+    const ctx = findContext(el);
+    el.addEventListener(eventName, event => {
+      ctx.getMethod(methodName)?.call(this)
+    })
   }
 }

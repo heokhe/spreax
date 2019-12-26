@@ -15,16 +15,17 @@ export interface Listener {
   callback: VoidFunction;
 }
 
-export type SpreaxOptions<T extends Dict> = {
+export type SpreaxOptions<T extends Dict, M extends Methods> = {
   el: Element;
   state: T;
+  methods: M;
 }
 
 export type ContextOptions<T extends Dict, M extends Methods, C extends Dict> = {
-  state: T,
-  methods: M,
-  constants?: C,
-  parent?: Context
+  state: T;
+  methods: M;
+  constants?: C;
+  parent?: Context;
 }
 
 declare global {
