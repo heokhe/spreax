@@ -1,9 +1,11 @@
 import { Context, findContext } from './context';
 import {
-  getAllTextNodes, getDirectives, getAllElements, isElement
+  getAllTextNodes, getDirectives, getAllElements
 } from './dom';
 import { Dict, SpreaxOptions, Methods } from './types';
 import createTemplate from './template';
+import { bind } from './bind'
+import { each } from './each'
 
 export class Spreax<T extends Dict, M extends Methods> {
   $el: Element;
@@ -48,41 +50,10 @@ export class Spreax<T extends Dict, M extends Methods> {
     }
   }
 
-  handleInput(input: HTMLInputElement, prop: string): void {
-    const ctx = findContext(input);
-    ctx.on(prop, () => 
-      input.value = ctx.get(prop)
-    , true);
-    input.addEventListener('keydown', () => {
-      setTimeout(() => ctx.set(prop, input.value), 0);
-    })
-  }
-
   handleAction(el: Element, eventName: string, methodName: string): void {
     const ctx = findContext(el);
     el.addEventListener(eventName, event => {
       ctx.getMethod(methodName)?.call(this)
     })
-  }
-
-  handleEach<T>(el: Element, prop: string, variableName: string): void {
-    const array: T[] = findContext(el).get(prop);
-    const child = el.firstElementChild;
-    for (let i = 0; i < array.length; i++) {
-      const item = array[i];
-      const newChild = child.cloneNode(true);
-      if (isElement(newChild)) {
-        el.appendChild(newChild);
-        this.setupElement(newChild, new Context({
-          state: {}, methods: {},
-          parent: findContext(newChild),
-          constants: {
-            i,
-            [variableName]: item
-          }
-        }));
-      }
-    }
-    el.removeChild(child);
   }
 }
