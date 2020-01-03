@@ -2,16 +2,17 @@ import { Context, findContext } from './context';
 import {
   getAllTextNodes, getDirectives, getAllElements
 } from './dom';
-import { Dict, SpreaxOptions, Methods } from './types';
+import { Dict } from './types';
 import createTemplate from './template';
 import { bind } from './bind'
 import { each } from './each'
 
-export class Spreax<T extends Dict, M extends Methods> {
+export class Spreax<T extends Dict<any>> {
   $el: Element;
-  $ctx: Context<T>;
 
-  constructor(options: SpreaxOptions<T, M>) {
+  constructor(el: Element, variables: {
+    [x in keyof T]: StateVariable<T[x]> 
+  }) {
     const { el: rootEl, state, methods } = options;
     this.$el = rootEl;
     this.$ctx = new Context({ state, methods });

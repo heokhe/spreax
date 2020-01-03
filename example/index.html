@@ -9,16 +9,13 @@
 </head>
 <body>
     <div id="app">
-        <input @bind="name">
+        @(n) * 2 = <b>@(dbl)</b>
         <br>
-        <span>
-            <i>@@(name)</i>: @(a), @(b), @(c), <b>@(c)</b>
-            <button @on:click="log">bruh @(a)x</button>
-        </span>
+        @(n) / 2 = <b>@(hlf)</b>
         <br>
-        <div @each:x="arr">
-            <div>@(i). @(x)</div>
-        </div>
+        @(n) ^ 2 = <b>@(pow2)</b>
+        <br>
+        @(n) ^ 0.5 = <b>@(sqrt)</b>
     </div>
 </body>
 <script src='app.js'></script>

@@ -1,3 +1,5 @@
+import { Dict } from "./types";
+
 /**
  * Joins two arrays into eachother.
  * @example joinTwo([1,3,5], [2,4]) // '12345'
@@ -38,3 +40,20 @@ export const isEmptyObject = o => {
 export const getDuplicateIndexes = arr => arr
   .map((x, i) => (i !== arr.indexOf(x) ? i : null))
   .filter(e => e !== null);
+
+export const isKeyOf = <T>(o: T, k: string | number | symbol): k is keyof T => {
+  return k in o;
+}
+
+export function splitWithOffset(string: string, regex: RegExp) {
+  const results: [string, number][] = [];
+  let index = regex.lastIndex,
+    match = regex.exec(string);
+  while (match) {
+    results.push([string.substring(index, match.index), index]);
+    index = regex.lastIndex;
+    match = regex.exec(string);
+  }
+  results.push([string.substring(index), index]);
+  return results;
+}
