@@ -14,9 +14,6 @@ export class Subscriber<C> {
 
   listenFor<K extends keyof C>(name: K, callback: Subscription<C[K]>, immediate = false) {
     const variable = this.context[name];
-    variable?.subscribe(callback);
-    if (immediate) {
-      callback.call(null, variable?.value);
-    }
+    variable?.subscribe(callback, immediate);
   }
 }
