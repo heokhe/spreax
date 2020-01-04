@@ -12,7 +12,7 @@ export class ElementWrapper<T, E extends Element = Element> extends Subscriber<T
     return [
       ...this.el.childNodes
     ].filter(node => node.nodeType === TEXT_NODE)
-    .map(node => new TextNodeWrapper<T>(node))
-    .filter(node => node.dependencies.length > 0)
+      .map(node => new TextNodeWrapper<T>(node))
+      .filter(node => node.dependencies.length > 0)
   }
 }
