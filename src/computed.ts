@@ -1,4 +1,5 @@
 import { Subscribable } from "./subscribable";
+import { StateVariable } from "./state";
 
 export type Computable<T> = () => T;
 
@@ -15,6 +16,9 @@ export class ComputedVariable<T> extends Subscribable<T> {
       this.value = newValue;
       this.push();
     }
+  }
+  subscribeAndAutoCompute<T>(state: StateVariable<T>) {
+    state.subscribe(() => this.compute())
   }
 }
 

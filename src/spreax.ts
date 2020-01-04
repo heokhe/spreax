@@ -9,10 +9,10 @@ export class Spreax<T, E extends Element = Element> {
     this.el = rootEl;
     this.variables = variables;
 
-    const groups = groupVariables(variables);
-    for (const computedVar of groups.computedVars)
-      for (const stateVar of groups.stateVars)
-        stateVar.subscribe(() => computedVar.compute());
+    const { computedVars, stateVars } = groupVariables(variables);
+    for (const computedVar of computedVars)
+      for (const stateVar of stateVars)
+        computedVar.subscribeAndAutoCompute(stateVar)
 
     this.setupElement(rootEl);
     for (const el of getAllElements(rootEl))
