@@ -13,14 +13,14 @@ describe('State variables', () => {
 })
 
 describe('Computed variables', () => {
-  number.set(10);
   const double = computed(() => number.value * 2);
+  double.subscribeAndAutoCompute(number);  // you don't need to manually call this in real world
   it('Holds the value', () => {
+    number.set(10);
     expect(double.value).toEqual(20);
   })
   it('Can re-compute the value', () => {
     number.set(1);
-    double.compute(); // you don't need to manually call this in real world
     expect(double.value).toEqual(2);
   })
 })
