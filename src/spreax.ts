@@ -1,6 +1,7 @@
 import { ElementWrapper } from './element-wrapper';
 import { Variables, groupVariables } from "./variables";
 import { getAllElements } from './dom';
+import { bind } from './bind';
 
 export class Spreax<T, E extends Element = Element> {
   el: E;
@@ -26,6 +27,12 @@ export class Spreax<T, E extends Element = Element> {
         node.listenFor(dep, () => node.setText());
       }
       node.setText();
+    }
+    const bindValue = wrapper.el.getAttribute('@bind');
+    if (wrapper.el.tagName === 'INPUT' && bindValue && bindValue in this.variables) {
+      const propName = bindValue as keyof T;
+      wrapper.subscribeTo(propName, this.variables[propName]);
+      bind(wrapper as ElementWrapper<T, HTMLInputElement>, propName);
     }
   }
 }
