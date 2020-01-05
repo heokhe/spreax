@@ -1,6 +1,6 @@
 export type Subscription<T> = (value: T) => any
 
-export class Subscribable<T> {
+export abstract class Subscribable<T> {
   value: T;
   subscriptions: Subscription<T>[] = [];
   subscribe(callback: Subscription<T>, immediate = false) {

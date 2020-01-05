@@ -1,7 +1,7 @@
 import { Subscription } from "./subscribable";
 import { Variables, Variable } from "./variables";
 
-export class Subscriber<C> {
+export abstract class Subscriber<C> {
   context: Variables<C>
 
   constructor() {

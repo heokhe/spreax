@@ -1,10 +1,12 @@
 import { state } from "../../src/state";
 import { Subscriber } from "../../src/subscriber";
 
+class TestSubscriber extends Subscriber<{ char: string }> {}
+
 describe('Subscribables and subscribers', () => {
   // we'll use a state variable as a subscribable
   const char = state('A');
-  const subscriber = new Subscriber<{ char: string }>();
+  const subscriber = new TestSubscriber();
   it('Subscribes', () => {
     subscriber.subscribeTo('char', char);
     expect(subscriber.context).toHaveProperty('char');
