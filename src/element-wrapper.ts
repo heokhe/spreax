@@ -8,10 +8,10 @@ export class ElementWrapper<T, E extends Element = Element> extends Subscriber<T
     super();
     this.el = element;
   }
+
   nodes() {
-    return [
-      ...this.el.childNodes
-    ].filter(node => node.nodeType === TEXT_NODE)
+    return [...this.el.childNodes]
+      .filter(node => node.nodeType === TEXT_NODE)
       .map(node => new TextNodeWrapper<T>(node))
       .filter(node => node.dependencies.length > 0)
   }

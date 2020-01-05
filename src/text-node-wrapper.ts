@@ -13,9 +13,11 @@ export class TextNodeWrapper<T> extends Subscriber<T> {
     this.initialText = node.textContent;
     this.sections = this.initialText.split(DEP_REGEX);
     for (let i = 0; i < this.sections.length; i++) {
-      if (i % 2 === 0) continue;
-      const dep = this.sections[i].slice(2, -1) as keyof T;
-      this.dependencies.push(dep);
+      // sections with odd indexes are variables.
+      if (i % 2 === 1) {
+        const dep = this.sections[i].slice(2, -1) as keyof T;
+        this.dependencies.push(dep);
+      }
     }
   }
   

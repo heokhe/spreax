@@ -8,14 +8,14 @@ export type Variables<T> = {
 };
 
 export function groupVariables<T, K extends keyof T>(vars: Variables<T>) {
-  const state: StateVariable<T[K]>[] = [],
-    computed: ComputedVariable<T[K]>[] = [];
+  const stateVars = [] as StateVariable<T[K]>[],
+    computedVars = [] as ComputedVariable<T[K]>[];
   for (const varName in vars) {
     const current = vars[varName as keyof T];
     if (current instanceof StateVariable)
-      state.push(current);
+      stateVars.push(current);
     else if (current instanceof ComputedVariable)
-      computed.push(current);
+      computedVars.push(current);
   }
-  return { stateVars: state, computedVars: computed }
+  return { stateVars, computedVars }
 }
