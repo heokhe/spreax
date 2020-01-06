@@ -3,7 +3,7 @@ import { Variables, groupVariables } from "./variables";
 import { getAllElements } from './dom';
 import { bind } from './bind';
 
-export class Spreax<T, E extends Element = Element> {
+export default class Spreax<T, E extends Element = Element> {
   el: E;
   variables: Variables<T>;
   constructor(rootEl: E, variables: Variables<T>) {
@@ -36,3 +36,7 @@ export class Spreax<T, E extends Element = Element> {
     }
   }
 }
+
+export { state } from './state';
+export { computed } from './computed';
+export * from './state-helpers';
