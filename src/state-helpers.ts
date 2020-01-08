@@ -20,3 +20,15 @@ export function set<
 >(state: StateVariable<T>, key: K, value: T[K]) {
   state.update(object => ({ ...object, [key]: value }));
 }
+
+export function setIndex<T>(state: StateVariable<T[]>, index: number, newValue: T) {
+  state.update(array => array.map((x, i) => i === index ? newValue : x));
+}
+
+export function inc(state: StateVariable<number>, x = 1) {
+  state.update(n => n + x);
+}
+
+export function dec(state: StateVariable<number>, x = 1) {
+  inc(state, -x);
+}
