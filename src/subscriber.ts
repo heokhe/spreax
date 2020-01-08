@@ -8,8 +8,8 @@ export abstract class Subscriber<C> {
     this.context = {} as Variables<C>;
   }
 
-  subscribeTo<K extends keyof C, V extends Variable<C[K]>>(name: K, value: V) {
-    this.context[name] = value;
+  subscribeTo<K extends keyof C, V extends Variable<C[K]>>(name: K, variable: V) {
+    if (!(name in this.context)) this.context[name] = variable;
   }
 
   listenFor<K extends keyof C>(name: K, callback: Subscription<C[K]>, immediate = false) {
