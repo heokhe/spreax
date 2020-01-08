@@ -14,10 +14,10 @@ export function getAllTextNodes(root: Element): Node[] {
   return nodes;
 }
 
-export function getAllElements(root: Element): Element[] {
-  const elements = [];
+export function makeElementTree(root: Element): Element[] {
+  const elements = [root];
   for (const child of root.children)
-    elements.push(child, ...getAllElements(child));
+    elements.push(...makeElementTree(child));
   return elements;
 }
 
