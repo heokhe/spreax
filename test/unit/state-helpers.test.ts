@@ -14,3 +14,17 @@ describe('Array helpers', () => {
     expect(numbers.value[0]).toEqual(-1);
   })
 })
+
+const object = state({ bar: 1, baz: 2, foo: 3 });
+
+describe('Object helpers', () => {
+  it('Can merge objects', () => {
+    helpers.merge(object, { foo: 0, baz: 9 });
+    expect(object.value.foo).toEqual(0);
+    expect(object.value.baz).toEqual(9);
+  })
+  it('Can modify a specific key', () => {
+    helpers.set(object, 'bar', -1);
+    expect(object.value.bar).toEqual(-1);
+  })
+})
