@@ -42,7 +42,5 @@
 	"author": "Hosein Khansari <hrk.x11@gmail.com>",
 	"license": "MIT",
 	"version": "1.0.0-beta.4",
-	"dependencies": {
-		"deep-diff": "^1.0.2"
-	}
+	"dependencies": {}
 }
