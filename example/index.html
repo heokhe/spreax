@@ -8,17 +8,12 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div id="app">
-        <input type="number" @bind="n" min="0">
-        <br>
-        @(n) * 2 = <b>@(dbl)</b>
-        <br>
-        @(n) / 2 = <b>@(hlf)</b>
-        <br>
-        @(n) ^ 2 = <b>@(pow2)</b>
-        <br>
-        @(n) ^ 0.5 = <b>@(sqrt)</b>
+<div id="app">
+    <input type="number" @bind="n" min="0">
+    <div @each="num in dblarray">
+        @(i). @(num)
     </div>
+</div>
 </body>
 <script src='app.js'></script>
 </html>

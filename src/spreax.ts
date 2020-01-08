@@ -1,7 +1,9 @@
 import { ElementWrapper } from './element-wrapper';
 import { Variables, groupVariables } from "./variables";
-import { getAllElements } from './dom';
-import { bind } from './bind';
+import { makeElementTree } from './dom';
+import { handleBind } from './bind';
+import { handleEach } from './each';
+import { TextNodeWrapper } from './text-node-wrapper';
 
 export default class Spreax<T, E extends Element = Element> {
   el: E;
@@ -15,25 +17,43 @@ export default class Spreax<T, E extends Element = Element> {
       for (const stateVar of stateVars)
         computedVar.subscribeAndAutoCompute(stateVar)
 
-    this.setupElement(rootEl);
-    for (const el of getAllElements(rootEl))
+    for (const el of makeElementTree(rootEl))
       this.setupElement(el);
   }
-  setupElement(element: Element) {
-    const wrapper = new ElementWrapper<T>(element);
-    for (const node of wrapper.nodes()) {
-      for (const dep of node.dependencies) {
-        node.subscribeTo(dep, this.variables[dep]);
-        node.listenFor(dep, () => node.setText());
-      }
-      node.setText();
-    }
-    const bindValue = wrapper.el.getAttribute('@bind');
-    if (wrapper.el.tagName === 'INPUT' && bindValue && bindValue in this.variables) {
-      const propName = bindValue as keyof T;
+  setupElement(el: Element) {
+    this.setupWrapper(new ElementWrapper<T>(el));
+  }
+  setupWrapper(wrapper: ElementWrapper<T>) {
+    const { el } = wrapper;
+
+    const { bind, each } = wrapper.directives();
+    if (el.tagName === 'INPUT' && bind && bind in this.variables) {
+      const propName = bind as keyof T;
       wrapper.subscribeTo(propName, this.variables[propName]);
-      bind(wrapper as ElementWrapper<T, HTMLInputElement>, propName);
+      handleBind(wrapper as ElementWrapper<T, HTMLInputElement>, propName);
     }
+    if (each && each.arrayName in this.variables) {
+      const arrayName = each.arrayName as keyof T;
+      if (this.variables[arrayName].value instanceof Array) {
+        wrapper.subscribeTo(arrayName, this.variables[arrayName]);
+        handleEach({
+          arrayName, varName: each.variableName, wrapper,
+          onCreate: wr => this.setupWrapper(wr as ElementWrapper<T>)
+        })
+      }
+    }
+
+    if (!each)
+      for (const node of wrapper.nodes)
+        this.setupNode(node);
+  }
+
+  setupNode(node: TextNodeWrapper<T>) {
+    for (const dep of node.dependencies) {
+      node.subscribeTo(dep, this.variables[dep]);
+      node.listenFor(dep, () => node.setText());
+    }
+    node.setText();
   }
 }
 
