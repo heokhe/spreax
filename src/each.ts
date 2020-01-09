@@ -1,6 +1,7 @@
 import { ElementWrapper as Wrapper } from "./element-wrapper";
 import { computed } from "./computed";
 import { Variable } from "./variables";
+import { makeElementTree } from './dom';
 
 type WithExtraVars<T, V extends string> = T & { i: number } & { [x in V]: any }
 type WrapperWithExtraVars<T, V extends string> = Wrapper<WithExtraVars<T, V>>;
@@ -17,16 +18,16 @@ class LoopHandler<T, V extends string> {
   el: Element;
   varName: V;
   onCreate: (wrapper: WrapperWithExtraVars<T, V>) => any;
-  comment: Comment;
-  wrappers: WrapperWithExtraVars<T, V>[];
+  comment: Comment = new Comment();
+  wrappers: WrapperWithExtraVars<T, V>[] = [];
+  backup: Element;
   constructor({ wrapper, arrayName, varName, onCreate }: LoopHandlerOptions<T, V>) {
     this.wrapper = wrapper;
     this.el = wrapper.el;
+    this.backup = this.clone(this.el);
     this.arrayName = arrayName;
     this.varName = varName;
     this.onCreate = onCreate;
-    this.comment = new Comment('bruh');
-    this.wrappers = [];
   }
 
   get variable(): Variable<T[keyof T] & any[]> {
@@ -42,10 +43,14 @@ class LoopHandler<T, V extends string> {
     this.wrapper.destroy();
   }
 
-  createWrapper() {
-    const child = this.el.cloneNode(true) as Element;
+  wrap(el: Element) {
+    return new Wrapper<WithExtraVars<T, V>>(el);
+  }
+
+  clone(el = this.backup) {
+    const child = el.cloneNode(true) as Element;
     child.removeAttribute('@each');
-    return new Wrapper<WithExtraVars<T, V>>(child);
+    return child;
   }
 
   subscribeWrapper(wrapper: WrapperWithExtraVars<T, V>, index: number) {
@@ -59,14 +64,18 @@ class LoopHandler<T, V extends string> {
       node.subscribeTo(varName, item);
       node.subscribeTo('i', ci);
     }
-    this.wrappers.push(wrapper);
   }
 
   createAndSetupWrapper(index: number) {
-    const childWrapper = this.createWrapper();
-    this.comment.before(childWrapper.el);
-    this.subscribeWrapper(childWrapper, index);
-    this.onCreate.call(null, childWrapper);
+    const clone = this.clone();
+    this.comment.before(clone);
+    for (const el of makeElementTree(clone)) {
+      const wrapper = this.wrap(el);
+      if (el === clone)
+        this.wrappers.push(wrapper);
+      this.subscribeWrapper(wrapper, index);
+      this.onCreate.call(null, wrapper);
+    }
   }
 
   listenForChanges() {

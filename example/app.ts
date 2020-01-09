@@ -16,8 +16,5 @@ push(array, 10);
 push(array, 11);
 push(array, -1);
 setIndex(array, 2, 85);
-setTimeout(() => {
-  array.update(a => a.slice(2, -1))
-}, 150);
 
 globalThis.app = app;
