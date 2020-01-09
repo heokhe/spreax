@@ -3,7 +3,7 @@ import { terser } from 'rollup-plugin-terser';
 import ts from '@rollup/plugin-typescript';
 import { main, module as _module, browser } from './package.json';
 
-const input = 'src/spreax.ts',
+const input = 'src/index.ts',
   createOutput = (format, file, plugins) => ({
     input,
     output: {
@@ -14,7 +14,9 @@ const input = 'src/spreax.ts',
       exports: 'named'
     },
     plugins: [
-      ts(),
+      ts({
+        tsconfig: 'tsconfig.json'
+      }),
       resolve({
         extensions: ['.ts', '.js']
       }),

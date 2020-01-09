@@ -5,7 +5,7 @@ import { handleBind } from './bind';
 import { handleEach } from './each';
 import { TextNodeWrapper } from './text-node-wrapper';
 
-export default class Spreax<T, E extends Element = Element> {
+export class Spreax<T, E extends Element = Element> {
   el: E;
   variables: Variables<T>;
   constructor(rootEl: E, variables: Variables<T>) {
@@ -56,7 +56,3 @@ export default class Spreax<T, E extends Element = Element> {
     node.setText();
   }
 }
-
-export { state } from './state';
-export { computed } from './computed';
-export * from './state-helpers';
