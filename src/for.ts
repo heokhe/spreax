@@ -49,7 +49,7 @@ class LoopHandler<T, V extends string> {
 
   clone(el = this.backup) {
     const child = el.cloneNode(true) as Element;
-    child.removeAttribute('@each');
+    child.removeAttribute('@for');
     return child;
   }
 
@@ -95,6 +95,6 @@ class LoopHandler<T, V extends string> {
   }
 }
 
-export function handleEach<T, V extends string>(options: LoopHandlerOptions<T, V>) {
+export function handleFor<T, V extends string>(options: LoopHandlerOptions<T, V>) {
   new LoopHandler(options).start();
 }

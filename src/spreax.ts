@@ -2,7 +2,7 @@ import { ElementWrapper } from './element-wrapper';
 import { Variables, groupVariables } from "./variables";
 import { makeElementTree } from './dom';
 import { handleBind } from './bind';
-import { handleEach } from './each';
+import { handleFor } from './for';
 import { TextNodeWrapper } from './text-node-wrapper';
 
 export class Spreax<T, E extends Element = Element> {
@@ -26,24 +26,24 @@ export class Spreax<T, E extends Element = Element> {
   setupWrapper(wrapper: ElementWrapper<T>) {
     const { el } = wrapper;
 
-    const { bind, each } = wrapper.directives();
+    const { bind, $for } = wrapper.directives();
     if (el.tagName === 'INPUT' && bind && bind in this.variables) {
       const propName = bind as keyof T;
       wrapper.subscribeTo(propName, this.variables[propName]);
       handleBind(wrapper as ElementWrapper<T, HTMLInputElement>, propName);
     }
-    if (each && each.arrayName in this.variables) {
-      const arrayName = each.arrayName as keyof T;
+    if ($for && $for.arrayName in this.variables) {
+      const arrayName = $for.arrayName as keyof T;
       if (this.variables[arrayName].value instanceof Array) {
         wrapper.subscribeTo(arrayName, this.variables[arrayName]);
-        handleEach({
-          arrayName, varName: each.variableName, wrapper,
+        handleFor({
+          arrayName, varName: $for.variableName, wrapper,
           onCreate: wr => this.setupWrapper(wr as ElementWrapper<T>)
         })
       }
     }
 
-    if (!each)
+    if (!$for)
       for (const node of wrapper.nodes)
         this.setupNode(node);
   }

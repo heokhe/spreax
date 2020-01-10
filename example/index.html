@@ -10,7 +10,7 @@
 <body>
 <div id="app">
     <input type="number" @bind="n" min="0">
-    <div @each="num in dblarray">
+    <div @for="num of dblarray">
         <hr>
         @(i)) <b>@(num)</b>
     </div>

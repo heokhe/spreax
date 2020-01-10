@@ -17,17 +17,17 @@ export class ElementWrapper<T, E extends Element = Element> extends Subscriber<T
       .filter(node => node.dependencies.length > 0)
   }
 
-  directives() {
-    const { el } = this,
-      each = el.getAttribute('@each'),
-      [variableName, arrayName] = each?.split(' in ') ?? [];
-    return {
-      bind: el.getAttribute('@bind') ?? undefined,
-      each: each ? { variableName, arrayName } : undefined
-    }
-  }
-
   destroy() {
     this.el.remove();
+  }
+
+  directives() {
+    const { el } = this,
+      $for = el.getAttribute('@for'),
+      [variableName, arrayName] = $for?.split(/ (?:in|of) /) ?? [];
+    return {
+      bind: el.getAttribute('@bind') ?? undefined,
+      $for: $for ? { variableName, arrayName } : undefined
+    }
   }
 }

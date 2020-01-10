@@ -1,4 +1,4 @@
-import Spreax, { state, computed, setIndex, push } from "../src/spreax";
+import Spreax, { state, computed, setIndex, push } from "../src";
 
 const el = document.getElementById('app');
 const n = state(2);
