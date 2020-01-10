@@ -24,10 +24,14 @@ export class ElementWrapper<T, E extends Element = Element> extends Subscriber<T
   directives() {
     const { el } = this,
       $for = el.getAttribute('@for'),
-      [variableName, arrayName] = $for?.split(/ (?:in|of) /) ?? [];
+      [variableName, arrayName] = $for?.split(/ (?:in|of) /) ?? [],
+      boundAttributes = [...el.attributes]
+        .filter(attr => attr.name.startsWith('$'))
+        .map(attr => ({ name: attr.name.slice(1), value: attr.value }));
     return {
       bind: el.getAttribute('@bind') ?? undefined,
-      $for: $for ? { variableName, arrayName } : undefined
+      $for: $for ? { variableName, arrayName } : undefined,
+      boundAttributes
     }
   }
 }
