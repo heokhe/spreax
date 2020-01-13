@@ -25,6 +25,12 @@ export function setIndex<T>(state: StateVariable<T[]>, index: number, newValue: 
   state.update(array => array.map((x, i) => i === index ? newValue : x));
 }
 
+export function splice<T>(state: StateVariable<T[]>, start: number, deleteCount: number, ...items: T[]) {
+  const clone = [...state.value];
+  clone.splice(start, deleteCount, ...items);
+  state.set(clone)
+}
+
 export function inc(state: StateVariable<number>, x = 1) {
   state.update(n => n + x);
 }
