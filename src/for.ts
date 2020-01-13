@@ -79,19 +79,21 @@ class LoopHandler<T, V extends string> {
   }
 
   listenForChanges() {
-    let prevArray = [];
-    this.variable.subscribe(newArray => {
+    this.variable.subscribe((newArray, prevArray) => {
       const n = newArray.length,
-        p = prevArray.length;
-      if (n > p) {
+        p = prevArray?.length ?? 0;
+      if (n < p) {
+        this.removeWrappers(n, p);
+      } else {
         for (let i = p; i < n; i++)
           this.createAndSetupWrapper(i);
-      } else if (n < p) {
-        this.wrappers.slice(n).forEach(w => w.destroy());
-        this.wrappers = this.wrappers.slice(0, p)
       }
-      prevArray = newArray; 
     }, true)
+  }
+
+  removeWrappers(currentLength: number, prevLength: number) {
+    this.wrappers.slice(currentLength).forEach(w => w.destroy());
+    this.wrappers = this.wrappers.slice(0, prevLength);
   }
 }
 
