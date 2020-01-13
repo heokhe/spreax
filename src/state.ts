@@ -6,10 +6,7 @@ export class StateVariable<T> extends Subscribable<T> {
     this.value = value;
   }
   set(newValue: T) {
-    if (this.value !== newValue) {
-      this.value = newValue;
-      this.push();
-    }
+    this.changeValue(newValue);
   }
   update(fn: (value: T) => T) {
     this.set(fn(this.value));

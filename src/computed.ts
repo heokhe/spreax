@@ -10,11 +10,7 @@ export class ComputedVariable<T> extends Subscribable<T> {
     this.compute();
   }
   compute() {
-    const newValue = this.fn();
-    if (newValue !== this.value) {
-      this.value = newValue;
-      this.push();
-    }
+    this.changeValue(this.fn.call(null));
   }
   subscribeAndAutoCompute<T>(state: Subscribable<T>) {
     state.subscribe(() => this.compute())
