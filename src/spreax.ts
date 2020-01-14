@@ -1,10 +1,11 @@
-import { ElementWrapper } from './element-wrapper';
-import { Variables, groupVariables } from "./variables";
+import { Variables, getVariablesFromObject } from "./variables";
 import { makeElementTree } from './dom';
+import { ElementWrapper } from './element-wrapper';
+import { TextNodeWrapper } from './text-node-wrapper';
 import { handleBind } from './bind';
 import { handleFor } from './for';
-import { TextNodeWrapper } from './text-node-wrapper';
 import { handleAttr } from './attr';
+import { ComputedVariable } from "./computed";
 
 export class Spreax<T, E extends Element = Element> {
   el: E;
@@ -12,14 +13,18 @@ export class Spreax<T, E extends Element = Element> {
   constructor(rootEl: E, variables: Variables<T>) {
     this.el = rootEl;
     this.variables = variables;
-
-    const { computedVars, stateVars } = groupVariables(variables);
-    for (const computedVar of computedVars)
-      for (const stateVar of stateVars)
-        computedVar.subscribeAndAutoCompute(stateVar)
-
+    this.setupComputedVars();
     for (const el of makeElementTree(rootEl))
       this.setupElement(el);
+  }
+
+  setupComputedVars() {
+    const variablesArray = getVariablesFromObject(this.variables);
+    for (const v1 of variablesArray)
+      if (v1 instanceof ComputedVariable)
+        for (const v2 of variablesArray)
+          if (v2 !== v1)
+            v1.subscribeAndAutoCompute(v2);
   }
 
   setupElement(el: Element) {
@@ -35,7 +40,7 @@ export class Spreax<T, E extends Element = Element> {
 
     for (const node of wrapper.nodes)
       this.setupNode(node);
-}
+  }
 
   bindAttributes(wrapper: ElementWrapper<T>, boundAttributes: { name: string; value: string }[]) {
     for (const { name, value } of boundAttributes) {
