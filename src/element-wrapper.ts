@@ -4,10 +4,12 @@ import { TextNodeWrapper } from "./text-node-wrapper";
 export class ElementWrapper<T, E extends Element = Element> extends Subscriber<T> {
   el: E;
   nodes: TextNodeWrapper<T>[];
+  attrs: Attr[];
   constructor(element: E) {
     super();
     this.el = element;
     this.nodes = this.getNodes();
+    this.attrs = [...element.attributes]
   }
 
   getNodes() {
@@ -21,17 +23,30 @@ export class ElementWrapper<T, E extends Element = Element> extends Subscriber<T
     this.el.remove();
   }
 
-  directives() {
-    const { el } = this,
-      $for = el.getAttribute('@for'),
-      [variableName, arrayName] = $for?.split(/ (?:in|of) /) ?? [],
-      boundAttributes = [...el.attributes]
-        .filter(attr => attr.name.startsWith('$'))
-        .map(attr => ({ name: attr.name.slice(1), value: attr.value }));
-    return {
-      bind: el.getAttribute('@bind') ?? undefined,
-      $for: $for ? { variableName, arrayName } : undefined,
-      boundAttributes
-    }
+  get $for() {
+    const string = this.el.getAttribute('@for'),
+      [variableName, arrayName] = string?.split(/ (?:in|of) /) ?? [];
+    return string ? { variableName, arrayName } : undefined;
+  }
+
+  get boundAttributes() {
+    return this.attrs
+      .filter(attr => attr.name.startsWith('$'))
+      .map(attr => ({ name: attr.name.slice(1), value: attr.value }))
+  }
+
+  get eventListeners() {
+    return this.attrs
+      .filter(attr => attr.name.startsWith('@on:'))
+      .map(attr => ({ eventName: attr.name.slice(4), actionName: attr.value }));
+  }
+
+  get bind() {
+    return this.el.getAttribute('@bind')
+  }
+
+  get directives() {
+    const { $for, bind, boundAttributes, eventListeners } = this;
+    return { $for, bind, boundAttributes, eventListeners }
   }
 }

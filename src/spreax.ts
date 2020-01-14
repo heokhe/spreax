@@ -6,13 +6,20 @@ import { handleBind } from './bind';
 import { handleFor } from './for';
 import { handleAttr } from './attr';
 import { ComputedVariable } from "./computed";
+import { Actions } from "./actions";
 
-export class Spreax<T, E extends Element = Element> {
-  el: E;
+export class Spreax<T, E extends Element, A extends string> {
+  readonly el: E;
   variables: Variables<T>;
-  constructor(rootEl: E, variables: Variables<T>) {
+  readonly actions: Actions<A>;
+  constructor(
+    rootEl: E,
+    variables: Variables<T>,
+    actions: Actions<A> = {} as Actions<A>
+  ) {
     this.el = rootEl;
     this.variables = variables;
+    this.actions = actions;
     this.setupComputedVars();
     for (const el of makeElementTree(rootEl))
       this.setupElement(el);
@@ -32,12 +39,13 @@ export class Spreax<T, E extends Element = Element> {
   }
 
   setupWrapper(wrapper: ElementWrapper<T>) {
-    const { bind, $for, boundAttributes } = wrapper.directives();
+    const { bind, $for, boundAttributes, eventListeners } = wrapper.directives;
 
     this.handleFor(wrapper, $for);
     this.handleBind(wrapper, bind);
     this.bindAttributes(wrapper, boundAttributes)
-
+    for (const { actionName, eventName } of eventListeners)
+      wrapper.el.addEventListener(eventName, this.actions[actionName])
     for (const node of wrapper.nodes)
       this.setupNode(node);
   }
