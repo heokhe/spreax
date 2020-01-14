@@ -23,8 +23,9 @@ export class TextNodeWrapper<T> extends Subscriber<T> {
   
   render() {
     return this.sections.map((sect, i) => {
-      if (i % 2 === 0) return sect;
-      return this.context[sect.slice(2, -1) as keyof T]?.value;
+      return i % 2 === 0
+        ? sect
+        : this.context[sect.slice(2, -1) as keyof T]?.value;
     }).join('');
   }
 
