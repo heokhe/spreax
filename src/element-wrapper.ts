@@ -45,8 +45,12 @@ export class ElementWrapper<T, E extends Element = Element> extends Subscriber<T
     return this.el.getAttribute('@bind')
   }
 
+  get $if() {
+    return this.el.getAttribute('@if');
+  }
+
   get directives() {
-    const { $for, bind, boundAttributes, eventListeners } = this;
-    return { $for, bind, boundAttributes, eventListeners }
+    const { $for, bind, boundAttributes, eventListeners, $if } = this;
+    return { $for, bind, boundAttributes, eventListeners, $if }
   }
 }

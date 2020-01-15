@@ -7,6 +7,7 @@ import { handleFor } from './for';
 import { handleAttr } from './attr';
 import { ComputedVariable } from "./computed";
 import { Actions } from "./actions";
+import { handleIf } from "./if";
 
 export class Spreax<T, E extends Element, A extends string> {
   readonly el: E;
@@ -39,15 +40,25 @@ export class Spreax<T, E extends Element, A extends string> {
   }
 
   setupWrapper(wrapper: ElementWrapper<T>) {
-    const { bind, $for, boundAttributes, eventListeners } = wrapper.directives;
+    const { bind, $for, boundAttributes, eventListeners, $if } = wrapper.directives;
 
     this.handleFor(wrapper, $for);
     this.handleBind(wrapper, bind);
     this.bindAttributes(wrapper, boundAttributes)
+    this.handleIf(wrapper, $if)
     for (const { actionName, eventName } of eventListeners)
       wrapper.el.addEventListener(eventName, this.actions[actionName])
     for (const node of wrapper.nodes)
       this.setupNode(node);
+  }
+
+  handleIf(wrapper: ElementWrapper<T>, varName: string) {
+    if (varName && varName in this.variables) {
+      const n = varName as keyof T;
+      const v = this.variables[n];
+      wrapper.subscribeTo(n, v);
+      handleIf(wrapper, n);
+    }
   }
 
   bindAttributes(wrapper: ElementWrapper<T>, boundAttributes: { name: string; value: string }[]) {

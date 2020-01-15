@@ -10,11 +10,11 @@
   <body>
     <div id="app">
       <h6>Window size: @(windowSize) (big: @(isTablet))</h6>
-      <input type="number" @bind="n" min="0">
+      <input type="number" @bind="n" min="0" @if="isTablet">
       <button @on:click="increase">++</button>
       <div @for="num of dblarray" $id="i">
         <hr>
-        @(i)) <b>@(num)</b>
+        @(i). <b>@(num)</b>
       </div>
     </div>
   </body>
