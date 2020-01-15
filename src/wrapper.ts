@@ -25,8 +25,9 @@ export class Wrapper<T, E extends Element = Element> extends Subscriber<T> {
 
   get $for() {
     const string = this.el.getAttribute('@for'),
-      [variableName, arrayName] = string?.split(/ (?:in|of) /) ?? [];
-    return string ? { variableName, arrayName } : undefined;
+      [leftHand, arrayName] = string?.split(/ (?:in|of) /) ?? [],
+      [variableName, indexName = 'i'] = leftHand?.split(', ') ?? [];
+    return string ? { variableName, arrayName, indexName } : undefined;
   }
 
   get boundAttributes() {

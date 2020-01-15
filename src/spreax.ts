@@ -70,13 +70,13 @@ export class Spreax<T, E extends Element, A extends string> {
     }
   }
 
-  handleFor(wrapper: Wrapper<T>, data: { variableName: string; arrayName: string }) {
+  handleFor(wrapper: Wrapper<T>, data: { variableName: string; arrayName: string; indexName: string }) {
     if (data && data.arrayName in this.variables) {
       const arrayName = data.arrayName as keyof T;
       if (this.variables[arrayName].value instanceof Array) {
         wrapper.subscribeTo(arrayName, this.variables[arrayName]);
         handleFor({
-          arrayName, varName: data.variableName, wrapper,
+          arrayName, varName: data.variableName, wrapper, indexName: data.indexName,
           onCreate: wr => this.setupWrapper(wr as Wrapper<T>)
         })
       }

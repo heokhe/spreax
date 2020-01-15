@@ -3,30 +3,33 @@ import { computed } from "./computed";
 import { Variable } from "./variables";
 import { makeElementTree } from './dom';
 
-type WithExtraVars<T, V extends string> = T & { i: number } & { [x in V]: any }
-type WrapperWithExtraVars<T, V extends string> = Wrapper<WithExtraVars<T, V>>;
-type LoopHandlerOptions<T, V extends string> = {
+type WithExtraVars<T, V extends string, I extends string> = T & { [x in I]: number } & { [x in V]: any }
+type WrapperWithExtraVars<T, V extends string, I extends string> = Wrapper<WithExtraVars<T, V, I>>;
+type LoopHandlerOptions<T, V extends string, I extends string> = {
   wrapper: Wrapper<T>;
   arrayName: keyof T;
   varName: V;
-  onCreate: (wrapper: WrapperWithExtraVars<T, V>) => any;
+  indexName: I;
+  onCreate: (wrapper: WrapperWithExtraVars<T, V, I>) => any;
 }
 
-class LoopHandler<T, V extends string> {
+class LoopHandler<T, V extends string, I extends string> {
   wrapper: Wrapper<T>;
   arrayName: keyof T;
   el: Element;
   varName: V;
-  onCreate: (wrapper: WrapperWithExtraVars<T, V>) => any;
+  onCreate: (wrapper: WrapperWithExtraVars<T, V, I>) => any;
   comment: Comment = new Comment();
-  wrappers: WrapperWithExtraVars<T, V>[] = [];
+  wrappers: WrapperWithExtraVars<T, V, I>[] = [];
   backup: Element;
-  constructor({ wrapper, arrayName, varName, onCreate }: LoopHandlerOptions<T, V>) {
+  indexName: I;
+  constructor({ wrapper, arrayName, varName, onCreate, indexName }: LoopHandlerOptions<T, V, I>) {
     this.wrapper = wrapper;
     this.el = wrapper.el;
     this.backup = this.clone(this.el);
     this.arrayName = arrayName;
     this.varName = varName;
+    this.indexName = indexName;
     this.onCreate = onCreate;
   }
 
@@ -44,7 +47,7 @@ class LoopHandler<T, V extends string> {
   }
 
   wrap(el: Element) {
-    return new Wrapper<WithExtraVars<T, V>>(el);
+    return new Wrapper<WithExtraVars<T, V, I>>(el);
   }
 
   clone(el = this.backup) {
@@ -53,16 +56,16 @@ class LoopHandler<T, V extends string> {
     return child;
   }
 
-  subscribeWrapper(wrapper: WrapperWithExtraVars<T, V>, index: number) {
+  subscribeWrapper(wrapper: WrapperWithExtraVars<T, V, I>, index: number) {
     const { varName, variable } = this,
       item = computed(() => variable.value[index]),
-      ci = computed(() => index);
+      ci = computed(() => index as WithExtraVars<T, V, I>[I]);
     item.subscribeAndAutoCompute(variable);
     wrapper.subscribeTo(varName, item);
-    wrapper.subscribeTo('i', ci);
+    wrapper.subscribeTo(this.indexName, ci);
     for (const node of wrapper.nodes) {
       node.subscribeTo(varName, item);
-      node.subscribeTo('i', ci);
+      node.subscribeTo(this.indexName, ci);
     }
   }
 
@@ -97,6 +100,6 @@ class LoopHandler<T, V extends string> {
   }
 }
 
-export function handleFor<T, V extends string>(options: LoopHandlerOptions<T, V>) {
+export function handleFor<T, V extends string, I extends string>(options: LoopHandlerOptions<T, V, I>) {
   new LoopHandler(options).start();
 }
