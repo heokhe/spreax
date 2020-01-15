@@ -1,6 +1,6 @@
-import { ElementWrapper } from "./element-wrapper";
+import { Wrapper } from "./wrapper";
 
-export function handleIf<T>(wrapper: ElementWrapper<T>, varName: keyof T) {
+export function handleIf<T>(wrapper: Wrapper<T>, varName: keyof T) {
   const comment = new Comment(),
     { el } = wrapper;
   el.before(comment);

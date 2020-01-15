@@ -1,7 +1,7 @@
 import { Subscriber } from "./subscriber";
 import { TextNodeWrapper } from "./text-node-wrapper";
 
-export class ElementWrapper<T, E extends Element = Element> extends Subscriber<T> {
+export class Wrapper<T, E extends Element = Element> extends Subscriber<T> {
   el: E;
   nodes: TextNodeWrapper<T>[];
   attrs: Attr[];

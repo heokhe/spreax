@@ -1,7 +1,7 @@
-import { ElementWrapper } from "./element-wrapper";
+import { Wrapper } from "./wrapper";
 import { StateVariable } from "./state";
 
-export function handleBind<T, K extends keyof T>(wrapper: ElementWrapper<T, HTMLInputElement>, varName: K) {
+export function handleBind<T, K extends keyof T>(wrapper: Wrapper<T, HTMLInputElement>, varName: K) {
   const { el: input } = wrapper,
     inputIsNumeric = input.type === 'number';
 

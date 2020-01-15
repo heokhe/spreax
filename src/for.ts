@@ -1,4 +1,4 @@
-import { ElementWrapper as Wrapper } from "./element-wrapper";
+import { Wrapper as Wrapper } from "./wrapper";
 import { computed } from "./computed";
 import { Variable } from "./variables";
 import { makeElementTree } from './dom';

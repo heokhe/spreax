@@ -1,7 +1,7 @@
-import { ElementWrapper } from "./element-wrapper";
+import { Wrapper } from "./wrapper";
 
 export function handleAttr<T>(
-  wrapper: ElementWrapper<T>,
+  wrapper: Wrapper<T>,
   attrName: string,
   varName: keyof T
 ){

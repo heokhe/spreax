@@ -1,6 +1,6 @@
 import { Variables, getVariablesFromObject } from "./variables";
 import { makeElementTree } from './dom';
-import { ElementWrapper } from './element-wrapper';
+import { Wrapper } from './wrapper';
 import { TextNodeWrapper } from './text-node-wrapper';
 import { handleBind } from './bind';
 import { handleFor } from './for';
@@ -36,10 +36,10 @@ export class Spreax<T, E extends Element, A extends string> {
   }
 
   setupElement(el: Element) {
-    this.setupWrapper(new ElementWrapper<T>(el));
+    this.setupWrapper(new Wrapper<T>(el));
   }
 
-  setupWrapper(wrapper: ElementWrapper<T>) {
+  setupWrapper(wrapper: Wrapper<T>) {
     const { bind, $for, boundAttributes, eventListeners, $if } = wrapper.directives;
 
     this.handleFor(wrapper, $for);
@@ -52,7 +52,7 @@ export class Spreax<T, E extends Element, A extends string> {
       this.setupNode(node);
   }
 
-  handleIf(wrapper: ElementWrapper<T>, varName: string) {
+  handleIf(wrapper: Wrapper<T>, varName: string) {
     if (varName && varName in this.variables) {
       const n = varName as keyof T;
       const v = this.variables[n];
@@ -61,7 +61,7 @@ export class Spreax<T, E extends Element, A extends string> {
     }
   }
 
-  bindAttributes(wrapper: ElementWrapper<T>, boundAttributes: { name: string; value: string }[]) {
+  bindAttributes(wrapper: Wrapper<T>, boundAttributes: { name: string; value: string }[]) {
     for (const { name, value } of boundAttributes) {
       if (value in wrapper.context || value in this.variables) {
         wrapper.subscribeTo(value as keyof T, this.variables[value])
@@ -70,24 +70,24 @@ export class Spreax<T, E extends Element, A extends string> {
     }
   }
 
-  handleFor(wrapper: ElementWrapper<T>, data: { variableName: string; arrayName: string }) {
+  handleFor(wrapper: Wrapper<T>, data: { variableName: string; arrayName: string }) {
     if (data && data.arrayName in this.variables) {
       const arrayName = data.arrayName as keyof T;
       if (this.variables[arrayName].value instanceof Array) {
         wrapper.subscribeTo(arrayName, this.variables[arrayName]);
         handleFor({
           arrayName, varName: data.variableName, wrapper,
-          onCreate: wr => this.setupWrapper(wr as ElementWrapper<T>)
+          onCreate: wr => this.setupWrapper(wr as Wrapper<T>)
         })
       }
     }
   }
 
-  handleBind(wrapper: ElementWrapper<T>, varName: string) {
+  handleBind(wrapper: Wrapper<T>, varName: string) {
     if (wrapper.el.tagName === 'INPUT' && varName && varName in this.variables) {
       const v = varName as keyof T;
       wrapper.subscribeTo(v, this.variables[v]);
-      handleBind(wrapper as ElementWrapper<T, HTMLInputElement>, v);
+      handleBind(wrapper as Wrapper<T, HTMLInputElement>, v);
     }
   }
 
