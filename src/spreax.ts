@@ -53,7 +53,7 @@ export class Spreax<T, E extends Element, A extends string> {
   }
 
   handleIf(wrapper: Wrapper<T>, varName: string) {
-    if (varName && varName in this.variables) {
+    if (varName && (varName in wrapper.context || varName in this.variables)) {
       const n = varName as keyof T;
       const v = this.variables[n];
       wrapper.addToContext(n, v);
@@ -84,7 +84,7 @@ export class Spreax<T, E extends Element, A extends string> {
   }
 
   handleBind(wrapper: Wrapper<T>, varName: string) {
-    if (wrapper.el.tagName === 'INPUT' && varName && varName in this.variables) {
+    if (wrapper.el.tagName === 'INPUT' && varName && (varName in this.variables || varName in wrapper.context)) {
       const v = varName as keyof T;
       wrapper.addToContext(v, this.variables[v]);
       handleBind(wrapper as Wrapper<T, HTMLInputElement>, v);
