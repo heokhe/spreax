@@ -24,11 +24,13 @@ class LoopHandler<T, V extends string, I extends string> {
   indexName: I;
   constructor({ wrapper, arrayName, varName, onCreate, indexName }: LoopHandlerOptions<T, V, I>) {
     this.wrapper = wrapper;
-    this.el = this.el.cloneNode(true) as Element;
+    wrapper.el.before(this.comment);
+    this.el = wrapper.el.cloneNode(true) as Element;
     this.arrayName = arrayName;
     this.varName = varName;
     this.indexName = indexName;
     this.onCreate = onCreate;
+    this.wrapper.destroy();
   }
 
   get variable(): Variable<T[keyof T] & any[]> {
@@ -36,12 +38,6 @@ class LoopHandler<T, V extends string, I extends string> {
     return v.value instanceof Array
       ? v as Variable<T[keyof T] & any[]>
       : undefined;
-  }
-
-  start() {
-    this.el.before(this.comment);
-    this.listenForChanges();
-    this.wrapper.destroy();
   }
 
   wrap(el: Element) {
@@ -99,5 +95,5 @@ class LoopHandler<T, V extends string, I extends string> {
 }
 
 export function handleFor<T, V extends string, I extends string>(options: LoopHandlerOptions<T, V, I>) {
-  new LoopHandler(options).start();
+  new LoopHandler(options).listenForChanges();
 }

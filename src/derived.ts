@@ -1,10 +1,10 @@
 import { Subscribable } from "./subscribable";
 
-export type Computable<T> = () => T;
+type DerivedFn<T> = () => T;
 
 export class DerivedVariable<T> extends Subscribable<T> {
-  fn: Computable<T>;
-  constructor(fn: Computable<T>) {
+  fn: DerivedFn<T>;
+  constructor(fn: DerivedFn<T>) {
     super();
     this.fn = fn;
     this.compute();
@@ -17,6 +17,6 @@ export class DerivedVariable<T> extends Subscribable<T> {
   }
 }
 
-export function derived<T>(fn: Computable<T>) {
+export function derived<T>(fn: DerivedFn<T>) {
   return new DerivedVariable(fn);
 }
