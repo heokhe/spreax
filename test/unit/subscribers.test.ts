@@ -8,12 +8,12 @@ describe('Subscribables and subscribers', () => {
   const char = state('A');
   const subscriber = new TestSubscriber();
   it('Subscribes', () => {
-    subscriber.subscribeTo('char', char);
+    subscriber.addToContext('char', char);
     expect(subscriber.context.char).toBe(char);
   })
   it('Gets notified about updates', () => {
     let called = 0;
-    subscriber.listenFor('char', () => called++, true);
+    subscriber.subscribeTo('char', () => called++, true);
     expect(called).toEqual(1);
     char.set('B');
     expect(called).toEqual(2);

@@ -5,7 +5,7 @@ export function handleBind<T, K extends keyof T>(wrapper: Wrapper<T, HTMLInputEl
   const { el: input } = wrapper,
     inputIsNumeric = input.type === 'number';
 
-  wrapper.listenFor(varName, value => {
+  wrapper.subscribeTo(varName, value => {
     input.value = String(value);
   }, true)
 

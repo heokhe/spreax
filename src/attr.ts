@@ -5,7 +5,7 @@ export function handleAttr<T>(
   attrName: string,
   varName: keyof T
 ){
-  wrapper.listenFor(varName, value => {
+  wrapper.subscribeTo(varName, value => {
     wrapper.el.setAttribute(attrName, String(value));
   }, true);
 }

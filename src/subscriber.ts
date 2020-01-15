@@ -12,12 +12,12 @@ export abstract class Subscriber<C> {
    * Subscribes the object to a `Subscribable`.
    * Silently fails if `name` already exists.
    */
-  subscribeTo<K extends keyof C, V extends Variable<C[K]>>(name: K, variable: V) {
+  addToContext<K extends keyof C, V extends Variable<C[K]>>(name: K, variable: V) {
     if (!(name in this.context))
       this.context[name] = variable;
   }
 
-  listenFor<K extends keyof C>(name: K, callback: Subscription<C[K]>, immediate = false) {
+  subscribeTo<K extends keyof C>(name: K, callback: Subscription<C[K]>, immediate = false) {
     const variable = this.context[name];
     variable?.subscribe(callback, immediate);
   }

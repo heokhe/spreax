@@ -56,7 +56,7 @@ export class Spreax<T, E extends Element, A extends string> {
     if (varName && varName in this.variables) {
       const n = varName as keyof T;
       const v = this.variables[n];
-      wrapper.subscribeTo(n, v);
+      wrapper.addToContext(n, v);
       handleIf(wrapper, n);
     }
   }
@@ -64,7 +64,7 @@ export class Spreax<T, E extends Element, A extends string> {
   bindAttributes(wrapper: Wrapper<T>, boundAttributes: { name: string; value: string }[]) {
     for (const { name, value } of boundAttributes) {
       if (value in wrapper.context || value in this.variables) {
-        wrapper.subscribeTo(value as keyof T, this.variables[value])
+        wrapper.addToContext(value as keyof T, this.variables[value])
         handleAttr(wrapper, name, value as keyof T);
       }
     }
@@ -74,7 +74,7 @@ export class Spreax<T, E extends Element, A extends string> {
     if (data && data.arrayName in this.variables) {
       const arrayName = data.arrayName as keyof T;
       if (this.variables[arrayName].value instanceof Array) {
-        wrapper.subscribeTo(arrayName, this.variables[arrayName]);
+        wrapper.addToContext(arrayName, this.variables[arrayName]);
         handleFor({
           arrayName, varName: data.variableName, wrapper, indexName: data.indexName,
           onCreate: wr => this.setupWrapper(wr as Wrapper<T>)
@@ -86,15 +86,15 @@ export class Spreax<T, E extends Element, A extends string> {
   handleBind(wrapper: Wrapper<T>, varName: string) {
     if (wrapper.el.tagName === 'INPUT' && varName && varName in this.variables) {
       const v = varName as keyof T;
-      wrapper.subscribeTo(v, this.variables[v]);
+      wrapper.addToContext(v, this.variables[v]);
       handleBind(wrapper as Wrapper<T, HTMLInputElement>, v);
     }
   }
 
   setupNode(node: TextNodeWrapper<T>) {
     for (const dep of node.dependencies) {
-      node.subscribeTo(dep, this.variables[dep]);
-      node.listenFor(dep, () => node.setText());
+      node.addToContext(dep, this.variables[dep]);
+      node.subscribeTo(dep, () => node.setText());
     }
     node.setText();
   }

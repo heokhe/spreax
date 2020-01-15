@@ -1,4 +1,4 @@
-import Spreax, { state, derived, push } from "../src/index";
+import Spreax, { state, derived, unshift } from "../src/index";
 
 const windowSize = derived(() => window.innerWidth);
 window.addEventListener('resize', () => windowSize.compute());
@@ -12,8 +12,8 @@ const app = new Spreax(
   el,
   { n, array, dblarray, windowSize, isTablet },
   {
-    push() {
-      push(array, Math.round(Math.random() * 20))
+    addANumber() {
+      unshift(array, Math.round(Math.random() * 20))
     }
   }
 );

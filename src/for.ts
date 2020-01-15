@@ -21,12 +21,10 @@ class LoopHandler<T, V extends string, I extends string> {
   onCreate: (wrapper: WrapperWithExtraVars<T, V, I>) => any;
   comment: Comment = new Comment();
   wrappers: WrapperWithExtraVars<T, V, I>[] = [];
-  backup: Element;
   indexName: I;
   constructor({ wrapper, arrayName, varName, onCreate, indexName }: LoopHandlerOptions<T, V, I>) {
     this.wrapper = wrapper;
-    this.el = wrapper.el;
-    this.backup = this.clone(this.el);
+    this.el = this.el.cloneNode(true) as Element;
     this.arrayName = arrayName;
     this.varName = varName;
     this.indexName = indexName;
@@ -50,8 +48,8 @@ class LoopHandler<T, V extends string, I extends string> {
     return new Wrapper<WithExtraVars<T, V, I>>(el);
   }
 
-  clone(el = this.backup) {
-    const child = el.cloneNode(true) as Element;
+  clone() {
+    const child = this.el.cloneNode(true) as Element;
     child.removeAttribute('@for');
     return child;
   }
@@ -59,13 +57,13 @@ class LoopHandler<T, V extends string, I extends string> {
   subscribeWrapper(wrapper: WrapperWithExtraVars<T, V, I>, index: number) {
     const { varName, variable } = this,
       item = derived(() => variable.value[index]),
-      ci = derived(() => index as WithExtraVars<T, V, I>[I]);
+      i = derived(() => index as WithExtraVars<T, V, I>[I]);
     item.subscribeAndAutoCompute(variable);
-    wrapper.subscribeTo(varName, item);
-    wrapper.subscribeTo(this.indexName, ci);
+    wrapper.addToContext(varName, item);
+    wrapper.addToContext(this.indexName, i);
     for (const node of wrapper.nodes) {
-      node.subscribeTo(varName, item);
-      node.subscribeTo(this.indexName, ci);
+      node.addToContext(varName, item);
+      node.addToContext(this.indexName, i);
     }
   }
 
