@@ -5,7 +5,7 @@ import { TextNodeWrapper } from './text-node-wrapper';
 import { handleBind } from './bind';
 import { handleFor } from './for';
 import { handleAttr } from './attr';
-import { ComputedVariable } from "./computed";
+import { DerivedVariable } from "./derived";
 import { Actions } from "./actions";
 import { handleIf } from "./if";
 
@@ -21,15 +21,15 @@ export class Spreax<T, E extends Element, A extends string> {
     this.el = rootEl;
     this.variables = variables;
     this.actions = actions;
-    this.setupComputedVars();
+    this.setupderivedVars();
     for (const el of makeElementTree(rootEl))
       this.setupElement(el);
   }
 
-  setupComputedVars() {
+  setupderivedVars() {
     const variablesArray = getVariablesFromObject(this.variables);
     for (const v1 of variablesArray)
-      if (v1 instanceof ComputedVariable)
+      if (v1 instanceof DerivedVariable)
         for (const v2 of variablesArray)
           if (v2 !== v1)
             v1.subscribeAndAutoCompute(v2);

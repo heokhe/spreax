@@ -1,5 +1,5 @@
 import { state } from "../../src/state"
-import { computed } from "../../src/computed"
+import { derived } from "../../src/derived"
 
 const number = state(10);
 describe('State variables', () => {
@@ -12,8 +12,8 @@ describe('State variables', () => {
   })
 })
 
-describe('Computed variables', () => {
-  const double = computed(() => number.value * 2);
+describe('Derived variables', () => {
+  const double = derived(() => number.value * 2);
   double.subscribeAndAutoCompute(number);  // you don't need to manually call this in real world
   it('Holds the value', () => {
     number.set(10);

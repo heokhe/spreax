@@ -11,11 +11,12 @@
     <div id="app">
       <h6>Window size: @(windowSize) (big: @(isTablet))</h6>
       <input type="number" @bind="n" min="0" @if="isTablet">
-      <button @on:click="increase">++</button>
-      <div @for="num of dblarray" $id="i">
+      <div @for="num, j of dblarray">
         <hr>
-        @(i). <b>@(num)</b>
+        @(j). <b>@(num)</b>
       </div>
+      <br>
+      <button @on:click="push">Add</button>
     </div>
   </body>
   <script src='app.js'></script>

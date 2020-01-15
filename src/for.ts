@@ -1,5 +1,5 @@
 import { Wrapper as Wrapper } from "./wrapper";
-import { computed } from "./computed";
+import { derived } from "./derived";
 import { Variable } from "./variables";
 import { makeElementTree } from './dom';
 
@@ -58,8 +58,8 @@ class LoopHandler<T, V extends string, I extends string> {
 
   subscribeWrapper(wrapper: WrapperWithExtraVars<T, V, I>, index: number) {
     const { varName, variable } = this,
-      item = computed(() => variable.value[index]),
-      ci = computed(() => index as WithExtraVars<T, V, I>[I]);
+      item = derived(() => variable.value[index]),
+      ci = derived(() => index as WithExtraVars<T, V, I>[I]);
     item.subscribeAndAutoCompute(variable);
     wrapper.subscribeTo(varName, item);
     wrapper.subscribeTo(this.indexName, ci);
