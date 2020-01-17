@@ -12,7 +12,7 @@ export abstract class Subscriber<C> {
    * Subscribes the object to a `Subscribable`.
    * Silently fails if `name` already exists.
    */
-  addToContext<K extends keyof C, V extends Variable<C[K]>>(name: K, variable: V) {
+  addToContextIfNotPresent<K extends keyof C, V extends Variable<C[K]>>(name: K, variable: V) {
     if (!(name in this.context))
       this.context[name] = variable;
   }

@@ -8,7 +8,7 @@ describe('Subscribables and subscribers', () => {
   const char = state('A');
   const subscriber = new TestSubscriber();
   it('Subscribes', () => {
-    subscriber.addToContext('char', char);
+    subscriber.addToContextIfNotPresent('char', char);
     expect(subscriber.context.char).toBe(char);
   })
   it('Gets notified about updates', () => {
