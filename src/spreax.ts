@@ -72,7 +72,7 @@ export class Spreax<T, E extends Element, A extends string> {
   }
 
   handleFor(wrapper: Wrapper<T>, data: { variableName: string; arrayName: string; indexName: string }) {
-    const arrayName = this.castVarNameIfExists(wrapper, data.arrayName);
+    const arrayName = this.castVarNameIfExists(wrapper, data?.arrayName);
     if (arrayName) {
       if (this.variables[arrayName].value instanceof Array) {
         wrapper.addToContextIfNotPresent(arrayName, this.variables[arrayName]);

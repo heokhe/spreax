@@ -55,11 +55,11 @@ class LoopHandler<T, V extends string, I extends string> {
       item = derived(() => variable.value[index]),
       i = derived(() => index as WithExtraVars<T, V, I>[I]);
     item.subscribeAndAutoCompute(variable);
-    wrapper.addToContext(varName, item);
-    wrapper.addToContext(this.indexName, i);
+    wrapper.addToContextIfNotPresent(varName, item);
+    wrapper.addToContextIfNotPresent(this.indexName, i);
     for (const node of wrapper.nodes) {
-      node.addToContext(varName, item);
-      node.addToContext(this.indexName, i);
+      node.addToContextIfNotPresent(varName, item);
+      node.addToContextIfNotPresent(this.indexName, i);
     }
   }
 
