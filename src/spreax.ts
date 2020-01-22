@@ -53,28 +53,29 @@ export class Spreax<T, E extends Element, A extends string> {
   }
 
   handleIf(wrapper: Wrapper<T>, varName: string) {
-    if (varName && (varName in wrapper.context || varName in this.variables)) {
-      const n = varName as keyof T;
+    const n = this.castVarNameIfExists(wrapper, varName);
+    if (n) {
       const v = this.variables[n];
-      wrapper.addToContext(n, v);
+      wrapper.addToContextIfNotPresent(n, v);
       handleIf(wrapper, n);
     }
   }
 
   bindAttributes(wrapper: Wrapper<T>, boundAttributes: { name: string; value: string }[]) {
     for (const { name, value } of boundAttributes) {
-      if (value in wrapper.context || value in this.variables) {
-        wrapper.addToContext(value as keyof T, this.variables[value])
-        handleAttr(wrapper, name, value as keyof T);
+      const varName = this.castVarNameIfExists(wrapper, value);
+      if (varName) {
+        wrapper.addToContextIfNotPresent(varName, this.variables[varName])
+        handleAttr(wrapper, name, varName);
       }
     }
   }
 
   handleFor(wrapper: Wrapper<T>, data: { variableName: string; arrayName: string; indexName: string }) {
-    if (data && data.arrayName in this.variables) {
-      const arrayName = data.arrayName as keyof T;
+    const arrayName = this.castVarNameIfExists(wrapper, data.arrayName);
+    if (arrayName) {
       if (this.variables[arrayName].value instanceof Array) {
-        wrapper.addToContext(arrayName, this.variables[arrayName]);
+        wrapper.addToContextIfNotPresent(arrayName, this.variables[arrayName]);
         handleFor({
           arrayName, varName: data.variableName, wrapper, indexName: data.indexName,
           onCreate: wr => this.setupWrapper(wr as Wrapper<T>)
@@ -84,18 +85,25 @@ export class Spreax<T, E extends Element, A extends string> {
   }
 
   handleBind(wrapper: Wrapper<T>, varName: string) {
-    if (wrapper.el.tagName === 'INPUT' && varName && (varName in this.variables || varName in wrapper.context)) {
-      const v = varName as keyof T;
-      wrapper.addToContext(v, this.variables[v]);
+    const v = this.castVarNameIfExists(wrapper, varName);
+    if (wrapper.el.tagName === 'INPUT' && v) {
+      wrapper.addToContextIfNotPresent(v, this.variables[v]);
       handleBind(wrapper as Wrapper<T, HTMLInputElement>, v);
     }
   }
 
   setupNode(node: TextNodeWrapper<T>) {
     for (const dep of node.dependencies) {
-      node.addToContext(dep, this.variables[dep]);
+      // may be present in the context, if node is created by a LoopHandler.
+      node.addToContextIfNotPresent(dep, this.variables[dep]);
       node.subscribeTo(dep, () => node.setText());
     }
     node.setText();
+  }
+
+  castVarNameIfExists(wrapper: Wrapper<T>, varName: string) {
+    return (varName && (varName in wrapper.context || varName in this.variables))
+     ? varName as keyof T
+     : undefined;
   }
 }
