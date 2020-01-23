@@ -53,13 +53,15 @@ class LoopHandler<T, V extends string, I extends string> {
   subscribeWrapper(wrapper: WrapperWithExtraVars<T, V, I>, index: number) {
     const { varName, variable } = this,
       item = derived(() => variable.value[index]),
-      i = derived(() => index as WithExtraVars<T, V, I>[I]);
+      i = this.indexName
+        ? derived(() => index as WithExtraVars<T, V, I>[I])
+        : null;
     item.subscribeAndAutoCompute(variable);
     wrapper.addToContextIfNotPresent(varName, item);
-    wrapper.addToContextIfNotPresent(this.indexName, i);
+    if (i) wrapper.addToContextIfNotPresent(this.indexName, i);
     for (const node of wrapper.nodes) {
       node.addToContextIfNotPresent(varName, item);
-      node.addToContextIfNotPresent(this.indexName, i);
+      if (i) node.addToContextIfNotPresent(this.indexName, i);
     }
   }
 
