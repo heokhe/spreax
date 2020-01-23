@@ -1,5 +1,5 @@
 import { ParseResult } from './parser';
-import { Variables, Variable } from '../variables';
+import { Variables, Variable } from '../core/variables';
 
 export function evaluate<T>(parseResult: ParseResult, context: Variables<T>) {
   if (parseResult.type === 'literal')

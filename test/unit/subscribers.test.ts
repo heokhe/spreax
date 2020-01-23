@@ -1,5 +1,5 @@
-import { state } from "../../src/state";
-import { Subscriber } from "../../src/subscriber";
+import { state } from "../../src/core/state";
+import { Subscriber } from "../../src/core/subscriber";
 
 class TestSubscriber extends Subscriber<{ char: string }> {}
 

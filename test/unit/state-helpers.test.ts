@@ -1,4 +1,4 @@
-import { state } from "../../src/state";
+import { state } from "../../src/core/state";
 import * as helpers from '../../src/state-helpers';
 
 const numbers = state([0]);

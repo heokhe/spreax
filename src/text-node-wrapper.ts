@@ -1,4 +1,4 @@
-import { Subscriber } from "./subscriber";
+import { Subscriber } from "./core/subscriber";
 import { parse } from './parser/parser';
 import { evaluate } from './parser/evaluate';
 

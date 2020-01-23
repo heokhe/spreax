@@ -1,4 +1,4 @@
-import { StateVariable } from "./state";
+import { StateVariable } from "./core/state";
 
 export function push<T>(state: StateVariable<T[]>, ...items: T[]) {
   state.update(array => [...array, ...items]);

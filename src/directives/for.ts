@@ -1,6 +1,6 @@
 import { Wrapper as Wrapper } from "../wrapper";
-import { derived } from "../derived";
-import { Variable } from "../variables";
+import { derived } from "../core/derived";
+import { Variable } from "../core/variables";
 import { makeElementTree } from '../dom';
 
 type WithExtraVars<T, V extends string, I extends string> = T & { [x in I]: number } & { [x in V]: any }

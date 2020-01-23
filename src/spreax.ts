@@ -1,12 +1,12 @@
-import { Variables, getVariablesFromObject } from "./variables";
+import { Variables, getVariablesFromObject } from "./core/variables";
 import { makeElementTree } from './dom';
 import { Wrapper } from './wrapper';
 import { TextNodeWrapper } from './text-node-wrapper';
 import { handleBind } from './directives/bind';
 import { handleFor } from './directives/for';
 import { handleAttr } from './directives/attr';
-import { DerivedVariable } from "./derived";
-import { Actions } from "./actions";
+import { DerivedVariable } from "./core/derived";
+import { Actions } from "./core/actions";
 import { handleIf } from "./directives/if";
 import { checkAndCast } from "./helpers";
 

@@ -1,5 +1,5 @@
 import { Wrapper } from "../wrapper";
-import { StateVariable } from "../state";
+import { StateVariable } from "../core/state";
 
 export function handleBind<T, K extends keyof T>(wrapper: Wrapper<T, HTMLInputElement>, varName: K) {
   const { el: input } = wrapper,

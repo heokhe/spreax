@@ -1,5 +1,5 @@
-import { state } from "../../src/state"
-import { derived } from "../../src/derived"
+import { state } from "../../src/core/state"
+import { derived } from "../../src/core/derived"
 
 const number = state(10);
 describe('State variables', () => {

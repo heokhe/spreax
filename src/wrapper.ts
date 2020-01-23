@@ -1,4 +1,4 @@
-import { Subscriber } from "./subscriber";
+import { Subscriber } from "./core/subscriber";
 import { TextNodeWrapper } from "./text-node-wrapper";
 
 export class Wrapper<T, E extends Element = Element> extends Subscriber<T> {
