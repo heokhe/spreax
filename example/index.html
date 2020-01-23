@@ -11,9 +11,9 @@
     <div id="app">
       <h6>Window size: @(windowSize) (big: @(isTablet))</h6>
       <input type="number" @bind="n" min="0" @if="isTablet">
-      <div @for="num, j of dblarray">
+      <div @for="num, i of dblarray">
         <hr>
-        @(j). <b>@(num)</b>
+        @(array[i]) * @(n) = <b>@(num)</b>
       </div>
       <br>
       <button @on:click="addANumber">Add a number</button>
