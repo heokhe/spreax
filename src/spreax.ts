@@ -8,6 +8,7 @@ import { handleAttr } from './attr';
 import { DerivedVariable } from "./derived";
 import { Actions } from "./actions";
 import { handleIf } from "./if";
+import { checkAndCast } from "./helpers";
 
 export class Spreax<T, E extends Element, A extends string> {
   readonly el: E;
@@ -53,7 +54,7 @@ export class Spreax<T, E extends Element, A extends string> {
   }
 
   handleIf(wrapper: Wrapper<T>, varName: string) {
-    const n = this.castVarNameIfExists(wrapper, varName);
+    const n = this.checkAndCastVarName(wrapper, varName);
     if (n) {
       const v = this.variables[n];
       wrapper.addToContextIfNotPresent(n, v);
@@ -63,7 +64,7 @@ export class Spreax<T, E extends Element, A extends string> {
 
   bindAttributes(wrapper: Wrapper<T>, boundAttributes: { name: string; value: string }[]) {
     for (const { name, value } of boundAttributes) {
-      const varName = this.castVarNameIfExists(wrapper, value);
+      const varName = this.checkAndCastVarName(wrapper, value);
       if (varName) {
         wrapper.addToContextIfNotPresent(varName, this.variables[varName])
         handleAttr(wrapper, name, varName);
@@ -72,7 +73,7 @@ export class Spreax<T, E extends Element, A extends string> {
   }
 
   handleFor(wrapper: Wrapper<T>, data: { variableName: string; arrayName: string; indexName: string }) {
-    const arrayName = this.castVarNameIfExists(wrapper, data?.arrayName);
+    const arrayName = this.checkAndCastVarName(wrapper, data?.arrayName);
     if (arrayName) {
       if (this.variables[arrayName].value instanceof Array) {
         wrapper.addToContextIfNotPresent(arrayName, this.variables[arrayName]);
@@ -85,7 +86,7 @@ export class Spreax<T, E extends Element, A extends string> {
   }
 
   handleBind(wrapper: Wrapper<T>, varName: string) {
-    const v = this.castVarNameIfExists(wrapper, varName);
+    const v = this.checkAndCastVarName(wrapper, varName);
     if (wrapper.el.tagName === 'INPUT' && v) {
       wrapper.addToContextIfNotPresent(v, this.variables[v]);
       handleBind(wrapper as Wrapper<T, HTMLInputElement>, v);
@@ -101,9 +102,7 @@ export class Spreax<T, E extends Element, A extends string> {
     node.setText();
   }
 
-  castVarNameIfExists(wrapper: Wrapper<T>, varName: string) {
-    return (varName && (varName in wrapper.context || varName in this.variables))
-     ? varName as keyof T
-     : undefined;
+  checkAndCastVarName(wrapper: Wrapper<T>, varName: string) {
+    return checkAndCast({...this.variables, ...wrapper.context }, varName);
   }
 }
