@@ -1,4 +1,4 @@
-import { Wrapper } from "./wrapper";
+import { Wrapper } from "../wrapper";
 
 export function handleIf<T>(wrapper: Wrapper<T>, varName: keyof T) {
   const comment = new Comment(),

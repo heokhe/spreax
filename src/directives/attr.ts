@@ -1,4 +1,4 @@
-import { Wrapper } from "./wrapper";
+import { Wrapper } from "../wrapper";
 
 export function handleAttr<T>(
   wrapper: Wrapper<T>,

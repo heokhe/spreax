@@ -2,12 +2,12 @@ import { Variables, getVariablesFromObject } from "./variables";
 import { makeElementTree } from './dom';
 import { Wrapper } from './wrapper';
 import { TextNodeWrapper } from './text-node-wrapper';
-import { handleBind } from './bind';
-import { handleFor } from './for';
-import { handleAttr } from './attr';
+import { handleBind } from './directives/bind';
+import { handleFor } from './directives/for';
+import { handleAttr } from './directives/attr';
 import { DerivedVariable } from "./derived";
 import { Actions } from "./actions";
-import { handleIf } from "./if";
+import { handleIf } from "./directives/if";
 import { checkAndCast } from "./helpers";
 
 export class Spreax<T, E extends Element, A extends string> {

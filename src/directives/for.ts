@@ -1,7 +1,7 @@
-import { Wrapper as Wrapper } from "./wrapper";
-import { derived } from "./derived";
-import { Variable } from "./variables";
-import { makeElementTree } from './dom';
+import { Wrapper as Wrapper } from "../wrapper";
+import { derived } from "../derived";
+import { Variable } from "../variables";
+import { makeElementTree } from '../dom';
 
 type WithExtraVars<T, V extends string, I extends string> = T & { [x in I]: number } & { [x in V]: any }
 type WrapperWithExtraVars<T, V extends string, I extends string> = Wrapper<WithExtraVars<T, V, I>>;
