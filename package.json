@@ -1,6 +1,6 @@
 {
 	"name": "spreax",
-	"description": "Tiny library for making reactive views, without virtual DOM",
+	"description": "A library to help you make pure web applications, Without any bloat and Virtual DOM stuff",
 	"main": "dist/spreax.cjs.js",
 	"browser": "dist/spreax.browser.js",
 	"unpkg": "dist/spreax.browser.min.js",
