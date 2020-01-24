@@ -1,7 +1,7 @@
 # Installing Spreax
 ## npm
 ```shell
-npm install --save spreax
+npm install spreax
 ```
 Or if you prefer Yarn:
 ```shell
@@ -16,9 +16,10 @@ You can get it from **unpkg**:
 A global variable called `sp` will be available.
 ```js
 var sp = {
-  Spreax: ...,
-  Directive: ...,
-  register: ...
+  default: ..., // use this for creating instances
+  state: ...,
+  derived: ...,
+  // ...
 }
 ```
 
