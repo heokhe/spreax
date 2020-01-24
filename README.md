@@ -1,29 +1,23 @@
 # Spreax
-Tiny (~3 KB gzipped) library for making reactive views, without virtual DOM.
+<img src="logo.png" alt="Spreax logo" width="120" align="right">
 
-# Features
-* State, Methods, Getters (computed properties)
-* Bind values to inputs
-* Text interpolation
-* Attach event listeners to elements
-* and... 
+Spreax is a library to help you make pure web applications, Without any bloat and Virtual DOM stuff. 
+It has a size of ~2.7KB (minified, gzipped) and doesn't force you to deliver large payloads of JavaScript code.
+It also supports TypeScript.
+
+Spreax isn't created for doing anything new; **It only takes care of the state and synchronizes the UI with it.**
 
 # How?
-Spreax doesn't render anything. Instead, after every state change, it updates the elements (their text content, attributes, ...) to synchronize the view with the state. 
-**You don't have to write your template in JavaScript; just configure Spreax and write the app logic.**
+Spreax doesn't render anything. Instead, after every state change, it updates the elements (their text content, attributes, ...) to synchronize the UI with the state. 
+![Diagram](diagram.png)
 
-# Demo
-See more in [Example Page](./index.html):
-```bash
-git clone https://github.com/hkh12/spreax
-npm run build
-npm run serve
+# Get Started
+Install it by executing:
+```sh
+npm i spreax # npm
+yarn add spreax # npm
 ```
+See more in [Installtion docs](docs/installation.md).
 
-# Why?
-Most importantly, **Performance**. Vue and React do their job very well, but they force you to deliver large JavaScript payloads, Because everything is rendered by JavaScript code. 
-
-Spreax may not be used in large apps, but it's useful for small projects.
-
-# Documentation
-See [docs folder](docs/README.md).
+# Docs
+See [docs folder](docs).
