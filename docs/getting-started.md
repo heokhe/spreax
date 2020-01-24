@@ -1,34 +1,42 @@
 # Getting started with Spreax
 
-## Creating an instance 
-To make Spreax work, you must create an **instance** attached to an element and define your app's [state](https://en.wikipedia.org/wiki/State_(computer_science)):
-
+## Stage 1: Create a greeting app
+Ok. We've installed the library, And we're going to create a simple greeting app.
 ```js
-import { Spreax } from 'spreax' // ES module
-const { Spreax } = require('spreax') // CJS module
-var Spreax = sp.Spreax // browser
-
-const instance = new Spreax({
-  el: document.getElementById('app'),
-  state: {
-    msg: 'hello'
-  }
-})
+import Spreax, { state } from 'spreax';
+const name = state('Hosein');
+const app = new Spreax('#app', { name });
 ```
 ```html
 <div id='app'>
-  <output>Message: @(msg)</output>
+  Hello @(name)
 </div>
 ```
+Let's break this down:
 
-Now when you open the page, you will see message "hello". This feature is called **text interpolation**.
+- `name` is a **state variable**. You can assing another value to it, And things will get updated.
+- `app` is an instance of Spreax. It does the work for everything in `<div id='app'>`.
+- `@(name)` means to Spreax. Whenever `name` is updated, Spreax inserts its value there.
 
-Now open the console and write `instance.msg = 'goodbye'` and you'll see the message change to "goodbye".
+Open the page in your browser. You should be seeing the sentence `Hello Hosein`.
 
-In addition of text interpolation, you can dynamically set attributes:
-```html
-<div @attr:title='msg'>Hover over me to see the message!</div>
+Now, try changing the name:
+```js
+name.set('Jack');
 ```
-> Attributes starting with `@` are called **Directives** and they add extra behavior to elements. Spreax includes [built-in directives](builtins.md) and you create custom ones too.
+The sentence has been updated to `Hello Jack`. Isn't it cool?
 
-Here `@attr` is saying: "keep the value of `title` attribute up-to-date with property `msg`".
+## Stage 2: Allowing the viewers to enter their names
+Now, we want a `<input>` to enter a name and see a warm greeting message. Let's change our HTML:
+```html
+<div id='app'>
+  <input type='text' @bind='name'>
+  Hello @(name)
+</div>
+```
+And that's it!
+
+- When you type in the input, `name.set()` will be called.
+- If you manually call `name.set()`, input's value will be updated.
+
+Attributes starting with `@`, called **directives**, are meaningful to Spreax. You'll learn about them later.
