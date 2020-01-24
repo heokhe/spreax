@@ -16,7 +16,7 @@ Let's break this down:
 
 - `name` is a **state variable**. You can assing another value to it, And things will get updated.
 - `app` is an instance of Spreax. It does the work for everything in `<div id='app'>`.
-- `@(name)` means to Spreax. Whenever `name` is updated, Spreax inserts its value there.
+- `@(name)` means to Spreax. Whenever `name` is updated, Spreax inserts its value there. (You can use dot/bracket notation like `@(user.name)` too)
 
 Open the page in your browser. You should be seeing the sentence `Hello Hosein`.
 
