@@ -42,5 +42,5 @@
 	"author": "Hosein Khansari <hrk.x11@gmail.com>",
 	"license": "MIT",
 	"version": "1.0.0-beta.4",
-	"dependencies": {}
+	"typings": "typings"
 }
