@@ -15,10 +15,13 @@ export class Spreax<T, E extends Element, A extends string> {
   variables: Variables<T>;
   readonly actions: Actions<A>;
   constructor(
-    rootEl: E,
+    rootElOrSelector: E | string,
     variables: Variables<T>,
     actions: Actions<A> = {} as Actions<A>
   ) {
+    const rootEl: E = typeof rootElOrSelector === 'string'
+      ? document.querySelector(rootElOrSelector)
+      : rootElOrSelector;
     this.el = rootEl;
     this.variables = variables;
     this.actions = actions;
