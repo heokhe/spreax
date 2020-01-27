@@ -1,15 +1,11 @@
 import Spreax, { state, derived, unshift } from "../src/index";
 
-const windowSize = derived(() => window.innerWidth);
-window.addEventListener('resize', () => windowSize.compute());
-const isTablet = derived(() => windowSize.value >= 768);
-
-const n = state(2);
+const x = state(2);
 const array = state([1, 2, 3, 9, 7]);
-const dblarray = derived(() => array.value.map(x => x * n.value));
+const mappedArray = derived(() => array.value.map(n => n * x.value));
 const app = new Spreax(
   '#app',
-  { n, array, dblarray, windowSize, isTablet },
+  { x, array, mappedArray },
   {
     addANumber() {
       unshift(array, Math.round(Math.random() * 20))

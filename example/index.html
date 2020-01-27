@@ -9,15 +9,14 @@
   </head>
   <body>
     <div id="app">
-      <h6>Window size: @(windowSize) (big: @(isTablet))</h6>
-      <input type="number" @bind="n" min="0" $disabled="isTablet">
-      <div @for="num, i of dblarray">
+      <input type="number" @bind="x" min="0">
+      <div @for="y, i of mappedArray">
         <hr>
-        @(array[i]) * @(n) = <b>@(num)</b>
+        @(array[i]) * @(x) = <b>@(y)</b>
       </div>
       <br>
       <button @on:click="addANumber">Add a number</button>
     </div>
   </body>
-  <script src='app.js'></script>
+  <script src="app.js"></script>
 </html>
