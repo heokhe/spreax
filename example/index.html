@@ -10,7 +10,7 @@
   <body>
     <div id="app">
       <h6>Window size: @(windowSize) (big: @(isTablet))</h6>
-      <input type="number" @bind="n" min="0" @if="isTablet">
+      <input type="number" @bind="n" min="0" $disabled="isTablet">
       <div @for="num, i of dblarray">
         <hr>
         @(array[i]) * @(n) = <b>@(num)</b>
