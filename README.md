@@ -9,7 +9,9 @@ Spreax isn't created for doing anything new; **It only takes care of the state a
 
 # How?
 Spreax doesn't render anything. Instead, after every state change, it updates the elements (their text content, attributes, ...) to synchronize the UI with the state. 
-![Diagram](diagram.png)
+<center>
+<img src="diagram.png" alt="A diagram demonstrating how Spreax works." width="550" align="center">
+</center>
 
 # Get Started
 Install it by executing:
