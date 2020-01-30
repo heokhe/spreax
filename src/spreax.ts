@@ -1,15 +1,18 @@
-import { Variables, getVariablesFromObject } from "./core/variables";
+import { Variables, getVariablesFromObject } from './core/variables';
 import { makeElementTree } from './dom';
 import { Wrapper } from './wrapper';
 import { TextNodeWrapper } from './text-node-wrapper';
-import { DerivedVariable } from "./core/derived";
-import { Actions } from "./core/actions";
-import { checkAndCast } from "./helpers";
+import { DerivedVariable } from './core/derived';
+import { Actions } from './core/actions';
+import { checkAndCast } from './helpers';
 
 export class Spreax<T, E extends Element, A extends string> {
   readonly el: E;
+
   variables: Variables<T>;
+
   readonly actions: Actions<A>;
+
   constructor(
     rootElOrSelector: E | string,
     variables: Variables<T>,
@@ -56,6 +59,6 @@ export class Spreax<T, E extends Element, A extends string> {
   }
 
   checkAndCastVarName(wrapper: Wrapper<T>, varName: string) {
-    return checkAndCast({...this.variables, ...wrapper.context }, varName);
+    return checkAndCast({ ...this.variables, ...wrapper.context }, varName);
   }
 }

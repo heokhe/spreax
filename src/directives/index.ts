@@ -12,8 +12,11 @@ export type DirectiveMatch = {
 
 export abstract class DirectiveHandler<T, E extends Element = Element> {
   target: Wrapper<T, E>;
+
   protected name: string;
+
   protected parameters = false;
+
   private matches: DirectiveMatch[];
 
   get el(): E {
@@ -35,7 +38,7 @@ export abstract class DirectiveHandler<T, E extends Element = Element> {
           parameter,
           value,
           parsed: this.parse(value)
-        })
+        });
       }
     }
     return output;
@@ -54,6 +57,7 @@ export abstract class DirectiveHandler<T, E extends Element = Element> {
   }
 
   abstract handle(value: any, match?: DirectiveMatch): void;
+
   abstract init(value: any, match?: DirectiveMatch): void;
 
   private use(variables: Variables<T>) {

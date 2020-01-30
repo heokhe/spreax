@@ -1,4 +1,4 @@
-import { Subscriber } from "./core/subscriber";
+import { Subscriber } from './core/subscriber';
 import { parse } from './parser/parser';
 import { evaluate } from './parser/evaluate';
 
@@ -6,9 +6,13 @@ const DEP_REGEX = /(@\([^)]+\))/gi;
 
 export class TextNodeWrapper<T> extends Subscriber<T> {
   node: Node;
+
   initialText: string;
+
   sections: string[];
+
   dependencies: (keyof T)[] = [];
+
   constructor(node: Node) {
     super();
     this.node = node;
@@ -17,12 +21,12 @@ export class TextNodeWrapper<T> extends Subscriber<T> {
     for (let i = 0; i < this.sections.length; i++) {
       // sections with odd indexes are variables.
       if (i % 2 === 1) {
-        const { dependencies } = parse(this.sections[i].slice(2, -1))
+        const { dependencies } = parse(this.sections[i].slice(2, -1));
         this.dependencies.push(...dependencies as (keyof T)[]);
       }
     }
   }
-  
+
   render() {
     return this.sections.map((sect, i) => {
       return i % 2 === 0

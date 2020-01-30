@@ -1,19 +1,22 @@
-import { Subscribable } from "./subscribable";
+import { Subscribable } from './subscribable';
 
 type DerivedFn<T> = () => T;
 
 export class DerivedVariable<T> extends Subscribable<T> {
   fn: DerivedFn<T>;
+
   constructor(fn: DerivedFn<T>) {
     super();
     this.fn = fn;
     this.compute();
   }
+
   compute() {
     this.changeValue(this.fn.call(null));
   }
+
   subscribeAndAutoCompute<T>(state: Subscribable<T>) {
-    state.subscribe(() => this.compute())
+    state.subscribe(() => this.compute());
   }
 }
 

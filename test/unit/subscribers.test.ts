@@ -1,5 +1,5 @@
-import { state } from "../../src/core/state";
-import { Subscriber } from "../../src/core/subscriber";
+import { state } from '../../src/core/state';
+import { Subscriber } from '../../src/core/subscriber';
 
 class TestSubscriber extends Subscriber<{ char: string }> {}
 
@@ -10,12 +10,12 @@ describe('Subscribables and subscribers', () => {
   it('Subscribes', () => {
     subscriber.addToContextIfNotPresent('char', char);
     expect(subscriber.context.char).toBe(char);
-  })
+  });
   it('Gets notified about updates', () => {
     let called = 0;
     subscriber.subscribeTo('char', () => called++, true);
     expect(called).toEqual(1);
     char.set('B');
     expect(called).toEqual(2);
-  })
-})
+  });
+});

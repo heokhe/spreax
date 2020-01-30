@@ -1,5 +1,5 @@
-import { Subscription } from "./subscribable";
-import { Variables, Variable } from "./variables";
+import { Subscription } from './subscribable';
+import { Variables, Variable } from './variables';
 
 export abstract class Subscriber<C> {
   context: Variables<C>

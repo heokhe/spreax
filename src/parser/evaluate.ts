@@ -7,7 +7,7 @@ export function evaluate<T>(parseResult: ParseResult, context: Variables<T>) {
   const { varName, path } = parseResult;
   let val = (context[varName] as Variable<any>)?.value;
   for (const { isLiteral, name } of path) {
-    val = val?.[isLiteral ? name : context[name]?.value]
+    val = val?.[isLiteral ? name : context[name]?.value];
   }
   return val;
 }

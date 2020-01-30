@@ -1,4 +1,4 @@
-import { StateVariable } from "./core/state";
+import { StateVariable } from './core/state';
 
 export function push<T>(state: StateVariable<T[]>, ...items: T[]) {
   state.update(array => [...array, ...items]);
@@ -11,7 +11,7 @@ export function unshift<T>(state: StateVariable<T[]>, ...items: T[]) {
 export function merge<T extends object>(state: StateVariable<T>, sourceObject: {
   [x in keyof T]?: T[x]
 }) {
-  state.update(object => ({ ...object, ...sourceObject }))
+  state.update(object => ({ ...object, ...sourceObject }));
 }
 
 export function set<
@@ -22,13 +22,13 @@ export function set<
 }
 
 export function setIndex<T>(state: StateVariable<T[]>, index: number, newValue: T) {
-  state.update(array => array.map((x, i) => i === index ? newValue : x));
+  state.update(array => array.map((x, i) => (i === index ? newValue : x)));
 }
 
 export function splice<T>(state: StateVariable<T[]>, start: number, deleteCount: number, ...items: T[]) {
   const clone = [...state.value];
   clone.splice(start, deleteCount, ...items);
-  state.set(clone)
+  state.set(clone);
 }
 
 export function inc(state: StateVariable<number>, x = 1) {

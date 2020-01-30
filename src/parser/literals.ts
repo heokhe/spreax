@@ -5,9 +5,9 @@ const LITERALS = {
   true: true,
   false: false,
   null: null,
-  NaN: NaN,
-  undefined: undefined
-}
+  NaN,
+  undefined
+};
 
 /**
  * @returns An array with containing a value.
@@ -15,9 +15,9 @@ const LITERALS = {
  */
 export function parseLiteralExpression(expr: string): [Literal] | [] {
   if (expr in LITERALS)
-    return [LITERALS[expr]]
+    return [LITERALS[expr]];
   const parsedToFloat = parseFloat(expr);
-  if (!isNaN(parsedToFloat))
+  if (!Number.isNaN(parsedToFloat))
     return [parsedToFloat];
-  return []
+  return [];
 }
