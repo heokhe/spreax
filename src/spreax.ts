@@ -2,12 +2,8 @@ import { Variables, getVariablesFromObject } from "./core/variables";
 import { makeElementTree } from './dom';
 import { Wrapper } from './wrapper';
 import { TextNodeWrapper } from './text-node-wrapper';
-import { handleBind } from './directives/bind';
-import { handleFor } from './directives/for';
-import { handleAttr } from './directives/attr';
 import { DerivedVariable } from "./core/derived";
 import { Actions } from "./core/actions";
-import { handleIf } from "./directives/if";
 import { checkAndCast } from "./helpers";
 
 export class Spreax<T, E extends Element, A extends string> {
@@ -25,12 +21,12 @@ export class Spreax<T, E extends Element, A extends string> {
     this.el = rootEl;
     this.variables = variables;
     this.actions = actions;
-    this.setupderivedVars();
+    this.setupDerivedVars();
     for (const el of makeElementTree(rootEl))
       this.setupElement(el);
   }
 
-  setupderivedVars() {
+  setupDerivedVars() {
     const variablesArray = getVariablesFromObject(this.variables);
     for (const v1 of variablesArray)
       if (v1 instanceof DerivedVariable)
@@ -44,56 +40,10 @@ export class Spreax<T, E extends Element, A extends string> {
   }
 
   setupWrapper(wrapper: Wrapper<T>) {
-    const { bind, $for, boundAttributes, eventListeners, $if } = wrapper.directives;
-
-    this.handleFor(wrapper, $for);
-    this.handleBind(wrapper, bind);
-    this.bindAttributes(wrapper, boundAttributes)
-    this.handleIf(wrapper, $if)
-    for (const { actionName, eventName } of eventListeners)
-      wrapper.el.addEventListener(eventName, this.actions[actionName])
+    for (const handler of wrapper.directives)
+      handler.start(wrapper, this.variables);
     for (const node of wrapper.nodes)
       this.setupNode(node);
-  }
-
-  handleIf(wrapper: Wrapper<T>, varName: string) {
-    const n = this.checkAndCastVarName(wrapper, varName);
-    if (n) {
-      const v = this.variables[n];
-      wrapper.addToContextIfNotPresent(n, v);
-      handleIf(wrapper, n);
-    }
-  }
-
-  bindAttributes(wrapper: Wrapper<T>, boundAttributes: { name: string; value: string }[]) {
-    for (const { name, value } of boundAttributes) {
-      const varName = this.checkAndCastVarName(wrapper, value);
-      if (varName) {
-        wrapper.addToContextIfNotPresent(varName, this.variables[varName])
-        handleAttr(wrapper, name, varName);
-      }
-    }
-  }
-
-  handleFor(wrapper: Wrapper<T>, data: { variableName: string; arrayName: string; indexName: string }) {
-    const arrayName = this.checkAndCastVarName(wrapper, data?.arrayName);
-    if (arrayName) {
-      if (this.variables[arrayName].value instanceof Array) {
-        wrapper.addToContextIfNotPresent(arrayName, this.variables[arrayName]);
-        handleFor({
-          arrayName, varName: data.variableName, wrapper, indexName: data.indexName,
-          onCreate: wr => this.setupWrapper(wr as Wrapper<T>)
-        })
-      }
-    }
-  }
-
-  handleBind(wrapper: Wrapper<T>, varName: string) {
-    const v = this.checkAndCastVarName(wrapper, varName);
-    if (wrapper.el.tagName === 'INPUT' && v) {
-      wrapper.addToContextIfNotPresent(v, this.variables[v]);
-      handleBind(wrapper as Wrapper<T, HTMLInputElement>, v);
-    }
   }
 
   setupNode(node: TextNodeWrapper<T>) {

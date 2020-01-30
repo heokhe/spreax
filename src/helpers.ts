@@ -11,3 +11,12 @@ export function memoize<T, U>(fn: Fn<T, U>): Fn<T, U> {
     return cache.get(x);
   }
 }
+
+export function flatUnique<T>(array: T[][]): T[] {
+  const output = [];
+  for (const a of array)
+    for (const b of a)
+      if (!output.includes(b))
+        output.push(b);
+  return output;
+}

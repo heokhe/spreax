@@ -1,23 +1,28 @@
-import { Wrapper } from "../wrapper";
 import { StateVariable } from "../core/state";
+import { DirectiveHandler, DirectiveMatch } from './index';
 
-export function handleBind<T, K extends keyof T>(wrapper: Wrapper<T, HTMLInputElement>, varName: K) {
-  const { el: input } = wrapper,
-    inputIsNumeric = input.type === 'number';
-
-  wrapper.subscribeTo(varName, value => {
-    input.value = String(value);
-  }, true)
-
-  const update = () => {
-    const variable = wrapper.context[varName];
+export class BindHandler<T> extends DirectiveHandler<T, HTMLInputElement> {
+  name = 'bind';
+  parameters = false;
+  get isNumericInput() {
+    return this.el.type === 'number';
+  }
+  handleInput(varName: string) {
+    const { context, el } = this.target,
+      variable = context[varName as keyof T];
     if (variable instanceof StateVariable) {
-      if (inputIsNumeric)
-        variable.set(input.valueAsNumber);
-      else variable.set(input.value);
+      const value = this.isNumericInput ? el.valueAsNumber : el.value;
+      variable.set(value);
     }
   }
-
-  input.addEventListener('change', update);
-  input.addEventListener('keydown', () => setTimeout(update, 0))
+  init(_: never, { parsed }: DirectiveMatch) {
+    const input = this.el;
+    input.addEventListener('change', () => this.handleInput(parsed.varName));
+    input.addEventListener('keydown', () => 
+      setTimeout(() => this.handleInput(parsed.varName), 0)
+    )
+  }
+  handle(value: any) {
+    this.el.value = String(value);
+  }
 }

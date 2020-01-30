@@ -1,5 +1,8 @@
 import { Subscriber } from "./core/subscriber";
 import { TextNodeWrapper } from "./text-node-wrapper";
+import { IfHandler } from './directives/if';
+import { AttrHandler } from './directives/attr';
+import { BindHandler } from './directives/bind';
 
 export class Wrapper<T, E extends Element = Element> extends Subscriber<T> {
   el: E;
@@ -23,35 +26,11 @@ export class Wrapper<T, E extends Element = Element> extends Subscriber<T> {
     this.el.remove();
   }
 
-  get $for() {
-    const string = this.el.getAttribute('@for'),
-      [leftHand, arrayName] = string?.split(' of ') ?? [],
-      [variableName, indexName] = leftHand?.split(', ', 2) ?? [];
-    return string ? { variableName, arrayName, indexName } : undefined;
-  }
-
-  get boundAttributes() {
-    return this.attrs
-      .filter(attr => attr.name.startsWith('$'))
-      .map(attr => ({ name: attr.name.slice(1), value: attr.value }))
-  }
-
-  get eventListeners() {
-    return this.attrs
-      .filter(attr => attr.name.startsWith('@on:'))
-      .map(attr => ({ eventName: attr.name.slice(4), actionName: attr.value }));
-  }
-
-  get bind() {
-    return this.el.getAttribute('@bind')
-  }
-
-  get $if() {
-    return this.el.getAttribute('@if');
-  }
-
   get directives() {
-    const { $for, bind, boundAttributes, eventListeners, $if } = this;
-    return { $for, bind, boundAttributes, eventListeners, $if }
+    return [
+      new IfHandler<T>(),
+      new AttrHandler<T>(),
+      new BindHandler<T>()
+    ]
   }
 }
