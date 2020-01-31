@@ -1,8 +1,10 @@
 import { Wrapper } from '../wrapper';
 import { ParseResult, parse } from '../parser/parser';
-import { evaluate } from '../parser/evaluate';
-import { Variables } from '../core/variables';
-import { flatUnique } from '../helpers';
+import { evaluate, pathSectionsToString } from '../parser/evaluate';
+import { Variables, Variable } from '../core/variables';
+import { flatUnique, setDeep } from '../helpers';
+import { setPath } from '../state-helpers';
+// import { lens } from '../core/lens';
 
 export type DirectiveMatch = {
   value: string;
@@ -17,10 +19,14 @@ export abstract class DirectiveHandler<T, E extends Element = Element> {
 
   protected parameters = false;
 
-  private matches: DirectiveMatch[];
+  protected matches: DirectiveMatch[];
 
   get el(): E {
     return this.target.el;
+  }
+
+  get context() {
+    return this.target.context;
   }
 
   private isValidName(name: string) {
@@ -71,7 +77,16 @@ export abstract class DirectiveHandler<T, E extends Element = Element> {
   }
 
   private eval(parsed: ParseResult) {
-    return evaluate(parsed, this.target.context);
+    return evaluate(parsed, this.context);
+  }
+
+  set({ path, varName }: ParseResult, value: any) {
+    const variable = this.context[varName as keyof T];
+    if (!path.length) {
+      variable.set(value);
+    } else {
+      setPath(variable, pathSectionsToString(path, this.context), value);
+    }
   }
 
   start(wrapper: Wrapper<T, E>, variables: Variables<T>) {
@@ -79,11 +94,11 @@ export abstract class DirectiveHandler<T, E extends Element = Element> {
     this.use(variables);
     for (const match of this.matches) {
       const value = this.eval(match.parsed);
-      this.init?.(value, match);
-      this.handle?.(value, match);
+      this.init(value, match);
+      this.handle(value, match);
       for (const dep of match.parsed.dependencies) {
         this.target.subscribeTo(dep as keyof T, () => {
-          this.handle?.(this.eval(match.parsed), match);
+          this.handle(this.eval(match.parsed), match);
         });
       }
     }
