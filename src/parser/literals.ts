@@ -19,5 +19,7 @@ export function parseLiteralExpression(expr: string): [Literal] | [] {
   const parsedToFloat = parseFloat(expr);
   if (!Number.isNaN(parsedToFloat))
     return [parsedToFloat];
+  if (/^(['"]).*\1$/.test(expr))
+    return [expr.slice(1, -1)];
   return [];
 }
