@@ -1,9 +1,11 @@
+import { eq } from '../helpers';
+
 export type Subscription<T> = (value: T, prevValue?: T) => any
 
 export type UpdateFn<T> = (value: T) => T;
 
 export abstract class Subscribable<T> {
-  value: T;
+  value: T = undefined;
 
   prevValue: T = undefined;
 
@@ -22,7 +24,7 @@ export abstract class Subscribable<T> {
   }
 
   protected changeValue(newValue: T) {
-    if (this.value !== newValue) {
+    if (!eq(newValue, this.value)) {
       this.prevValue = this.value;
       this.value = newValue;
       this.push();

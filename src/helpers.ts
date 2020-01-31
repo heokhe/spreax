@@ -12,11 +12,21 @@ export function memoize<T, U>(fn: Fn<T, U>): Fn<T, U> {
   };
 }
 
-export function flatUnique<T>(array: T[][]): T[] {
+export function flatUnique<T>(nestedArray: T[][]): T[] {
   const output = [];
-  for (const a of array)
-    for (const b of a)
-      if (!output.includes(b))
-        output.push(b);
+  for (const array of nestedArray)
+    for (const item of array)
+      if (!output.includes(item))
+        output.push(item);
   return output;
+}
+
+export function eq(a: any, b: any): boolean {
+  if (typeof a !== typeof b) return false;
+
+  if (Array.isArray(a))
+    return a.every((x, i) => eq(b[i], x));
+  if (typeof a === 'object')
+    return eq(Object.entries(a), Object.entries(b));
+  return a === b;
 }
