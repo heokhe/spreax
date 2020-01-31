@@ -1,4 +1,6 @@
 import { StateVariable } from './core/state';
+import { setDeep } from './helpers';
+import { Variable } from './core/variables';
 
 export function push<T>(state: StateVariable<T[]>, ...items: T[]) {
   state.update(array => [...array, ...items]);
@@ -21,11 +23,21 @@ export function set<
   state.update(object => ({ ...object, [key]: value }));
 }
 
+export function setPath(state: Variable<any>, path: string[], value: any) {
+  state.update(object => {
+    const cloned = { ...object };
+    setDeep(cloned, path, value);
+    return cloned;
+  });
+}
+
 export function setIndex<T>(state: StateVariable<T[]>, index: number, newValue: T) {
   state.update(array => array.map((x, i) => (i === index ? newValue : x)));
 }
 
-export function splice<T>(state: StateVariable<T[]>, start: number, deleteCount: number, ...items: T[]) {
+export function splice<T>(
+  state: StateVariable<T[]>, start: number, deleteCount: number, ...items: T[]
+) {
   const clone = [...state.value];
   clone.splice(start, deleteCount, ...items);
   state.set(clone);

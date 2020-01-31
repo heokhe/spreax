@@ -21,6 +21,17 @@ export function flatUnique<T>(nestedArray: T[][]): T[] {
   return output;
 }
 
+function getDeep(object: any, path: string[]) {
+  let val = object;
+  for (const section of path)
+    val = val?.[section];
+  return val;
+}
+
+export function setDeep(object: any, path: string[], value: any) {
+  getDeep(object, path.slice(0, -1))[path[path.length - 1]] = value;
+}
+
 export function eq(a: any, b: any): boolean {
   if (typeof a !== typeof b) return false;
 
