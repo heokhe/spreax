@@ -17,18 +17,26 @@
 	],
 	"extends": [
 		"eslint:recommended",
-    "plugin:@typescript-eslint/eslint-recommended",
+		"plugin:@typescript-eslint/eslint-recommended",
 		"plugin:@typescript-eslint/recommended",
 		"@hkh12"
 	],
 	"rules": {
-		"import/no-unresolved": "off",
 		"implicit-arrow-linebreak": "off",
 		"class-methods-use-this": "off",
 		"nonblock-statement-body-position": "off",
 		"curly": "off",
 		"no-unused-expressions": "off",
+		"import/no-unresolved": "off",
 		"@typescript-eslint/explicit-function-return-type": "off",
-		"@typescript-eslint/no-explicit-any": "off"
-	}
+		"@typescript-eslint/no-explicit-any": "off"						
+	},
+	"overrides": [
+		{
+			"files": "**/*.js",
+			"rules": {
+				"import/no-unresolved": "error"
+			}
+		}
+	]
 }
