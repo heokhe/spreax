@@ -28,6 +28,6 @@ export class DerivedVariable<T> extends Subscribable<T> {
   }
 }
 
-export function derived<T>(fn: DerivedGetter<T>) {
-  return new DerivedVariable(fn);
+export function derived<T>(getter: DerivedGetter<T>, setter?: DerivedSetter<T>) {
+  return new DerivedVariable(getter, setter);
 }
