@@ -1,4 +1,4 @@
-import { ParseResult } from './parser';
+import { ParseResult, PathSection, parse } from './parser';
 import { Variables, Variable } from '../core/variables';
 
 export function evaluate<T>(parseResult: ParseResult, context: Variables<T>) {
@@ -10,4 +10,10 @@ export function evaluate<T>(parseResult: ParseResult, context: Variables<T>) {
     val = val?.[isLiteral ? name : context[name]?.value];
   }
   return val;
+}
+
+export function pathSectionsToString<T>(path: PathSection[], context: Variables<T>) {
+  return path
+    .map(section => (section.isLiteral ? `"${section.name}"` : section.name))
+    .map(section => evaluate(parse(section), context));
 }
