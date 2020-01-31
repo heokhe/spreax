@@ -51,7 +51,6 @@ export class Spreax<T, E extends Element, A extends string> {
 
   setupNode(node: TextNodeWrapper<T>) {
     for (const dep of node.dependencies) {
-      // may be present in the context, if node is created by a LoopHandler.
       node.addToContextIfNotPresent(dep, this.variables[dep]);
       node.subscribeTo(dep, () => node.setText());
     }

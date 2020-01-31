@@ -1,8 +1,9 @@
 import { Subscriber } from './core/subscriber';
 import { TextNodeWrapper } from './text-node-wrapper';
-import { IfHandler } from './directives/if';
-import { AttrHandler } from './directives/attr';
-import { BindHandler } from './directives/bind';
+import { DirectiveHandler } from './directives/index';
+import { IfHandler } from './directives/handlers/if';
+import { AttrHandler } from './directives/handlers/attr';
+import { BindHandler } from './directives/handlers/bind';
 
 export class Wrapper<T, E extends Element = Element> extends Subscriber<T> {
   el: E;
@@ -29,7 +30,7 @@ export class Wrapper<T, E extends Element = Element> extends Subscriber<T> {
     this.el.remove();
   }
 
-  get directives() {
+  get directives(): DirectiveHandler<T>[] {
     return [
       new IfHandler<T>(),
       new AttrHandler<T>(),

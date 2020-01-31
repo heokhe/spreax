@@ -16,7 +16,7 @@ export class DerivedVariable<T> extends Subscribable<T> {
   }
 
   compute() {
-    this.changeValue(this.getter.call(null));
+    this.changeValue(this.getter());
   }
 
   subscribeAndAutoCompute<T>(stateVar: Subscribable<T>) {
