@@ -1,25 +1,33 @@
 import { Subscribable } from './subscribable';
 
-type DerivedFn<T> = () => T;
+type DerivedGetter<T> = () => T;
+type DerivedSetter<T> = (prevValue: T) => void;
 
 export class DerivedVariable<T> extends Subscribable<T> {
-  fn: DerivedFn<T>;
+  getter: DerivedGetter<T>;
 
-  constructor(fn: DerivedFn<T>) {
+  setter: DerivedSetter<T>;
+
+  constructor(getter: DerivedGetter<T>, setter?: DerivedSetter<T>) {
     super();
-    this.fn = fn;
+    this.getter = getter;
+    this.setter = setter;
     this.compute();
   }
 
   compute() {
-    this.changeValue(this.fn.call(null));
+    this.changeValue(this.getter.call(null));
   }
 
-  subscribeAndAutoCompute<T>(state: Subscribable<T>) {
-    state.subscribe(() => this.compute());
+  subscribeAndAutoCompute<T>(stateVar: Subscribable<T>) {
+    stateVar.subscribe(() => this.compute());
+  }
+
+  set(newValue: T) {
+    this.setter?.(newValue);
   }
 }
 
-export function derived<T>(fn: DerivedFn<T>) {
+export function derived<T>(fn: DerivedGetter<T>) {
   return new DerivedVariable(fn);
 }
