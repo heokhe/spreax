@@ -1,29 +1,16 @@
-import { DirectiveHandler } from '../index';
+import { DirectiveHandler, DirectiveMatch } from '../index';
 import { Wrapper } from '../../wrapper';
-import { Variable } from '../../core/variables';
 import { parse } from '../../parser/parser';
-import { derived } from '../../core/derived';
+import { derived, DerivedVariable as Derived } from '../../core/derived';
+import { makeElementTree } from '../../dom';
 
-// import { Wrapper as Wrapper } from "../wrapper";
-// import { derived } from "../core/derived";
-// import { Variable } from "../core/variables";
-// import { makeElementTree } from '../dom';
-// import { DirectiveHandler, DirectiveMatch } from './index';
-// import { parse } from '../parser/parser';
+type OnCreateFn<T> = (wrapper: Wrapper<T>) => void;
 
-// type WithExtraVars<T, V extends string, I extends string> = T & { [x in I]: number } & { [x in V]: any }
-// type WrapperWithExtraVars<T, V extends string, I extends string> = Wrapper<WithExtraVars<T, V, I>>;
-// type LoopHandlerOptions<T, V extends string, I extends string> = {
-// wrapper: Wrapper<T>;
-// arrayName: keyof T;
-// varName: V;
-// indexName: I;
-// onCreate: (wrapper: WrapperWithExtraVars<T, V, I>) => any;
-// }
-//
-
-type OnCreateFn<T> = (wrapper: Wrapper<T>) => any;
 export class LoopHandler<T> extends DirectiveHandler<T> {
+  name = 'for';
+
+  parameters = false;
+
   onCreate: OnCreateFn<T>;
 
   comment = new Comment();
@@ -34,125 +21,91 @@ export class LoopHandler<T> extends DirectiveHandler<T> {
 
   indexName?: string;
 
-  cloned: Element;
+  array: any[] = [];
+
+  backupEl: Element;
 
   constructor(onCreate: OnCreateFn<T>) {
     super();
-    this.el.before(this.comment);
-    this.cloned = this.el.cloneNode(true) as Element;
     this.onCreate = onCreate;
-    this.target.destroy();
   }
 
-  get attrValue() {
-    return this.matches[0].value;
+  get hasIndex() {
+    return !!this.indexName;
   }
 
-  get sides() {
-    return this.attrValue.split(' of ', 2);
-  }
-
-  get leftHandSide() {
-    return this.sides[0].split(', ', 2);
-  }
-
-  get variable(): Variable<T[keyof T] & any[]> {
-    const v = this.target.context[this.itemName];
-    return v.value instanceof Array
-      ? v as Variable<T[keyof T] & any[]>
-      : undefined;
-  }
-
-  init() {
-    [this.itemName, this.indexName] = this.leftHandSide;
-  }
-
-  parse() {
-    return parse(this.sides[1]);
-  }
-
-  clone() {
-    const child = this.el.cloneNode(true) as Element;
+  private clone() {
+    const child = this.backupEl.cloneNode(true) as Element;
     child.removeAttribute('@for');
     return child;
   }
 
-  createNewItem(index: number) {
-    const el = this.clone();
-    const wrapper = new Wrapper<T>(el);
-    // const item = derived(() => )
-
-    return wrapper;
+  parse(expression: string) {
+    return parse(expression.split(' of ', 2)[1]);
   }
 
-  wrap(el: Element) {
-    return new Wrapper<WithExtraVars<T, V, I>>(el);
+
+  private createVariables(index: number) {
+    const itemVar = derived(() => this.array[index]);
+    const indexVar = this.hasIndex ? derived(() => index as any) : undefined;
+    return [itemVar, indexVar];
   }
 
-  subscribeWrapper(wrapper: WrapperWithExtraVars<T, V, I>, index: number) {
-    const { leftHandSide: varName, variable } = this,
-      item = derived(() => variable.value[index]),
-      i = this.indexName
-        ? derived(() => index as WithExtraVars<T, V, I>[I])
-        : null;
-    item.subscribeAndAutoCompute(variable);
-    wrapper.addToContextIfNotPresent(varName, item);
-    if (i) wrapper.addToContextIfNotPresent(this.indexName, i);
-    for (const node of wrapper.nodes) {
-      node.addToContextIfNotPresent(varName, item);
-      if (i) node.addToContextIfNotPresent(this.indexName, i);
-    }
-  }
-
-  createAndSetupWrapper(index: number) {
-    const clone = this.clone();
-    this.comment.before(clone);
-    for (const el of makeElementTree(clone)) {
-      const wrapper = this.wrap(el);
-      if (el === clone)
+  private createNewItem(index: number) {
+    const [itemVar, indexVar] = this.createVariables(index);
+    const rootEl = this.clone();
+    for (const el of makeElementTree(rootEl)) {
+      const wrapper = new Wrapper<T>(el);
+      if (el === rootEl)
         this.wrappers.push(wrapper);
-      this.subscribeWrapper(wrapper, index);
-      this.onCreate.call(null, wrapper);
+      this.addToItemContext(wrapper, itemVar, indexVar);
+      this.onCreate(wrapper);
+    }
+    this.comment.before(rootEl);
+  }
+
+  private addToItemContext(wrapper: Wrapper<T>, itemVar: Derived<any>, indexVar?: Derived<any>) {
+    const itemName = this.itemName as keyof T,
+      indexName = this.indexName as keyof T;
+
+    for (const dep of this.dependencies)
+      itemVar.subscribeAndAutoCompute(this.context[dep]);
+
+    wrapper.addToContextIfNotPresent(itemName, itemVar);
+    if (this.hasIndex)
+      wrapper.addToContextIfNotPresent(indexName, indexVar);
+
+    for (const node of wrapper.nodes) {
+      node.addToContextIfNotPresent(itemName, itemVar);
+      if (this.hasIndex)
+        node.addToContextIfNotPresent(indexName, indexVar);
     }
   }
 
-  listenForChanges() {
-    this.variable.subscribe((newArray, prevArray) => {
-      const n = newArray.length,
-        p = prevArray?.length ?? 0;
-      if (n < p) {
-        this.removeWrappers(n, p);
-      } else {
-        for (let i = p; i < n; i++)
-          this.createAndSetupWrapper(i);
-      }
-    }, true);
+  private destroyItem(index: number) {
+    this.wrappers[index].destroy();
+    this.wrappers.splice(index, 1);
   }
 
-  removeWrappers(currentLength: number, prevLength: number) {
-    this.wrappers.slice(currentLength).forEach(w => w.destroy());
-    this.wrappers = this.wrappers.slice(0, prevLength);
+  init(_: unknown, { value: attrValue }: DirectiveMatch) {
+    [this.itemName, this.indexName] = attrValue
+      .split(' of ')[0]
+      .split(', ', 2);
+    this.el.after(this.comment);
+    this.backupEl = this.el.cloneNode(true) as Element;
+    this.target.destroy();
+  }
+
+  handle(array: any[]) {
+    const n = array.length,
+      p = this.array?.length ?? 0;
+    this.array = array;
+
+    if (n > p)
+      for (let i = p; i < n; i++)
+        this.createNewItem(i);
+    else if (n < p)
+      for (let i = n; i < p; i++)
+        this.destroyItem(i);
   }
 }
-//
-// export function handleFor<T, V extends string, I extends string>(options: LoopHandlerOptions<T, V, I>) {
-// new LoopHandler(options).listenForChanges();
-// }
-
-
-// export class ForHandler<T> extends DirectiveHandler<T> {
-//   name = 'for';
-//   // onCreate: OnCreateFn<T, V, I>;
-//   constructor(/* onCreate: OnCreateFn<T, V, I> */) {
-//     super();
-//     // this.onCreate = onCreate;
-//   }
-//   parse(expression: string) {
-//     return parse(expression.split(' of ', 2)[1]);
-//   }
-//   // eslint-disable-next-line @typescript-eslint/no-empty-function
-//   init() {}
-//   handle(array: any[]) {
-//     console.log(array);
-//   }
-// }

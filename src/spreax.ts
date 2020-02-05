@@ -5,6 +5,7 @@ import { TextNodeWrapper } from './text-node-wrapper';
 import { DerivedVariable } from './core/derived';
 import { Actions } from './core/actions';
 import { checkAndCast } from './helpers';
+import { LoopHandler } from './directives/handlers/for';
 
 export class Spreax<T, E extends Element, A extends string> {
   readonly el: E;
@@ -43,6 +44,7 @@ export class Spreax<T, E extends Element, A extends string> {
   }
 
   setupWrapper(wrapper: Wrapper<T>) {
+    new LoopHandler<T>(this.setupWrapper.bind(this)).start(wrapper, this.variables);
     for (const handler of wrapper.directives)
       handler.start(wrapper, this.variables);
     for (const node of wrapper.nodes)
