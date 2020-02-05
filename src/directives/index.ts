@@ -1,10 +1,9 @@
 import { Wrapper } from '../wrapper';
 import { ParseResult, parse } from '../parser/parser';
 import { evaluate, pathSectionsToString } from '../parser/evaluate';
-import { Variables, Variable } from '../core/variables';
-import { flatUnique, setDeep } from '../helpers';
+import { Variables } from '../core/variables';
+import { flatUnique } from '../helpers';
 import { setPath } from '../state-helpers';
-// import { lens } from '../core/lens';
 
 export type DirectiveMatch = {
   value: string;
@@ -93,13 +92,11 @@ export abstract class DirectiveHandler<T, E extends Element = Element> {
     this.setTarget(wrapper);
     this.use(variables);
     for (const match of this.matches) {
-      const value = this.eval(match.parsed);
-      this.init(value, match);
-      this.handle(value, match);
+      this.init(this.eval(match.parsed), match);
       for (const dep of match.parsed.dependencies) {
         this.target.subscribeTo(dep as keyof T, () => {
           this.handle(this.eval(match.parsed), match);
-        });
+        }, true);
       }
     }
   }
