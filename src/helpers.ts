@@ -36,7 +36,7 @@ export function eq(a: any, b: any): boolean {
   if (typeof a !== typeof b) return false;
 
   if (Array.isArray(a))
-    return a.every((x, i) => eq(b[i], x));
+    return a.length === b.length && a.every((x, i) => eq(b[i], x));
   if (typeof a === 'object')
     return eq(Object.entries(a), Object.entries(b));
   return a === b;
