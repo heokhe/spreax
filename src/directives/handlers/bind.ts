@@ -8,12 +8,21 @@ export class BindHandler<T> extends DirectiveHandler<T, HTMLInputElement> {
   parameters = false;
 
   get isNumericInput() {
-    return this.el.type === 'number';
+    const { type } = this.el;
+    return type === 'number' || type === 'range';
+  }
+
+  get isCheckbox() {
+    return this.el.type === 'checkbox';
   }
 
   handleInput() {
     const { el } = this,
-      value = this.isNumericInput ? el.valueAsNumber : el.value;
+      value = this.isNumericInput
+        ? el.valueAsNumber
+        : this.isCheckbox
+          ? el.checked
+          : el.value;
     this.set(this.match.parsed, value as unknown as T[keyof T]);
   }
 
@@ -21,11 +30,15 @@ export class BindHandler<T> extends DirectiveHandler<T, HTMLInputElement> {
     this.match = match;
     const { el: input } = this;
     input.addEventListener('change', () => this.handleInput());
-    input.addEventListener('keydown', () =>
-      setTimeout(() => this.handleInput(), 0));
+    if (!this.isCheckbox)
+      input.addEventListener('keydown', () =>
+        requestAnimationFrame(() => this.handleInput()));
   }
 
   handle(value: any) {
-    this.el.value = String(value);
+    if (this.isCheckbox)
+      this.el.checked = !!value;
+    else
+      this.el.value = String(value);
   }
 }
