@@ -1,9 +1,10 @@
 import { Subscriber } from './core/subscriber';
 import { TextNodeWrapper } from './text-node-wrapper';
-import { DirectiveHandler } from './directives/index';
+import { DirectiveHandler } from './directives/handler';
 import { IfHandler } from './directives/handlers/if';
 import { AttrHandler } from './directives/handlers/attr';
 import { BindHandler } from './directives/handlers/bind';
+import { CssHandler } from './directives/handlers/css';
 
 export class Wrapper<T, E extends Element = Element> extends Subscriber<T> {
   el: E;
@@ -34,7 +35,8 @@ export class Wrapper<T, E extends Element = Element> extends Subscriber<T> {
     return [
       new IfHandler<T>(),
       new AttrHandler<T>(),
-      new BindHandler<T>()
+      new BindHandler<T>(),
+      new CssHandler<T>()
     ];
   }
 }
