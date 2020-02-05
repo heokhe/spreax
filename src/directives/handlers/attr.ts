@@ -1,4 +1,4 @@
-import { DirectiveHandler, DirectiveMatch } from '../index';
+import { DirectiveHandler, DirectiveMatch } from '../handler';
 
 export class AttrHandler<T> extends DirectiveHandler<T> {
   name = 'attr';

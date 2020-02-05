@@ -1,4 +1,4 @@
-import { DirectiveHandler } from '../index';
+import { DirectiveHandler } from '../handler';
 
 export class IfHandler<T> extends DirectiveHandler<T> {
   name = 'if'
