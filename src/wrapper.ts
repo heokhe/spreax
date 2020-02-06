@@ -21,7 +21,7 @@ export class Wrapper<T, E extends Element = Element> extends Subscriber<T> {
     this.attrs = [...element.attributes];
   }
 
-  getNodes() {
+  private getNodes() {
     return [...this.el.childNodes]
       .filter(node => node.nodeType === Node.TEXT_NODE)
       .map(node => new TextNodeWrapper<T>(node))

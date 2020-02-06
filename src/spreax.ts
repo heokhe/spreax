@@ -24,7 +24,7 @@ export class Spreax<T, E extends Element> {
       this.setupElement(el);
   }
 
-  setupDerivedVars() {
+  private setupDerivedVars() {
     const variablesArray = getVariablesFromObject(this.variables);
     for (const v1 of variablesArray)
       if (v1 instanceof DerivedVariable)
@@ -33,11 +33,11 @@ export class Spreax<T, E extends Element> {
             v1.subscribeAndAutoCompute(v2);
   }
 
-  setupElement(el: Element) {
+  private setupElement(el: Element) {
     this.setupWrapper(new Wrapper<T>(el));
   }
 
-  setupWrapper(wrapper: Wrapper<T>) {
+  private setupWrapper(wrapper: Wrapper<T>) {
     new LoopHandler<T>(this.setupWrapper.bind(this)).start(wrapper, this.variables);
     for (const handler of wrapper.directives)
       handler.start(wrapper, this.variables);
@@ -45,7 +45,7 @@ export class Spreax<T, E extends Element> {
       this.setupNode(node);
   }
 
-  setupNode(node: TextNodeWrapper<T>) {
+  private setupNode(node: TextNodeWrapper<T>) {
     for (const dep of node.dependencies) {
       node.addToContextIfNotPresent(dep, this.variables[dep]);
       node.subscribeTo(dep, () => node.setText());

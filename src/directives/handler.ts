@@ -79,7 +79,7 @@ export abstract class DirectiveHandler<T, E extends Element = Element> {
     return evaluate(parsed, this.context);
   }
 
-  set({ path, varName }: ParseResult, value: any) {
+  protected set({ path, varName }: ParseResult, value: any) {
     const variable = this.context[varName as keyof T];
     if (!path.length) {
       variable.set(value);
