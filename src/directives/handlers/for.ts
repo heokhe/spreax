@@ -113,7 +113,7 @@ export class LoopHandler<T> extends DirectiveHandler<T> {
 
   handle(array: any[]) {
     const n = array.length,
-      p = this.array?.length ?? 0;
+      p = this.array.length;
     this.array = array;
 
     if (n > p)
