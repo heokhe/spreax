@@ -37,3 +37,9 @@ export function eq(a: any, b: any): boolean {
     return eq(Object.entries(a), Object.entries(b));
   return a === b;
 }
+
+export function safeClone<T extends object>(objectOrArray: T): T {
+  return Array.isArray(objectOrArray)
+    ? [...objectOrArray] as T
+    : { ...objectOrArray };
+}

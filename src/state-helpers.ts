@@ -1,5 +1,5 @@
 import { StateVariable } from './core/state';
-import { setDeep } from './helpers';
+import { setDeep, safeClone } from './helpers';
 import { Variable } from './core/variables';
 
 export function push<T>(state: StateVariable<T[]>, ...items: T[]) {
@@ -25,7 +25,7 @@ export function set<
 
 export function setPath(state: Variable<any>, path: string[], value: any) {
   state.update(object => {
-    const cloned = { ...object };
+    const cloned = safeClone(object);
     setDeep(cloned, path, value);
     return cloned;
   });
