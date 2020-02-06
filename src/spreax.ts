@@ -3,28 +3,22 @@ import { makeElementTree } from './dom';
 import { Wrapper } from './wrapper';
 import { TextNodeWrapper } from './text-node-wrapper';
 import { DerivedVariable } from './core/derived';
-import { Actions } from './core/actions';
-import { checkAndCast } from './helpers';
 import { LoopHandler } from './directives/handlers/for';
 
-export class Spreax<T, E extends Element, A extends string> {
+export class Spreax<T, E extends Element> {
   readonly el: E;
 
   variables: Variables<T>;
 
-  readonly actions: Actions<A>;
-
   constructor(
     rootElOrSelector: E | string,
-    variables: Variables<T>,
-    actions: Actions<A> = {} as Actions<A>
+    variables: Variables<T>
   ) {
     const rootEl: E = typeof rootElOrSelector === 'string'
       ? document.querySelector(rootElOrSelector)
       : rootElOrSelector;
     this.el = rootEl;
     this.variables = variables;
-    this.actions = actions;
     this.setupDerivedVars();
     for (const el of makeElementTree(rootEl))
       this.setupElement(el);
@@ -57,9 +51,5 @@ export class Spreax<T, E extends Element, A extends string> {
       node.subscribeTo(dep, () => node.setText());
     }
     node.setText();
-  }
-
-  checkAndCastVarName(wrapper: Wrapper<T>, varName: string) {
-    return checkAndCast({ ...this.variables, ...wrapper.context }, varName);
   }
 }

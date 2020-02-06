@@ -1,5 +1,8 @@
-export type Action = <E extends Event>(event?: E) => any;
+import { constant, Constant } from './constant';
 
-export type Actions<K extends string> = {
-  [x in K]: Action;
-}
+export type ActionFn<E extends Event = Event> = (arg?: any, event?: E) => any;
+export type ActionVariable<E extends Event = Event> = Constant<ActionFn<E>>
+
+export const action = <E extends Event = Event>(
+  callback: ActionFn<E>
+): ActionVariable<E> => constant(callback);

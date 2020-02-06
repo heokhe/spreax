@@ -1,7 +1,3 @@
-export const checkAndCast = <T>(object: T, key: string) =>
-  (key && key in object ? key as keyof T : undefined);
-
-
 type Fn<T, U> = (x: T) => U;
 export function memoize<T, U>(fn: Fn<T, U>): Fn<T, U> {
   const cache = new Map<T, U>();
