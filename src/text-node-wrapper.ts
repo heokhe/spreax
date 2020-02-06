@@ -2,7 +2,7 @@ import { Subscriber } from './core/subscriber';
 import { parse } from './parser/parser';
 import { evaluate } from './parser/evaluate';
 
-const DEP_REGEX = /(@\([^)]+\))/gi;
+const DEP_REGEX = /(@(?:(?:{[^}]+})|(?:\([^)]+\))))/g;
 
 export class TextNodeWrapper<T> extends Subscriber<T> {
   node: Node;
