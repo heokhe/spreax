@@ -2,7 +2,7 @@ import { parseLiteralExpression, Literal } from './literals';
 import { isValidIdentifier } from './identifiers';
 import { memoize } from '../helpers';
 
-export type ParseResultType = 'literal' | 'variable';
+export type ParseResultType = 'literal' | 'variable' | 'function-call';
 export type PathSection = { name: string; isLiteral: boolean }
 export type ParseResult = {
   type: ParseResultType;
@@ -10,9 +10,30 @@ export type ParseResult = {
   value?: Literal;
   varName?: string;
   path?: PathSection[];
+  argument?: ParseResult;
 }
 
+/* eslint-disable @typescript-eslint/no-use-before-define, no-use-before-define */
 function parseUnmemoized(expr: string): ParseResult {
+  if (!expr.trim()) return undefined;
+
+  const [, functionExpr, argList] = expr.match(/^([^(]+)(\(.*\))$/) || [];
+  if (functionExpr) {
+    const argValue = argList.slice(1, -1);
+    const parsedArg = argValue ? parse(argValue) : undefined;
+    const parsedFn = parse(functionExpr);
+    const dependencies = [
+      ...parsedFn.dependencies,
+      ...(parsedArg?.dependencies ?? [])
+    ];
+    return {
+      ...parsedFn,
+      argument: parsedArg,
+      dependencies,
+      type: 'function-call'
+    };
+  }
+
   const literalResult = parseLiteralExpression(expr);
   if (literalResult.length) {
     return {
@@ -22,8 +43,8 @@ function parseUnmemoized(expr: string): ParseResult {
     };
   }
 
-
   const [varName, ...accessors] = expr
+      .replace(/'/g, '"')
     // replace .x with ["x"]
       .replace(/\.([^.[]+)/g, '["$1"]')
     // split the keys
