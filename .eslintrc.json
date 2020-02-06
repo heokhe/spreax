@@ -29,13 +29,14 @@
 		"no-unused-expressions": "off",
 		"import/no-unresolved": "off",
 		"@typescript-eslint/explicit-function-return-type": "off",
-		"@typescript-eslint/no-explicit-any": "off"						
+		"@typescript-eslint/no-explicit-any": "off"
 	},
 	"overrides": [
 		{
 			"files": "**/*.js",
 			"rules": {
-				"import/no-unresolved": "error"
+				"import/no-unresolved": "error",
+				"import/no-extraneous-dependencies": "off"
 			}
 		}
 	]

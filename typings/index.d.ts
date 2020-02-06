@@ -1,135 +1,62 @@
-type Subscription<T> = (value: T) => any;
-
+type Subscription<T> = (value: T, prevValue?: T) => any;
+type UpdateFn<T> = (value: T) => T;
 declare abstract class Subscribable<T> {
-  value: T;
-  prevValue: T;
-  subscriptions: Subscription<T>[];
-  subscribe(callback: Subscription<T>, immediate?: boolean): void;
-  changeValue(newValue: T): void;
-  push(): void;
-  call(subscription: Subscription<T>): void;
+    value: T;
+    prevValue: T;
+    private subscriptions;
+    abstract set(value: T): void;
+    update(fn: UpdateFn<T>): void;
+    subscribe(callback: Subscription<T>, immediate?: boolean): void;
+    protected changeValue(newValue: T): void;
+    protected push(): void;
+    private call;
 }
-
+type Variable<T> = Subscribable<T>;
+type Variables<T> = {
+    [x in keyof T]: Variable<T[x]>;
+};
+declare class Spreax<T, E extends Element> {
+    readonly el: E;
+    variables: Variables<T>;
+    constructor(rootElOrSelector: E | string, variables: Variables<T>);
+    private setupDerivedVars;
+    private setupElement;
+    private setupWrapper;
+    private setupNode;
+}
 declare class StateVariable<T> extends Subscribable<T> {
-  constructor(value: T);
-  set(newValue: T): void;
-  update(fn: (value: T) => T): void;
+    constructor(value: T);
+    set(newValue: T): void;
 }
 declare function state<T>(value: T): StateVariable<T>;
-
-type Computable<T> = () => T;
-declare class ComputedVariable<T> extends Subscribable<T> {
-  fn: Computable<T>;
-  constructor(fn: Computable<T>);
-  compute(): void;
-  subscribeAndAutoCompute<T>(state: Subscribable<T>): void;
+type DerivedGetter<T> = () => T;
+type DerivedSetter<T> = (prevValue: T) => void;
+declare class DerivedVariable<T> extends Subscribable<T> {
+    getter: DerivedGetter<T>;
+    setter: DerivedSetter<T>;
+    constructor(getter: DerivedGetter<T>, setter?: DerivedSetter<T>);
+    compute(): void;
+    subscribeAndAutoCompute<T>(stateVar: Subscribable<T>): void;
+    set(newValue: T): void;
 }
-declare function computed<T>(fn: Computable<T>): ComputedVariable<T>;
-
-type Variable<T> = ComputedVariable<T> | StateVariable<T>;
-type Variables<T> = {
-  [x in keyof T]: Variable<T[x]>;
-};
-
-declare abstract class Subscriber<C> {
-  context: Variables<C>;
-  constructor();
-  /**
-   * Subscribes the object to a `Subscribable`.
-   * Silently fails if `name` already exists.
-   */
-  addToContextIfNotPresent<K extends keyof C, V extends Variable<C[K]>>(name: K, variable: V): void;
-  subscribeTo<K extends keyof C>(name: K, callback: Subscription<C[K]>, immediate?: boolean): void;
+declare function derived<T>(getter: DerivedGetter<T>, setter?: DerivedSetter<T>): DerivedVariable<T>;
+declare class Constant<T> extends Subscribable<T> {
+    constructor(value: T);
+    set(): any;
 }
-
-export declare class TextNodeWrapper<T> extends Subscriber<T> {
-  node: Node;
-  initialText: string;
-  sections: string[];
-  dependencies: (keyof T)[];
-  constructor(node: Node);
-  render(): string;
-  setText(): void;
-}
-
-declare class Wrapper<T, E extends Element = Element> extends Subscriber<T> {
-  el: E;
-  nodes: TextNodeWrapper<T>[];
-  attrs: Attr[];
-  constructor(element: E);
-  getNodes(): TextNodeWrapper<T>[];
-  destroy(): void;
-  get $for(): {
-    variableName: string;
-    arrayName: string;
-    indexName: string;
-  };
-  get boundAttributes(): {
-    name: string;
-    value: string;
-  }[];
-  get eventListeners(): {
-    eventName: string;
-    actionName: string;
-  }[];
-  get bind(): string;
-  get $if(): string;
-  get directives(): {
-    $for: {
-      variableName: string;
-      arrayName: string;
-      indexName: string;
-    };
-    bind: string;
-    boundAttributes: {
-      name: string;
-      value: string;
-    }[];
-    eventListeners: {
-      eventName: string;
-      actionName: string;
-    }[];
-    $if: string;
-  };
-}
-
-declare type Action = <E extends Event>(event?: E) => any;
-declare type Actions<K extends string> = {
-  [x in K]: Action;
-};
-
-declare class Spreax<T, E extends Element, A extends string> {
-  readonly el: E;
-  variables: Variables<T>;
-  readonly actions: Actions<A>;
-  constructor(rootElOrSelector: E | string, variables: Variables<T>, actions?: Actions<A>);
-  setupderivedVars(): void;
-  setupElement(el: Element): void;
-  setupWrapper(wrapper: Wrapper<T>): void;
-  handleIf(wrapper: Wrapper<T>, varName: string): void;
-  bindAttributes(wrapper: Wrapper<T>, boundAttributes: {
-    name: string;
-    value: string;
-  }[]): void;
-  handleFor(wrapper: Wrapper<T>, data: {
-    variableName: string;
-    arrayName: string;
-    indexName: string;
-  }): void;
-  handleBind(wrapper: Wrapper<T>, varName: string): void;
-  setupNode(node: TextNodeWrapper<T>): void;
-  checkAndCastVarName(wrapper: Wrapper<T>, varName: string): keyof T;
-}
-
+declare const constant: <T>(value: T) => Constant<T>;
+type ActionFn<E extends Event = Event> = (arg?: any, event?: E) => any;
+type ActionVariable<E extends Event = Event> = Constant<ActionFn<E>>;
+declare const action: <E extends Event = Event>(callback: ActionFn<E>) => ActionVariable<E>;
 declare function push<T>(state: StateVariable<T[]>, ...items: T[]): void;
 declare function unshift<T>(state: StateVariable<T[]>, ...items: T[]): void;
 declare function merge<T extends object>(state: StateVariable<T>, sourceObject: {
-  [x in keyof T]?: T[x];
+    [x in keyof T]?: T[x];
 }): void;
 declare function set<T extends object, K extends keyof T>(state: StateVariable<T>, key: K, value: T[K]): void;
+declare function setPath(state: Variable<any>, path: string[], value: any): void;
 declare function setIndex<T>(state: StateVariable<T[]>, index: number, newValue: T): void;
 declare function splice<T>(state: StateVariable<T[]>, start: number, deleteCount: number, ...items: T[]): void;
 declare function inc(state: StateVariable<number>, x?: number): void;
 declare function dec(state: StateVariable<number>, x?: number): void;
-
-export { Spreax as default, state, computed, push, unshift, merge, set, setIndex, inc, dec, splice };
+export { Spreax as default, state, derived, constant, action, push, unshift, merge, set, setPath, setIndex, splice, inc, dec };
