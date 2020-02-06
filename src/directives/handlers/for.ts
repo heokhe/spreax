@@ -1,6 +1,6 @@
 import { DirectiveHandler, DirectiveMatch } from '../handler';
 import { Wrapper } from '../../wrapper';
-import { parse } from '../../parser/parser';
+import { parse, ParseResult } from '../../parser/parser';
 import { derived, DerivedVariable as Derived } from '../../core/derived';
 import { makeElementTree } from '../../dom';
 
@@ -10,6 +10,8 @@ export class LoopHandler<T> extends DirectiveHandler<T> {
   name = 'for';
 
   parameters = false;
+
+  parsed: ParseResult;
 
   onCreate: OnCreateFn<T>;
 
@@ -44,9 +46,21 @@ export class LoopHandler<T> extends DirectiveHandler<T> {
     return parse(expression.split(' of ', 2)[1]);
   }
 
+  private getParseResultForItem(index: number): ParseResult {
+    const { parsed } = this;
+    return {
+      ...parsed,
+      path: [...(parsed.path ?? []), {
+        isLiteral: true, name: `${index}`
+      }]
+    };
+  }
 
   private createVariables(index: number) {
-    const itemVar = derived(() => this.array[index]);
+    const itemVar = derived(
+      () => this.array[index],
+      value => this.set(this.getParseResultForItem(index), value)
+    );
     const indexVar = this.hasIndex ? derived(() => index as any) : undefined;
     return [itemVar, indexVar];
   }
@@ -87,7 +101,8 @@ export class LoopHandler<T> extends DirectiveHandler<T> {
     this.wrappers.splice(index, 1);
   }
 
-  init(_: unknown, { value: attrValue }: DirectiveMatch) {
+  init(_: unknown, { value: attrValue, parsed }: DirectiveMatch) {
+    this.parsed = parsed;
     [this.itemName, this.indexName] = attrValue
       .split(' of ')[0]
       .split(', ', 2);
