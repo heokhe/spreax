@@ -15,7 +15,8 @@ export type ParseResult = {
 
 /* eslint-disable @typescript-eslint/no-use-before-define, no-use-before-define */
 function parseUnmemoized(expr: string): ParseResult {
-  if (!expr.trim()) return undefined;
+  expr = expr.trim();
+  if (!expr) return undefined;
 
   const [, functionExpr, argList] = expr.match(/^([^(]+)(\(.*\))$/) || [];
   if (functionExpr) {
