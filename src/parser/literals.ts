@@ -1,5 +1,5 @@
-export type Literal = string | number | boolean | undefined;
-export type LiteralResult = { ok: boolean; value?: Literal };
+export type LiteralValue = string | number | boolean | undefined;
+export type LiteralResult = { ok: boolean; value?: LiteralValue };
 
 const LITERALS = {
   true: true,
@@ -13,7 +13,7 @@ const LITERALS = {
  * @returns An array with containing a value.
  * If it's empty, the function has failed to parse.
  */
-export function parseLiteralExpression(expr: string): [Literal] | [] {
+export function parseLiteralExpression(expr: string): [LiteralValue] | [] {
   if (expr in LITERALS)
     return [LITERALS[expr]];
   const parsedToFloat = parseFloat(expr);

@@ -1,4 +1,6 @@
-import { ParseResult, PathSection, parse } from './parser';
+import {
+  ParseResult, PathSection, parse, ParseResultType
+} from './parser';
 import { Variables, Variable } from '../core/variables';
 import { ActionFn } from '../core/actions';
 
@@ -6,13 +8,13 @@ export function evaluate<T>(parseResult: ParseResult, context: Variables<T>) {
   if (!parseResult)
     return undefined;
 
-  if (parseResult.type === 'literal')
+  if (parseResult.type === ParseResultType.Literal)
     return parseResult.value;
 
-  if (parseResult.type === 'function-call') {
+  if (parseResult.type === ParseResultType.FunctionExpression) {
     const fn: ActionFn = evaluate({
       ...parseResult,
-      type: 'variable'
+      type: ParseResultType.Variable
     }, context),
       arg = parseResult.argument
         ? evaluate(parseResult.argument, context)

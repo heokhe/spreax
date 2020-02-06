@@ -1,13 +1,17 @@
-import { parseLiteralExpression, Literal } from './literals';
+import { parseLiteralExpression, LiteralValue } from './literals';
 import { isValidIdentifier } from './identifiers';
 import { memoize } from '../helpers';
 
-export type ParseResultType = 'literal' | 'variable' | 'function-call';
+export const enum ParseResultType {
+  Literal,
+  Variable,
+  FunctionExpression
+}
 export type PathSection = { name: string; isLiteral: boolean }
 export type ParseResult = {
   type: ParseResultType;
   dependencies: string[];
-  value?: Literal;
+  value?: LiteralValue;
   varName?: string;
   path?: PathSection[];
   argument?: ParseResult;
@@ -31,14 +35,14 @@ function parseUnmemoized(expr: string): ParseResult {
       ...parsedFn,
       argument: parsedArg,
       dependencies,
-      type: 'function-call'
+      type: ParseResultType.FunctionExpression
     };
   }
 
   const literalResult = parseLiteralExpression(expr);
   if (literalResult.length) {
     return {
-      type: 'literal',
+      type: ParseResultType.Literal,
       value: literalResult[0],
       dependencies: []
     };
@@ -63,7 +67,7 @@ function parseUnmemoized(expr: string): ParseResult {
       throw new Error(`${dep} is not a valid identifier`);
 
   return {
-    type: 'variable',
+    type: ParseResultType.Literal,
     path: pathSections,
     varName,
     dependencies
