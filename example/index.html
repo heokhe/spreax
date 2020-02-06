@@ -9,13 +9,31 @@
   </head>
   <body>
     <div id="app">
-      <input type="number" @bind="x" min="0">
-      <div @for="y, i of mappedArray">
-        <hr>
-        @(array[i]) * @(x) = <b>@(y)</b>
-      </div>
-      <br>
-      <button @on:click="addANumber">Add a number</button>
+      <table>
+        <thead>
+          <th>#</th>
+          <th>Name</th>
+          <th>Age</th>
+          <th>Alive?</th>
+          <th>Actions</th>
+        </thead>
+        <tbody>
+          <tr @for="user, i of users">
+            <td>@(i).</td>
+            <td>@(user.name)</td>
+            <td>@(user.age)</td>
+            <td>
+              <input type="checkbox" @bind="user.isAlive">
+            </td>
+            <td>
+              <button @on:click="removeUser(i)">&times;</button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+      <hr>
+      <button @on:click="sortByAge()">Sort by age</button>
+      <button @on:click="reverseOrder()">Reverse order</button>
     </div>
   </body>
   <script src="app.js"></script>

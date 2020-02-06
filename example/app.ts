@@ -1,15 +1,33 @@
-import Spreax, { state, derived, unshift } from '../src/index';
+import Spreax, { state, action, splice } from '../src/index';
 
-const x = state(2);
-const array = state([1, 2, 3, 9, 7]);
-const mappedArray = derived(() => array.value.map(n => n * x.value));
+const users = state([
+  {
+    name: 'Akbar',
+    age: 47,
+    isAlive: true
+  },
+  {
+    name: 'Hosein',
+    age: 15,
+    isAlive: false
+  },
+  {
+    name: 'Joe',
+    age: 18,
+    isAlive: false
+  }
+]);
+const removeUser = action((i: number) =>
+  splice(users, i, 1));
+const sortByAge = action(() =>
+  users.update(u =>
+    [...u].sort((a, b) => b.age - a.age)));
+const reverseOrder = action(() =>
+  users.update(u => [...u].reverse()));
 const app = new Spreax(
   '#app',
-  { x, array, mappedArray },
   {
-    addANumber() {
-      unshift(array, Math.round(Math.random() * 20));
-    }
+    users, removeUser, sortByAge, reverseOrder
   }
 );
 
