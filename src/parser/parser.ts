@@ -67,7 +67,7 @@ function parseUnmemoized(expr: string): ParseResult {
       throw new Error(`${dep} is not a valid identifier`);
 
   return {
-    type: ParseResultType.Literal,
+    type: ParseResultType.Variable,
     path: pathSections,
     varName,
     dependencies

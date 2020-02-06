@@ -23,7 +23,7 @@ export class LoopHandler<T> extends DirectiveHandler<T> {
 
   indexName?: string;
 
-  array: any[] = [];
+  array = [];
 
   backupEl: Element;
 
