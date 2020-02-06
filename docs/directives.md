@@ -5,7 +5,8 @@
 const showTheMessage = state(true);
 ```
 ```html
-<span @if="showTheMessage">Now (!!showTheMessage.value === true) you see me!</button>
+<!-- Whenever showTheMessage.value is a truthy value, this will be rendered: -->
+<span @if="showTheMessage">Now you see me!</button>
 ```
 
 ## Loops
@@ -35,7 +36,7 @@ const items = state([
 ```js
 const name = state('Jack');
 function log(event) {
-  console.log(name.value); // logs 'Jack'
+  console.log(name.value); // -> Jack
 }
 const app = new Spreax('#app', { name }, { log })
 ```

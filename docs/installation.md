@@ -1,19 +1,19 @@
 # Installing Spreax
-## npm
-```shell
-npm install spreax
+## As a module
+```sh
+npm i spreax # npm
+yarn add spreax # npm
 ```
-Or if you prefer Yarn:
-```shell
-yarn add spreax
+```js
+import Spreax, { state /* ... */ } from 'spreax';
 ```
 
-## Using in browser
+## Using `<script>` tag
 You can get it from **unpkg**:
 ```html
 <script src="https://unpkg.com/spreax"></script>
 ```
-A global variable called `sp` will be available.
+A global variable `sp` will be available.
 ```js
 var sp = {
   default: ..., // use this for creating instances
@@ -23,7 +23,8 @@ var sp = {
 }
 ```
 
-## Different builds
+## Builds
+Each build is compiled down to ES6 JavaScript.
 Name | Usage
 --- | ---
 `spreax.esm.js` | ES module
