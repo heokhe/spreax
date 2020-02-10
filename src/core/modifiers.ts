@@ -42,10 +42,10 @@ export function splice<T>(
   state.set(clone);
 }
 
-export function inc(state: Variable<number>, x = 1) {
+export function increase(state: Variable<number>, x = 1) {
   state.update(n => n + x);
 }
 
-export function dec(state: Variable<number>, x = 1) {
-  inc(state, -x);
+export function decrease(state: Variable<number>, x = 1) {
+  state.update(n => n - x);
 }
