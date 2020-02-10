@@ -1,9 +1,9 @@
 import { state } from '../../src/core/state';
-import * as helpers from '../../src/state-helpers';
+import * as helpers from '../../src/core/modifiers';
 
 const numbers = state([0]);
 
-describe('Array helpers', () => {
+describe('Array modifiers', () => {
   it('Pushes items', () => {
     helpers.push(numbers, 1, 2);
     expect(numbers.value).toEqual([0, 1, 2]);
@@ -17,7 +17,7 @@ describe('Array helpers', () => {
 
 const object = state({ bar: 1, baz: 2, foo: 3 });
 
-describe('Object helpers', () => {
+describe('Object modifiers', () => {
   it('Can merge objects', () => {
     helpers.merge(object, { foo: 0, baz: 9 });
     expect(object.value.foo).toEqual(0);

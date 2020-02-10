@@ -3,7 +3,7 @@ import { ParseResult, parse } from '../parser/parser';
 import { evaluate, pathSectionsToString } from '../parser/evaluate';
 import { Variables } from '../core/variables';
 import { flatUnique } from '../helpers';
-import { setPath } from '../state-helpers';
+import { setPath } from '../core/modifiers';
 
 export type DirectiveMatch = {
   value: string;

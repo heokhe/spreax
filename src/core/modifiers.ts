@@ -1,5 +1,5 @@
-import { setDeep, safeClone } from './helpers';
-import { Variable } from './core/variables';
+import { setDeep, safeClone } from '../helpers';
+import { Variable } from './variables';
 
 export function push<T>(state: Variable<T[]>, ...items: T[]) {
   state.update(array => [...array, ...items]);
