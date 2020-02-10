@@ -1,7 +1,7 @@
 import { Variables, getVariablesFromObject } from './core/variables';
 import { createElementTree } from './dom';
-import { Wrapper } from './wrapper';
-import { TextNodeWrapper } from './text-node-wrapper';
+import { Wrapper } from './wrappers/element';
+import { TextNodeWrapper } from './wrappers/text-node';
 import { DerivedVariable } from './core/derived';
 import { ForHandler } from './directives/handlers/for';
 import { DirectiveHandler } from './directives/handler';

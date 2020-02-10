@@ -1,4 +1,4 @@
-import { Wrapper } from '../wrapper';
+import { Wrapper } from '../wrappers/element';
 import { ParseResult, parse } from '../parser/parser';
 import { evaluate, pathSectionsToString } from '../parser/evaluate';
 import { Variables } from '../core/variables';

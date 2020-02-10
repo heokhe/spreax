@@ -1,6 +1,6 @@
-import { Subscriber } from './core/subscriber';
-import { parse } from './parser/parser';
-import { evaluate } from './parser/evaluate';
+import { Subscriber } from '../core/subscriber';
+import { parse } from '../parser/parser';
+import { evaluate } from '../parser/evaluate';
 
 const DEP_REGEX = /(@(?:(?:{[^}]+})|(?:\([^)]+\))))/g;
 

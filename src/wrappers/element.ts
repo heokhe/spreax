@@ -1,5 +1,5 @@
-import { Subscriber } from './core/subscriber';
-import { TextNodeWrapper } from './text-node-wrapper';
+import { Subscriber } from '../core/subscriber';
+import { TextNodeWrapper } from './text-node';
 
 export class Wrapper<T, E extends Element = Element> extends Subscriber<T> {
   el: E;
