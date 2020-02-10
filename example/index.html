@@ -8,32 +8,23 @@
     <link rel="stylesheet" href="style.css">
   </head>
   <body>
+    <!--
+      This file is used a playground for Spreax.
+      You can run `npm run serve` to serve it.
+    -->
     <div id="app">
-      <table>
-        <thead>
-          <th>#</th>
-          <th>Name</th>
-          <th>Age</th>
-          <th>Alive?</th>
-          <th>Actions</th>
-        </thead>
-        <tbody>
-          <tr @for="user, i of users">
-            <td>@(i).</td>
-            <td>@(user.name)</td>
-            <td>@(user.age)</td>
-            <td>
-              <input type="checkbox" @bind="user.isAlive">
-            </td>
-            <td>
-              <button @on:click="removeUser(i)">&times;</button>
-            </td>
-          </tr>
-        </tbody>
-      </table>
+      <h1>Spreax todo app</h1>
+      <input type="text" @on:keydown="onKeydown()" placeholder="What needs to be done? (Press enter)" autofocus>
       <hr>
-      <button @on:click="sortByAge()">Sort by age</button>
-      <button @on:click="reverseOrder()">Reverse order</button>
+      <div class="todo" @class:completed="todo.completed" @for="todo, index of todos">
+        <input type="checkbox" @bind="todo.completed">
+        <div>@(todo.title)</div>
+        <button @on:click="removeTodo(index)">&times;</button>
+      </div>
+      <hr @if="todos.length">
+      @(itemsLeft) items left
+      <button @on:click="removeCompletedTodos()">Remove completed</button>
+      <button @on:click="removeAllTodos()">Remove all</button>
     </div>
   </body>
   <script src="app.js"></script>

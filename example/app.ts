@@ -1,33 +1,37 @@
-import Spreax, { state, action, splice } from '../src/index';
+import Spreax, {
+  state, action, push, splice, derived
+} from '../src/index';
 
-const users = state([
-  {
-    name: 'Akbar',
-    age: 47,
-    isAlive: true
-  },
-  {
-    name: 'Hosein',
-    age: 15,
-    isAlive: false
-  },
-  {
-    name: 'Joe',
-    age: 18,
-    isAlive: false
+interface Todo {
+  title: string;
+  completed: boolean;
+}
+
+const todos = state([] as Todo[]);
+const onKeydown = action((_: unknown, event: KeyboardEvent) => {
+  const input = event.target as HTMLInputElement;
+  if (event.code === 'Enter' && input.value) {
+    push(todos, {
+      title: input.value,
+      completed: false
+    });
+    input.value = '';
   }
-]);
-const removeUser = action((i: number) =>
-  splice(users, i, 1));
-const sortByAge = action(() =>
-  users.update(u =>
-    [...u].sort((a, b) => b.age - a.age)));
-const reverseOrder = action(() =>
-  users.update(u => [...u].reverse()));
+});
+const removeTodo = action((index: number) =>
+  splice(todos, index, 1));
+const removeCompletedTodos = action(() =>
+  todos.update(ts =>
+    ts.filter(t =>
+      !t.completed)));
+const removeAllTodos = action(() => todos.set([]));
+const itemsLeft = derived(() =>
+  todos.value.filter(todo => !todo.completed).length);
+
 const app = new Spreax(
   '#app',
   {
-    users, removeUser, sortByAge, reverseOrder
+    todos, onKeydown, removeTodo, removeCompletedTodos, removeAllTodos, itemsLeft
   }
 );
 

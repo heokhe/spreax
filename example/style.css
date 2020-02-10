@@ -16,6 +16,38 @@ body {
   min-height: 50vh
 }
 
+hr {
+  border: 0;
+  height: 1px;
+  background: #888;
+  margin: 1em 0;
+}
+
+input[type=text] {
+  width: 100%;
+}
+
 #app {
   margin: 5vh 0
+}
+
+.todo {
+  display: flex;
+  align-items: center;
+  min-height: 2em;
+  line-height: 1;
+}
+
+.todo > input {
+  width: 2em;
+  margin: 0;
+}
+
+.todo > div {
+  width: 100%;
+}
+
+.todo.completed > div {
+  text-decoration: line-through;
+  opacity: .5;
 }
