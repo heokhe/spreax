@@ -2,11 +2,11 @@ import { DirectiveHandler, DirectiveMatch } from '../handler';
 import { Wrapper } from '../../wrapper';
 import { parse, ParseResult } from '../../parser/parser';
 import { derived, DerivedVariable as Derived } from '../../core/derived';
-import { makeElementTree } from '../../dom';
+import { createElementTree } from '../../dom';
 
 type OnCreateFn<T> = (wrapper: Wrapper<T>) => void;
 
-export class LoopHandler<T> extends DirectiveHandler<T> {
+export class ForHandler<T> extends DirectiveHandler<T> {
   name = 'for';
 
   parameters = false;
@@ -68,7 +68,7 @@ export class LoopHandler<T> extends DirectiveHandler<T> {
   private createNewItem(index: number) {
     const [itemVar, indexVar] = this.createVariables(index);
     const rootEl = this.clone();
-    for (const el of makeElementTree(rootEl)) {
+    for (const el of createElementTree(rootEl)) {
       const wrapper = new Wrapper<T>(el);
       if (el === rootEl)
         this.wrappers.push(wrapper);
@@ -96,9 +96,10 @@ export class LoopHandler<T> extends DirectiveHandler<T> {
     }
   }
 
-  private destroyItem(index: number) {
-    this.wrappers[index].destroy();
-    this.wrappers.splice(index, 1);
+  private destroyItems(from: number, to: number) {
+    for (let i = from; i < to; i++)
+      this.wrappers[i].destroy();
+    this.wrappers.splice(from, to - from);
   }
 
   init(_: unknown, { value: attrValue, parsed }: DirectiveMatch) {
@@ -120,7 +121,6 @@ export class LoopHandler<T> extends DirectiveHandler<T> {
       for (let i = p; i < n; i++)
         this.createNewItem(i);
     else if (n < p)
-      for (let i = n; i < p; i++)
-        this.destroyItem(i);
+      this.destroyItems(n, p);
   }
 }

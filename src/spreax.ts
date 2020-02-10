@@ -1,9 +1,16 @@
 import { Variables, getVariablesFromObject } from './core/variables';
-import { makeElementTree } from './dom';
+import { createElementTree } from './dom';
 import { Wrapper } from './wrapper';
 import { TextNodeWrapper } from './text-node-wrapper';
 import { DerivedVariable } from './core/derived';
-import { LoopHandler } from './directives/handlers/for';
+import { ForHandler } from './directives/handlers/for';
+import { DirectiveHandler } from './directives/handler';
+import { IfHandler } from './directives/handlers/if';
+import { OnHandler } from './directives/handlers/on';
+import { AttrHandler } from './directives/handlers/attr';
+import { BindHandler } from './directives/handlers/bind';
+import { CssHandler } from './directives/handlers/css';
+import { ClassHandler } from './directives/handlers/class';
 
 export class Spreax<T, E extends Element> {
   readonly el: E;
@@ -20,7 +27,7 @@ export class Spreax<T, E extends Element> {
     this.el = rootEl;
     this.variables = variables;
     this.setupDerivedVars();
-    for (const el of makeElementTree(rootEl))
+    for (const el of createElementTree(rootEl))
       this.setupElement(el);
   }
 
@@ -33,13 +40,24 @@ export class Spreax<T, E extends Element> {
             v1.subscribeAndAutoCompute(v2);
   }
 
+  private getDirectiveHandlers(): DirectiveHandler<T>[] {
+    return [
+      new ForHandler<T>(this.setupWrapper.bind(this)),
+      new IfHandler<T>(),
+      new OnHandler<T>(),
+      new AttrHandler<T>(),
+      new BindHandler<T>(),
+      new CssHandler<T>(),
+      new ClassHandler<T>()
+    ];
+  }
+
   private setupElement(el: Element) {
     this.setupWrapper(new Wrapper<T>(el));
   }
 
   private setupWrapper(wrapper: Wrapper<T>) {
-    new LoopHandler<T>(this.setupWrapper.bind(this)).start(wrapper, this.variables);
-    for (const handler of wrapper.directives)
+    for (const handler of this.getDirectiveHandlers())
       handler.start(wrapper, this.variables);
     for (const node of wrapper.nodes)
       this.setupNode(node);
