@@ -1,13 +1,13 @@
 {
 	"name": "spreax",
 	"description": "A library to help you make pure web applications, Without any bloat and Virtual DOM stuff",
-	"main": "dist/spreax.cjs.js",
-	"browser": "dist/spreax.browser.js",
-	"unpkg": "dist/spreax.browser.min.js",
-	"module": "dist/spreax.esm.js",
+	"main": "dist/cjs.js",
+	"browser": "dist/browser.js",
+	"unpkg": "dist/esm.min.js",
+	"module": "dist/esm.js",
 	"scripts": {
 		"build": "rollup -c config/development.js",
-		"build:prod": "rollup -c config/production.js && mv typings/spreax.esm.d.ts typings/index.d.ts",
+		"build:prod": "rollup -c config/production.js && mv typings/esm.d.ts typings/index.d.ts",
 		"prepublish": "npm run build:prod",
 		"serve": "http-server example -p 5656 -c-1",
 		"lint": "eslint --fix --ext ts src",

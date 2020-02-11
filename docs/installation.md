@@ -11,23 +11,27 @@ import Spreax, { state /* ... */ } from 'spreax';
 ## Using `<script>` tag
 You can get it from **unpkg**:
 ```html
-<script src="https://unpkg.com/spreax"></script>
+<script src="https://unpkg.com/spreax/dist/browser.js"></script>
 ```
-A global variable `sp` will be available.
+A global variable `spreax` will be available.
 ```js
-var sp = {
-  default: ..., // use this for creating instances
+window.spreax = {
+  default: ..., // Spreax itself
   state: ...,
   derived: ...,
   // ...
 }
 ```
+### Using `type="module"`
+```js 
+import Spreax, { state } from 'https://unpkg.com/spreax';
+```
 
 ## Builds
 Each build is compiled down to ES6 JavaScript.
-Name | Usage
+Name | Format
 --- | ---
-`spreax.esm.js` | ES module
-`spreax.cjs.js` | CommonJS module
-`spreax.browser.js` | Browser code
-`spreax.browser.min.js` | Browser code (minified)
+`esm.js` | ES Module
+`esm.min.js` | ES Module (minified)
+`browser.js` | IIFE (for browsers)
+`cjs.js` | CommonJS
