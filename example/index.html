@@ -23,8 +23,8 @@
       </div>
       <hr @if="todos.length">
       @(itemsLeft) items left
-      <button @on:click="removeCompletedTodos()">Remove completed</button>
-      <button @on:click="removeAllTodos()">Remove all</button>
+      <button @attr:disabled="removeCompletedIsDisabled" @on:click="removeCompletedTodos()">Remove completed</button>
+      <button @attr:disabled="removeAllIsDisabled" @on:click="removeAllTodos()">Remove all</button>
     </div>
   </body>
   <script src="app.js"></script>

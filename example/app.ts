@@ -27,6 +27,8 @@ const removeCompletedTodos = action(() =>
 const removeAllTodos = action(() => todos.set([]));
 const itemsLeft = derived(() =>
   todos.value.filter(todo => !todo.completed).length);
+const removeCompletedIsDisabled = derived(() => itemsLeft.value === 0);
+const removeAllIsDisabled = derived(() => todos.value.length === 0);
 
 const app = new Spreax(
   '#app',
@@ -34,6 +36,8 @@ const app = new Spreax(
     todos,
     onKeydown,
     itemsLeft,
+    removeCompletedIsDisabled,
+    removeAllIsDisabled,
     removeTodo,
     removeCompletedTodos,
     removeAllTodos
