@@ -62,3 +62,13 @@ const PI = constant(3.14);
 PI.set(2);
 console.log(PI.value); // still 3.14
 ```
+
+## Actions
+Actions are function constants. Use them to handle events, mutate the state, etc.
+```js
+const handleSubmit = action((parameter, event) => {
+  // do something
+})
+```
+- `parameter` is a optional parameter and it can be anything.
+- `event` is the event object. It's optional too.
