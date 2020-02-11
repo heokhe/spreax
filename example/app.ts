@@ -31,7 +31,12 @@ const itemsLeft = derived(() =>
 const app = new Spreax(
   '#app',
   {
-    todos, onKeydown, removeTodo, removeCompletedTodos, removeAllTodos, itemsLeft
+    todos,
+    onKeydown,
+    itemsLeft,
+    removeTodo,
+    removeCompletedTodos,
+    removeAllTodos
   }
 );
 
