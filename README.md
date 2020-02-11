@@ -23,6 +23,3 @@ See more in [Installtion docs](docs/installation.md).
 
 # Docs
 See [docs](docs).
-
-# TypeScript Support
-Spreax itself is fully written in TypeScript, and it also includes definitions.

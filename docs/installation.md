@@ -35,3 +35,8 @@ Name | Format
 `esm.min.js` | ES Module (minified)
 `browser.js` | IIFE (for browsers)
 `cjs.js` | CommonJS
+
+## TypeScript support
+Spreax itself is fully written in TypeScript, and you can use it in TS environments.
+
+It also includes [definitions](../typings/index.ts).
