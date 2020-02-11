@@ -20,6 +20,7 @@ declare class Spreax<T, E extends Element> {
     variables: Variables<T>;
     constructor(rootElOrSelector: E | string, variables: Variables<T>);
     private setupDerivedVars;
+    private getDirectiveHandlers;
     private setupElement;
     private setupWrapper;
     private setupNode;
@@ -48,15 +49,15 @@ declare const constant: <T>(value: T) => Constant<T>;
 type ActionFn<E extends Event = Event> = (arg?: any, event?: E) => any;
 type ActionVariable<E extends Event = Event> = Constant<ActionFn<E>>;
 declare const action: <E extends Event = Event>(callback: ActionFn<E>) => ActionVariable<E>;
-declare function push<T>(state: StateVariable<T[]>, ...items: T[]): void;
-declare function unshift<T>(state: StateVariable<T[]>, ...items: T[]): void;
-declare function merge<T extends object>(state: StateVariable<T>, sourceObject: {
+declare function push<T>(state: Variable<T[]>, ...items: T[]): void;
+declare function unshift<T>(state: Variable<T[]>, ...items: T[]): void;
+declare function merge<T extends object>(state: Variable<T>, sourceObject: {
     [x in keyof T]?: T[x];
 }): void;
-declare function set<T extends object, K extends keyof T>(state: StateVariable<T>, key: K, value: T[K]): void;
+declare function set<T extends object, K extends keyof T>(state: Variable<T>, key: K, value: T[K]): void;
 declare function setPath(state: Variable<any>, path: string[], value: any): void;
-declare function setIndex<T>(state: StateVariable<T[]>, index: number, newValue: T): void;
-declare function splice<T>(state: StateVariable<T[]>, start: number, deleteCount: number, ...items: T[]): void;
-declare function inc(state: StateVariable<number>, x?: number): void;
-declare function dec(state: StateVariable<number>, x?: number): void;
-export { Spreax as default, state, derived, constant, action, push, unshift, merge, set, setPath, setIndex, splice, inc, dec };
+declare function setIndex<T>(state: Variable<T[]>, index: number, newValue: T): void;
+declare function splice<T>(state: Variable<T[]>, start: number, deleteCount: number, ...items: T[]): void;
+declare function increase(state: Variable<number>, x?: number): void;
+declare function decrease(state: Variable<number>, x?: number): void;
+export { Spreax as default, state, derived, constant, action, push, unshift, merge, set, setPath, setIndex, splice, increase, decrease };
