@@ -4,7 +4,9 @@ import {
 import { Variables } from '../core/variables';
 import { ActionFn } from '../core/actions';
 
-export function evaluate<T>(parseResult: ParseResult, context: Variables<T>) {
+export function evaluate<T>(
+  parseResult: ParseResult, context: Variables<T>, preserveFunctions = false
+) {
   if (!parseResult)
     return undefined;
   switch (parseResult.type) {
@@ -23,7 +25,7 @@ export function evaluate<T>(parseResult: ParseResult, context: Variables<T>) {
         arg = parseResult.argument
           ? evaluate(parseResult.argument, context)
           : undefined;
-      return { fn, arg };
+      return preserveFunctions ? { fn, arg } : fn(arg);
     }
     default:
       return parseResult.value;

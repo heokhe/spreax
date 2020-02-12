@@ -18,6 +18,8 @@ export abstract class DirectiveHandler<T, E extends Element = Element> {
 
   protected parameters = false;
 
+  protected preserveFunctionsWhenEvaluating = false;
+
   protected matches: DirectiveMatch[];
 
   get el(): E {
@@ -76,7 +78,7 @@ export abstract class DirectiveHandler<T, E extends Element = Element> {
   }
 
   private eval(parsed: ParseResult) {
-    return evaluate(parsed, this.context);
+    return evaluate(parsed, this.context, this.preserveFunctionsWhenEvaluating);
   }
 
   protected set({ path, varName }: ParseResult, value: any) {

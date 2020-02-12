@@ -6,6 +6,8 @@ export class OnHandler<T> extends DirectiveHandler<T> {
 
   parameters = true;
 
+  preserveFunctionsWhenEvaluating = true;
+
   fn: ActionFn;
 
   arg?: any;
