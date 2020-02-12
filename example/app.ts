@@ -26,7 +26,7 @@ const removeCompletedTodos = action(() =>
       !t.completed)));
 const removeAllTodos = action(() => todos.set([]));
 const itemsLeft = derived(() =>
-  todos.value.filter(todo => !todo.completed).length);
+  todos.value.filter(todo => todo.completed).length);
 const removeCompletedIsDisabled = derived(() => itemsLeft.value === 0);
 const removeAllIsDisabled = derived(() => todos.value.length === 0);
 
