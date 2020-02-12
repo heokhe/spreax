@@ -1,6 +1,7 @@
 import { parseLiteralExpression, LiteralValue } from './literals';
 import { isValidIdentifier } from './identifiers';
 import { memoize } from '../helpers';
+import { UnaryOperator, UNARY_OPERATORS } from './unary-operators';
 
 export const enum ParseResultType {
   Literal,
@@ -15,12 +16,22 @@ export type ParseResult = {
   varName?: string;
   path?: PathSection[];
   argument?: ParseResult;
+  unaryOperators?: UnaryOperator[];
 }
 
 /* eslint-disable @typescript-eslint/no-use-before-define, no-use-before-define */
 function parseUnmemoized(expr: string): ParseResult {
   expr = expr.trim();
   if (!expr) return undefined;
+
+  if (UNARY_OPERATORS.includes(expr[0])) {
+    const [op] = expr;
+    const parsed = parse(expr.slice(1));
+    return {
+      ...parsed,
+      unaryOperators: [...parsed.unaryOperators ?? [], op as UnaryOperator]
+    }
+  }
 
   const [, functionExpr, argList] = expr.match(/^([^(]+)(\(.*\))$/) || [];
   if (functionExpr) {

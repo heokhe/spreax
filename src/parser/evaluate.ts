@@ -3,12 +3,15 @@ import {
 } from './parser';
 import { Variables } from '../core/variables';
 import { ActionFn } from '../core/actions';
+import { applyOperators } from './unary-operators';
 
-export function evaluate<T>(
+/* eslint-disable no-use-before-define, @typescript-eslint/no-use-before-define */
+function evaluateWithoutOperators<T>(
   parseResult: ParseResult, context: Variables<T>, preserveFunctions = false
 ) {
   if (!parseResult)
     return undefined;
+
   switch (parseResult.type) {
     case ParseResultType.Variable: {
       const { varName, path } = parseResult;
@@ -31,6 +34,16 @@ export function evaluate<T>(
       return parseResult.value;
   }
 }
+
+export function evaluate<T>(
+  parseResult: ParseResult, context: Variables<T>, preserveFunctions = false
+) {
+  return applyOperators(
+    evaluateWithoutOperators(parseResult, context, preserveFunctions),
+    parseResult.unaryOperators ?? []
+  );
+}
+
 
 export function pathSectionsToString<T>(path: PathSection[], context: Variables<T>) {
   return path
