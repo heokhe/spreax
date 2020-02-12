@@ -8,7 +8,7 @@ interface Todo {
 }
 
 const todos = state([] as Todo[]);
-const onKeydown = action((_: unknown, event: KeyboardEvent) => {
+const handleKeydown = action((_: unknown, event: KeyboardEvent) => {
   const input = event.target as HTMLInputElement;
   if (event.code === 'Enter' && input.value) {
     push(todos, {
@@ -25,19 +25,18 @@ const removeCompletedTodos = action(() =>
     ts.filter(t =>
       !t.completed)));
 const removeAllTodos = action(() => todos.set([]));
-const itemsLeft = derived(() =>
-  todos.value.filter(todo => todo.completed).length);
-const removeCompletedIsDisabled = derived(() => itemsLeft.value === 0);
-const removeAllIsDisabled = derived(() => todos.value.length === 0);
+const todosLeft = derived(() =>
+  todos.value.filter(todo => !todo.completed).length);
+const removeCompletedIsDisabled = derived(() =>
+  todos.value.length === 0 || todosLeft.value === todos.value.length);
 
 const app = new Spreax(
   '#app',
   {
     todos,
-    onKeydown,
-    itemsLeft,
+    handleKeydown,
+    todosLeft,
     removeCompletedIsDisabled,
-    removeAllIsDisabled,
     removeTodo,
     removeCompletedTodos,
     removeAllTodos

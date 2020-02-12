@@ -14,7 +14,7 @@
     -->
     <div id="app">
       <h1>Spreax todo app</h1>
-      <input type="text" @on:keydown="onKeydown()" placeholder="What needs to be done? (Press enter)" autofocus>
+      <input type="text" @on:keydown="handleKeydown()" placeholder="What needs to be done? (Press enter)" autofocus>
       <hr>
       <div class="todo" @class:completed="todo.completed" @for="todo, index of todos">
         <input type="checkbox" @bind="todo.completed">
@@ -22,9 +22,9 @@
         <button @on:click="removeTodo(index)">&times;</button>
       </div>
       <hr @if="todos.length">
-      @(itemsLeft) items left
+      @(todosLeft) items left
       <button @attr:disabled="removeCompletedIsDisabled" @on:click="removeCompletedTodos()">Remove completed</button>
-      <button @attr:disabled="removeAllIsDisabled" @on:click="removeAllTodos()">Remove all</button>
+      <button @attr:disabled="!todos.length" @on:click="removeAllTodos()">Remove all</button>
     </div>
   </body>
   <script src="app.js"></script>

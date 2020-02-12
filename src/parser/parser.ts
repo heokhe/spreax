@@ -25,12 +25,12 @@ function parseUnmemoized(expr: string): ParseResult {
   if (!expr) return undefined;
 
   if (UNARY_OPERATORS.includes(expr[0])) {
-    const [op] = expr;
-    const parsed = parse(expr.slice(1));
+    const [op] = expr,
+      parsed = parse(expr.slice(1));
     return {
       ...parsed,
       unaryOperators: [...parsed.unaryOperators ?? [], op as UnaryOperator]
-    }
+    };
   }
 
   const [, functionExpr, argList] = expr.match(/^([^(]+)(\(.*\))$/) || [];
