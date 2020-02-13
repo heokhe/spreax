@@ -11,7 +11,7 @@ export type DirectiveMatch = {
   parsed: ParseResult;
 }
 
-export abstract class DirectiveHandler<T, E extends Element = Element> {
+export abstract class DirectiveHandler<T, E extends HTMLElement = HTMLElement> {
   target: Wrapper<T, E>;
 
   protected name: string;
