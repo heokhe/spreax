@@ -90,15 +90,24 @@ export abstract class DirectiveHandler<T, E extends HTMLElement = HTMLElement> {
     }
   }
 
+  /**
+   * Applies a directive on a wrapper.
+   *
+   * Fails if the element is not present in the DOM,
+   * Or there's no attribute pointing to the directive.
+   */
   start(wrapper: Wrapper<T, E>, variables: Variables<T>) {
+    if (!wrapper.existsInDOM) return;
     this.setTarget(wrapper);
-    this.use(variables);
-    for (const match of this.matches) {
-      this.init(this.eval(match.parsed), match);
-      for (const dep of match.parsed.dependencies) {
-        this.target.subscribeTo(dep as keyof T, () => {
-          this.handle(this.eval(match.parsed), match);
-        }, true);
+    if (this.matches.length) {
+      this.use(variables);
+      for (const match of this.matches) {
+        this.init(this.eval(match.parsed), match);
+        for (const dep of match.parsed.dependencies) {
+          this.target.subscribeTo(dep as keyof T, () => {
+            this.handle(this.eval(match.parsed), match);
+          }, true);
+        }
       }
     }
   }

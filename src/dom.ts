@@ -4,3 +4,7 @@ export function createElementTree(root: Element): Element[] {
     elements.push(...createElementTree(child));
   return elements;
 }
+
+export function elementExistsInDOM(el: Element) {
+  return document.contains(el);
+}

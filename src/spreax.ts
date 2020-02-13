@@ -59,8 +59,9 @@ export class Spreax<T, E extends Element> {
   private setupWrapper(wrapper: Wrapper<T>) {
     for (const handler of this.getDirectiveHandlers())
       handler.start(wrapper, this.variables);
-    for (const node of wrapper.nodes)
-      this.setupNode(node);
+    if (wrapper.existsInDOM)
+      for (const node of wrapper.nodes)
+        this.setupNode(node);
   }
 
   private setupNode(node: TextNodeWrapper<T>) {

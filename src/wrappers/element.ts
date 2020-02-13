@@ -1,5 +1,6 @@
 import { Subscriber } from '../core/subscriber';
 import { TextNodeWrapper } from './text-node';
+import { elementExistsInDOM } from '../dom';
 
 export class Wrapper<T, E extends HTMLElement = HTMLElement> extends Subscriber<T> {
   el: E;
@@ -24,5 +25,9 @@ export class Wrapper<T, E extends HTMLElement = HTMLElement> extends Subscriber<
 
   destroy() {
     this.el.remove();
+  }
+
+  get existsInDOM() {
+    return elementExistsInDOM(this.el);
   }
 }
