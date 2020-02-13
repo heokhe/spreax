@@ -15,7 +15,7 @@ type Variable<T> = Subscribable<T>;
 type Variables<T> = {
     [x in keyof T]: Variable<T[x]>;
 };
-declare class Spreax<T, E extends Element> {
+declare class Spreax<T, E extends HTMLElement> {
     readonly el: E;
     variables: Variables<T>;
     constructor(rootElOrSelector: E | string, variables: Variables<T>);
