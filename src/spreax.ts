@@ -12,7 +12,7 @@ import { BindHandler } from './directives/handlers/bind';
 import { CssHandler } from './directives/handlers/css';
 import { ClassHandler } from './directives/handlers/class';
 
-export class Spreax<T, E extends Element> {
+export class Spreax<T, E extends HTMLElement> {
   readonly el: E;
 
   variables: Variables<T>;
@@ -52,7 +52,7 @@ export class Spreax<T, E extends Element> {
     ];
   }
 
-  private setupElement(el: Element) {
+  private setupElement(el: HTMLElement) {
     this.setupWrapper(new Wrapper<T>(el));
   }
 
