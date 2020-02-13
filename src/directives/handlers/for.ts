@@ -6,7 +6,7 @@ import { createElementTree } from '../../dom';
 
 type OnCreateFn<T> = (wrapper: Wrapper<T>) => void;
 
-export class ForHandler<T> extends DirectiveHandler<T> {
+export class ForHandler<T, E extends HTMLElement = HTMLElement> extends DirectiveHandler<T, E> {
   name = 'for';
 
   parameters = false;
@@ -25,7 +25,7 @@ export class ForHandler<T> extends DirectiveHandler<T> {
 
   array = [];
 
-  backupEl: Element;
+  backupEl: E;
 
   constructor(onCreate: OnCreateFn<T>) {
     super();
@@ -37,7 +37,7 @@ export class ForHandler<T> extends DirectiveHandler<T> {
   }
 
   private clone() {
-    const child = this.backupEl.cloneNode(true) as Element;
+    const child = this.backupEl.cloneNode(true) as E;
     child.removeAttribute('@for');
     return child;
   }
@@ -68,6 +68,7 @@ export class ForHandler<T> extends DirectiveHandler<T> {
   private createNewItem(index: number) {
     const [itemVar, indexVar] = this.createVariables(index);
     const rootEl = this.clone();
+    this.comment.before(rootEl);
     for (const el of createElementTree(rootEl)) {
       const wrapper = new Wrapper<T>(el);
       if (el === rootEl)
@@ -75,7 +76,6 @@ export class ForHandler<T> extends DirectiveHandler<T> {
       this.addToItemContext(wrapper, itemVar, indexVar);
       this.onCreate(wrapper);
     }
-    this.comment.before(rootEl);
   }
 
   private addToItemContext(wrapper: Wrapper<T>, itemVar: Derived<any>, indexVar?: Derived<any>) {
@@ -108,7 +108,7 @@ export class ForHandler<T> extends DirectiveHandler<T> {
       .split(' of ')[0]
       .split(', ', 2);
     this.el.after(this.comment);
-    this.backupEl = this.el.cloneNode(true) as Element;
+    this.backupEl = this.el.cloneNode(true) as E;
     this.target.destroy();
   }
 
