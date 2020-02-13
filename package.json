@@ -8,7 +8,7 @@
 	"scripts": {
 		"build": "rollup -c config/development.js",
 		"build:prod": "rollup -c config/production.js && mv typings/esm.d.ts typings/index.d.ts",
-		"prepublish": "npm run build:prod",
+		"prepare": "npm run build:prod",
 		"serve": "http-server example -p 5656 -c-1",
 		"lint": "eslint --fix --ext ts src",
 		"test": "jest"
