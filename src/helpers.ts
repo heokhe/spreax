@@ -38,8 +38,14 @@ export function eq(a: any, b: any): boolean {
   return a === b;
 }
 
-export function safeClone<T extends object>(objectOrArray: T): T {
-  return Array.isArray(objectOrArray)
-    ? [...objectOrArray] as T
-    : { ...objectOrArray };
+const isPrimitive = (value: any) => typeof value !== 'object';
+
+export function deepClone(object: any): any {
+  if (isPrimitive(object)) return object;
+  if (Array.isArray(object))
+    return [...object].map(deepClone);
+  const r = {};
+  for (const key in object)
+    r[key] = deepClone(object[key]);
+  return r;
 }
