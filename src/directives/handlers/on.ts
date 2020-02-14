@@ -1,6 +1,14 @@
 import { DirectiveHandler, DirectiveMatch } from '../handler';
 import { ActionFn } from '../../core/actions';
 
+type FnAndArg = {
+  fn: ActionFn;
+  arg?: any;
+}
+type Fns = {
+  [x: string]: FnAndArg;
+};
+
 export class OnHandler<T> extends DirectiveHandler<T> {
   name = 'on';
 
@@ -8,27 +16,27 @@ export class OnHandler<T> extends DirectiveHandler<T> {
 
   preserveFunctionsWhenEvaluating = true;
 
-  fn: ActionFn;
+  fns: Fns = {};
 
-  arg?: any;
-
-  init(value: any, match: DirectiveMatch) {
-    const { fn, arg = undefined } = value ?? {};
+  private addOrUpdateFunction(fnAndArg: any, eventName: string) {
+    const { fn, arg = undefined } = fnAndArg ?? {};
     if (typeof fn === 'function') {
-      this.fn = fn as ActionFn;
-      this.arg = arg;
+      this.fns[eventName] = {
+        fn: fn as ActionFn,
+        arg
+      };
     }
+  }
 
-    this.el.addEventListener(match.parameter, event => {
-      this.fn?.(this.arg, event);
+  init(value: any, { parameter: eventName }: DirectiveMatch) {
+    this.addOrUpdateFunction(value, eventName);
+    this.el.addEventListener(eventName, event => {
+      const { fn, arg } = this.fns[eventName] || {};
+      fn?.(arg, event);
     });
   }
 
-  handle(value: any) {
-    const { fn, arg = undefined } = value ?? {};
-    if (typeof fn === 'function') {
-      this.fn = fn as ActionFn;
-      this.arg = arg;
-    }
+  handle(value: any, { parameter: eventName }: DirectiveMatch) {
+    this.addOrUpdateFunction(value, eventName);
   }
 }
