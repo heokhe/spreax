@@ -46,7 +46,7 @@ declare class Constant<T> extends Subscribable<T> {
     set(): any;
 }
 declare const constant: <T>(value: T) => Constant<T>;
-type ActionFn<E extends Event = Event> = (arg?: any, event?: E) => any;
+type ActionFn<E extends Event = Event> = (event?: E, ...args: any[]) => any;
 type ActionVariable<E extends Event = Event> = Constant<ActionFn<E>>;
 declare const action: <E extends Event = Event>(callback: ActionFn<E>) => ActionVariable<E>;
 declare function push<T>(state: Variable<T[]>, ...items: T[]): void;
