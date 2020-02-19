@@ -3,7 +3,7 @@ import { ActionFn } from '../../core/actions';
 
 type FnAndArg = {
   fn: ActionFn;
-  arg?: any;
+  args: any[];
 }
 type Fns = {
   [x: string]: FnAndArg;
@@ -19,11 +19,11 @@ export class OnHandler<T> extends DirectiveHandler<T> {
   fns: Fns = {};
 
   private addOrUpdateFunction(fnAndArg: any, eventName: string) {
-    const { fn, arg = undefined } = fnAndArg ?? {};
+    const { fn, args } = fnAndArg ?? {};
     if (typeof fn === 'function') {
       this.fns[eventName] = {
         fn: fn as ActionFn,
-        arg
+        args
       };
     }
   }
@@ -31,8 +31,8 @@ export class OnHandler<T> extends DirectiveHandler<T> {
   init(value: any, { parameter: eventName }: DirectiveMatch) {
     this.addOrUpdateFunction(value, eventName);
     this.el.addEventListener(eventName, event => {
-      const { fn, arg } = this.fns[eventName] || {};
-      fn?.(arg, event);
+      const { fn, args } = this.fns[eventName] || {};
+      fn?.(event, ...args);
     });
   }
 

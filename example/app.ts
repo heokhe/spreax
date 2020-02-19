@@ -8,7 +8,7 @@ interface Todo {
 }
 
 const todos = state([] as Todo[]);
-const handleKeydown = action((_: unknown, event: KeyboardEvent) => {
+const handleKeydown = action((event: KeyboardEvent) => {
   const input = event.target as HTMLInputElement;
   if (event.code === 'Enter' && input.value) {
     push(todos, {
@@ -18,7 +18,7 @@ const handleKeydown = action((_: unknown, event: KeyboardEvent) => {
     input.value = '';
   }
 });
-const removeTodo = action((index: number) =>
+const removeTodo = action((_, index: number) =>
   splice(todos, index, 1));
 const removeCompletedTodos = action(() =>
   todos.update(ts =>

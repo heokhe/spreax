@@ -1,7 +1,8 @@
 import { parseLiteralExpression, LiteralValue } from './literals';
 import { isValidIdentifier } from './identifiers';
-import { memoize } from '../helpers';
+import { memoize, flatUnique } from '../helpers';
 import { UnaryOperator, UNARY_OPERATORS } from './unary-operators';
+import { parseFunctions } from './parse-functions';
 
 export const enum ParseResultType {
   Literal,
@@ -15,7 +16,7 @@ export type ParseResult = {
   value?: LiteralValue;
   varName?: string;
   path?: PathSection[];
-  argument?: ParseResult;
+  arguments?: ParseResult[];
   unaryOperators?: UnaryOperator[];
 }
 
@@ -33,29 +34,28 @@ function parseUnmemoized(expr: string): ParseResult {
     };
   }
 
-  const [, functionExpr, argList] = expr.match(/^([^(]+)(\(.*\))$/) || [];
-  if (functionExpr) {
-    const argValue = argList.slice(1, -1);
-    const parsedArg = argValue ? parse(argValue) : undefined;
-    const parsedFn = parse(functionExpr);
-    const dependencies = [
-      ...parsedFn.dependencies,
-      ...(parsedArg?.dependencies ?? [])
-    ];
-    return {
-      ...parsedFn,
-      argument: parsedArg,
-      dependencies,
-      type: ParseResultType.FunctionExpression
-    };
-  }
-
   const literalResult = parseLiteralExpression(expr);
   if (literalResult.length) {
     return {
       type: ParseResultType.Literal,
       value: literalResult[0],
       dependencies: []
+    };
+  }
+
+  const { functionName, parameters } = parseFunctions(expr) || {};
+  if (parameters) {
+    const parsedFunctionExpression = parse(functionName);
+    const parsedParameters = parameters.map(parse);
+    const dependencies = flatUnique([
+      parsedFunctionExpression.dependencies,
+      ...parsedParameters.map(p => p.dependencies)
+    ]);
+    return {
+      ...parsedFunctionExpression,
+      type: ParseResultType.FunctionExpression,
+      dependencies,
+      arguments: parsedParameters
     };
   }
 
