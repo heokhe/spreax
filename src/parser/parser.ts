@@ -17,6 +17,7 @@ export type ParseResult = {
   varName?: string;
   path?: PathSection[];
   arguments?: ParseResult[];
+  thisArg?: ParseResult;
   unaryOperators?: UnaryOperator[];
 }
 
@@ -55,7 +56,8 @@ function parseUnmemoized(expr: string): ParseResult {
       ...parsedFunctionExpression,
       type: ParseResultType.FunctionExpression,
       dependencies,
-      arguments: parsedParameters
+      arguments: parsedParameters,
+      thisArg: getThisArg(parsedFunctionExpression)
     };
   }
 
