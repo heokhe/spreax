@@ -2,7 +2,6 @@
 	"name": "spreax",
 	"description": "A library to help you make pure web applications, Without any bloat and Virtual DOM stuff",
 	"main": "dist/cjs.js",
-	"browser": "dist/browser.js",
 	"unpkg": "dist/esm.min.js",
 	"module": "dist/esm.js",
 	"scripts": {
