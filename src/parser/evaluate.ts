@@ -26,7 +26,9 @@ function evaluateWithoutOperators<T>(
         type: ParseResultType.Variable
       }, context),
         args = parseResult.arguments.map(a => evaluate(a, context));
-      return preserveFunctions ? { fn, args } : fn(...args);
+      return preserveFunctions
+        ? { fn, args }
+        : fn(undefined, ...args); // the first argument is an Event object
     }
     default:
       return parseResult.value;
