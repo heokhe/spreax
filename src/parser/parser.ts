@@ -3,6 +3,7 @@ import { isValidIdentifier } from './identifiers';
 import { memoize, flatUnique } from '../helpers';
 import { UnaryOperator, UNARY_OPERATORS } from './unary-operators';
 import { parseFunctions } from './parse-functions';
+import { getThisArg } from './this-arg';
 
 export const enum ParseResultType {
   Literal,
@@ -62,6 +63,9 @@ function parseUnmemoized(expr: string): ParseResult {
   }
 
   const [varName, ...accessors] = expr
+    // [0] -> ["0"]
+      .replace(/\[(\d+)\]/g, '["$1"]')
+    // ['key'] -> ["key"]
       .replace(/'/g, '"')
     // replace .x with ["x"]
       .replace(/\.([^.[]+)/g, '["$1"]')
