@@ -41,10 +41,11 @@ export abstract class DirectiveHandler<T, E extends HTMLElement = HTMLElement> {
     for (const { name, value } of el.attributes) {
       if (this.isValidName(name)) {
         const [, parameter] = name.split(':', 2);
+        const finalValue = this.parameters ? (value || parameter) : value;
         output.push({
           parameter,
-          value,
-          parsed: this.parse(value)
+          value: finalValue,
+          parsed: this.parse(finalValue)
         });
       }
     }
