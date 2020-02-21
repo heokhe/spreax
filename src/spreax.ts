@@ -11,6 +11,7 @@ import { AttrHandler } from './directives/handlers/attr';
 import { BindHandler } from './directives/handlers/bind';
 import { CssHandler } from './directives/handlers/css';
 import { ClassHandler } from './directives/handlers/class';
+import { HtmlHandler } from './directives/handlers/html';
 
 export class Spreax<T, E extends HTMLElement> {
   readonly el: E;
@@ -42,6 +43,7 @@ export class Spreax<T, E extends HTMLElement> {
 
   private getDirectiveHandlers(): DirectiveHandler<T>[] {
     return [
+      new HtmlHandler<T>(),
       new ForHandler<T>(this.setupWrapper.bind(this)),
       new IfHandler<T>(),
       new OnHandler<T>(),
