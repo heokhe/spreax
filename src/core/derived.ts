@@ -8,6 +8,8 @@ export class DerivedVariable<T> extends Subscribable<T> {
 
   setter: DerivedSetter<T>;
 
+  autoDependencies: Subscribable<any>[] = [];
+
   constructor(getter: DerivedGetter<T>, setter?: DerivedSetter<T>) {
     super();
     this.getter = getter;
@@ -19,8 +21,11 @@ export class DerivedVariable<T> extends Subscribable<T> {
     this.changeValue(this.getter());
   }
 
-  subscribeAndAutoCompute<T>(stateVar: Subscribable<T>) {
-    stateVar.subscribe(() => this.compute());
+  subscribeAndAutoCompute(subscribable: Subscribable<any>) {
+    if (!this.autoDependencies.includes(subscribable)) {
+      subscribable.subscribe(() => this.compute());
+      this.autoDependencies.push(subscribable);
+    }
   }
 
   set(newValue: T) {
