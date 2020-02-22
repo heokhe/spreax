@@ -1,8 +1,10 @@
 # Directives
 As we said in the previous file, Attributes starting with `@` are called directives and are meaningful to Spreax. A directive is written as:
 ```
-@<name>[:<parameter>]="<expression>"
+@<name>[:<parameter>][="<expression>"]
 ```
+You can use a shorthand syntax whenever `parameter === expression`: Write `@css:color` instead of `@css:color="color"`.
+
 There are a handful of directives in Spreax and we'll learn about them below.
 
 ## Conditional Rendering: `@if`
@@ -88,3 +90,12 @@ const isActive = state(true);
 <button class="button" @class:active="isActive">Click me</button>
 ```
 If `isActive.value` is truthy, the button will have the class `active`.
+
+## Rendering HTML strings: `@html`
+```js
+const myHtml = state('<b>hi</b>');
+```
+```html
+<div @html="myHtml"></div>
+```
+You'll see a bold "hi" rendered. **Be careful, Spreax doesn't sanitize the data for you!**
