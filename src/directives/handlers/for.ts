@@ -1,4 +1,5 @@
-import { DirectiveHandler, DirectiveMatch } from '../handler';
+import { DirectiveHandler } from '../handler';
+import { DirectiveMatch } from '../matches';
 import { Wrapper } from '../../wrappers/element';
 import { parse, ParseResult } from '../../parser/parser';
 import { derived, DerivedVariable as Derived } from '../../core/derived';

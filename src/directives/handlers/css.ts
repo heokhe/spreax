@@ -1,4 +1,5 @@
-import { DirectiveHandler, DirectiveMatch } from '../handler';
+import { DirectiveHandler } from '../handler';
+import { DirectiveMatch } from '../matches';
 
 export class CssHandler<T> extends DirectiveHandler<T> {
   name = 'css';

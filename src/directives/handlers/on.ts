@@ -1,4 +1,5 @@
-import { DirectiveHandler, DirectiveMatch } from '../handler';
+import { DirectiveHandler } from '../handler';
+import { DirectiveMatch } from '../matches';
 import { ActionFn } from '../../core/actions';
 
 type FnAndArg = {

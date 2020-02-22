@@ -4,12 +4,7 @@ import { evaluate, pathSectionsToString } from '../parser/evaluate';
 import { Variables } from '../core/variables';
 import { flatUnique } from '../helpers';
 import { setPath } from '../core/modifiers';
-
-export type DirectiveMatch = {
-  value: string;
-  parameter?: string;
-  parsed: ParseResult;
-}
+import { extractDirectiveMatches, DirectiveMatch } from './matches';
 
 export abstract class DirectiveHandler<T, E extends HTMLElement = HTMLElement> {
   target: Wrapper<T, E>;
@@ -30,26 +25,13 @@ export abstract class DirectiveHandler<T, E extends HTMLElement = HTMLElement> {
     return this.target.context;
   }
 
-  private isValidName(name: string) {
-    return this.parameters
-      ? name.startsWith(`@${this.name}:`)
-      : name === `@${this.name}`;
-  }
-
   private getMatches(el: E): DirectiveMatch[] {
-    const output = [] as DirectiveMatch[];
-    for (const { name, value } of el.attributes) {
-      if (this.isValidName(name)) {
-        const [, parameter] = name.split(':', 2);
-        const finalValue = this.parameters ? (value || parameter) : value;
-        output.push({
-          parameter,
-          value: finalValue,
-          parsed: this.parse(finalValue)
-        });
-      }
-    }
-    return output;
+    return extractDirectiveMatches({
+      element: el,
+      directiveName: this.name,
+      parameters: this.parameters,
+      parse: this.parse.bind(this)
+    });
   }
 
   get dependencies() {
