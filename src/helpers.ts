@@ -38,10 +38,8 @@ export function eq(a: any, b: any): boolean {
   return a === b;
 }
 
-const isPrimitive = (value: any) => typeof value !== 'object';
-
 export function deepClone(object: any): any {
-  if (isPrimitive(object)) return object;
+  if (typeof object !== 'object') return object;
   if (Array.isArray(object))
     return [...object].map(deepClone);
   const r = {};

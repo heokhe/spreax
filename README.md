@@ -17,7 +17,7 @@ Checkout [this CodeSandbox](https://codesandbox.io/s/spreax-todo-app-wg0e9)!
 Install it by executing:
 ```sh
 npm i spreax # npm
-yarn add spreax # npm
+yarn add spreax # yarn
 ```
 See more in [Installtion docs](docs/installation.md).
 
