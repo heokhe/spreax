@@ -4,11 +4,11 @@ type DerivedGetter<T> = () => T;
 type DerivedSetter<T> = (prevValue: T) => void;
 
 export class DerivedVariable<T> extends Subscribable<T> {
-  getter: DerivedGetter<T>;
+  private getter: DerivedGetter<T>;
 
-  setter: DerivedSetter<T>;
+  private setter: DerivedSetter<T>;
 
-  autoDependencies: Subscribable<any>[] = [];
+  private autoDependencies: Subscribable<any>[] = [];
 
   constructor(getter: DerivedGetter<T>, setter?: DerivedSetter<T>) {
     super();
