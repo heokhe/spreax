@@ -114,14 +114,18 @@ export class ForHandler<T, E extends HTMLElement = HTMLElement> extends Directiv
   }
 
   handle(array: any[]) {
-    const n = array.length,
-      p = this.array.length;
-    this.array = array;
+    if (Array.isArray(array)) {
+      const n = array.length,
+        p = this.array.length;
+      this.array = array;
 
-    if (n > p)
-      for (let i = p; i < n; i++)
-        this.createNewItem(i);
-    else if (n < p)
-      this.destroyItems(n, p);
+      if (n > p)
+        for (let i = p; i < n; i++)
+          this.createNewItem(i);
+      else if (n < p)
+        this.destroyItems(n, p);
+    } else {
+      console.warn(`@for expected an array, but got ${array}`);
+    }
   }
 }
