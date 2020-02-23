@@ -33,11 +33,12 @@ declare function state<T>(value: T): StateVariable<T>;
 type DerivedGetter<T> = () => T;
 type DerivedSetter<T> = (prevValue: T) => void;
 declare class DerivedVariable<T> extends Subscribable<T> {
-    getter: DerivedGetter<T>;
-    setter: DerivedSetter<T>;
+    private getter;
+    private setter;
+    private autoDependencies;
     constructor(getter: DerivedGetter<T>, setter?: DerivedSetter<T>);
     compute(): void;
-    subscribeAndAutoCompute<T>(stateVar: Subscribable<T>): void;
+    subscribeAndAutoCompute(subscribable: Subscribable<any>): void;
     set(newValue: T): void;
 }
 declare function derived<T>(getter: DerivedGetter<T>, setter?: DerivedSetter<T>): DerivedVariable<T>;
