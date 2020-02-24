@@ -80,16 +80,16 @@ export abstract class DirectiveHandler<T, E extends HTMLElement = HTMLElement> {
    * Or there's no attribute pointing to the directive.
    */
   start(wrapper: Wrapper<T, E>, variables: Variables<T>) {
-    if (!wrapper.existsInDOM) return;
     this.setTarget(wrapper);
     if (this.matches.length) {
       this.use(variables);
       for (const match of this.matches) {
         this.init(this.eval(match.parsed), match);
+        this.handle(this.eval(match.parsed), match);
         for (const dep of match.parsed.dependencies) {
           this.target.subscribeTo(dep as keyof T, () => {
             this.handle(this.eval(match.parsed), match);
-          }, true);
+          });
         }
       }
     }
