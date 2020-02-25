@@ -1,5 +1,6 @@
 import { DirectiveHandler } from '../handler';
 import { DirectiveMatch } from '../matches';
+import { isComponent, setSecretAttribute } from '../../dom';
 
 export class AttrHandler<T> extends DirectiveHandler<T> {
   name = 'attr';
@@ -16,6 +17,8 @@ export class AttrHandler<T> extends DirectiveHandler<T> {
   }
 
   handle(value: any, { parameter: attrName }: DirectiveMatch) {
+    if (isComponent(this.el))
+      setSecretAttribute(this.el, attrName, typeof value === 'string' ? `"${value}"` : value);
     if (typeof value === 'boolean') {
       this.handleBooleanValue(value, attrName);
     } else {
