@@ -1,10 +1,10 @@
-export function createElementTree(root: HTMLElement) {
-  const elements = [root];
+export function createElementTree(root: HTMLElement, components = false) {
+  const elements = (!components || root.tagName.includes('-')) ? [root] : [];
   for (const child of root.children)
-    elements.push(...createElementTree(child as HTMLElement));
+    elements.push(...createElementTree(child as HTMLElement, components));
   return elements;
 }
 
 export function elementExistsInDOM(el: HTMLElement) {
-  return document.contains(el);
+  return el.ownerDocument.contains(el);
 }

@@ -13,18 +13,8 @@
       You can run `npm run serve` to serve it.
     -->
     <div id="app">
-      <h1>Spreax todo app</h1>
-      <input type="text" @on:keydown="handleKeydown()" placeholder="What needs to be done? (Press enter)" autofocus>
-      <hr>
-      <div class="todo" @class:completed="todo.completed" @for="todo, index of todos">
-        <input type="checkbox" @bind="todo.completed">
-        <div>@(todo.title)</div>
-        <button @on:click="removeTodo(index)">&times;</button>
-      </div>
-      <hr @if="todos.length">
-      @(todosLeft) items left
-      <button @attr:disabled="removeCompletedIsDisabled" @on:click="removeCompletedTodos()">Remove completed</button>
-      <button @attr:disabled="!todos.length" @on:click="removeAllTodos()">Remove all</button>
+      <my-counter></my-counter>
+      <my-counter></my-counter>
     </div>
   </body>
   <script src="app.js"></script>
