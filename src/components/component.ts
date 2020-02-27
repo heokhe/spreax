@@ -1,10 +1,12 @@
-import { Variables, autoComputeAllDerivedVars } from '../core/variables';
+import { Variables } from '../core/variables';
 import { createTemplateElement } from './create-template';
-import { getPropsFromContext } from './get-props-from-context';
-import { Prop } from './prop';
+import { createClass } from './create-class';
 
 export type ComponentTemplate = HTMLTemplateElement | string | Promise<string>;
-export type ComponentSetupFunction<T> = () => Variables<T>;
+export type ComponentSetupArg = {
+  dispatch(type: string, details: any): void;
+}
+export type ComponentSetupFunction<T> = (arg: ComponentSetupArg) => Variables<T>;
 export type ComponentCallback<T> = (root: HTMLElement, context: Variables<T>) => void
 
 export class Component<T> {
@@ -16,7 +18,7 @@ export class Component<T> {
 
   setup: ComponentSetupFunction<T>;
 
-  observedAttributes: (keyof T)[];
+  observedAttributes: (keyof T)[]
 
   constructor(
     template: ComponentTemplate,
@@ -33,44 +35,7 @@ export class Component<T> {
   }
 
   private getClass() {
-    // eslint-disable-next-line @typescript-eslint/no-this-alias
-    const component = this;
-    return class extends HTMLElement {
-      props: Prop<T[keyof T]>[];
-
-      constructor() {
-        super();
-        const context = component.setup();
-        this.props = getPropsFromContext(context);
-
-        const shadow = this.attachShadow({ mode: 'closed' });
-        component.getTemplateEl()
-          .then((template: HTMLTemplateElement) => {
-            shadow.append(template.content.cloneNode(true));
-            const root = shadow.firstElementChild as HTMLElement;
-            autoComputeAllDerivedVars(context);
-            for (const p of component.observedAttributes) {
-              this.setProp(p as string);
-            }
-            component.callback(root, context);
-          });
-      }
-
-      setProp(name: string) {
-        const prop = this.props.find(p => p.name === name);
-        if (prop) {
-          prop.setFromAttribute(this);
-        }
-      }
-
-      attributeChangedCallback(name: string) {
-        this.setProp(name);
-      }
-
-      static get observedAttributes() {
-        return component.observedAttributes;
-      }
-    };
+    return createClass(this);
   }
 
   setNameAndCallback(name: string, callback: ComponentCallback<T>) {
