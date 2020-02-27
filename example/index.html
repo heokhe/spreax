@@ -13,8 +13,23 @@
       You can run `npm run serve` to serve it.
     -->
     <div id="app">
-      <my-counter></my-counter>
-      <my-counter></my-counter>
+      <add-todo @on:enter="addTodo()"></add-todo>
+      <hr>
+      <todo-item @for="todo, i of todos"
+        @attr:done="todo.done"
+        @on:remove="removeTodo(i)"
+        @on:toggle="toggleTodo(i)">
+        @(todo.title)
+      </todo-item>
+      <!-- <div @for="todo, i of todos" class="todo" @class:done="todo.done">
+        <input type="checkbox" @bind="todo.done">
+        <div>@(todo.title)</div>
+        <button @on:click="removeTodo(i)">&times;</button>
+      </div> -->
+      <hr @if="todos.length">
+      @(todosLeft) items left
+      <button @attr:disabled="removeCompletedIsDisabled" @on:click="removeCompletedTodos()">Remove completed</button>
+      <button @attr:disabled="!todos.length" @on:click="removeAllTodos()">Remove all</button>
     </div>
   </body>
   <script src="app.js"></script>

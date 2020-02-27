@@ -10,10 +10,7 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 body {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  min-height: 50vh
+  margin: 0;
 }
 
 hr {
@@ -23,31 +20,8 @@ hr {
   margin: 1em 0;
 }
 
-input[type=text] {
-  width: 100%;
-}
-
 #app {
-  margin: 5vh 0
-}
-
-.todo {
-  display: flex;
-  align-items: center;
-  min-height: 2em;
-  line-height: 1;
-}
-
-.todo > input {
-  width: 2em;
-  margin: 0;
-}
-
-.todo > div {
-  width: 100%;
-}
-
-.todo.completed > div {
-  text-decoration: line-through;
-  opacity: .5;
+  margin: 10vh auto;
+  max-width: 360px;
+  padding: 0 2rem;
 }
