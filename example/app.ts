@@ -24,10 +24,8 @@ const removeCompletedIsDisabled = derived(() =>
   todos.value.length === 0 || todosLeft.value === todos.value.length);
 const addTodo = action((event: CustomEvent<Todo>) =>
   push(todos, event.detail));
-const toggleTodo = action((_, i: number) => {
-  // console.log(todos.value[i].done);
-  setPath(todos, [i.toString(), 'done'], !todos.value[i].done);
-});
+const toggleTodo = action((_, i: number) =>
+  setPath(todos, [i.toString(), 'done'], !todos.value[i].done));
 
 const app = new Spreax(
   '#app',
@@ -48,11 +46,3 @@ const app = new Spreax(
 );
 
 globalThis.app = app;
-
-for (let i = 1; i <= 10; i++)
-  push(todos, { done: false, title: i.toString() });
-setPath(todos, ['2', 'done'], true);
-setPath(todos, ['7', 'done'], true);
-console.log(todos.value);
-removeCompletedTodos.value();
-// console.log(todos.value);

@@ -21,11 +21,6 @@
         @on:toggle="toggleTodo(i)">
         @(todo.title)
       </todo-item>
-      <!-- <div @for="todo, i of todos" class="todo" @class:done="todo.done">
-        <input type="checkbox" @bind="todo.done">
-        <div>@(todo.title)</div>
-        <button @on:click="removeTodo(i)">&times;</button>
-      </div> -->
       <hr @if="todos.length">
       @(todosLeft) items left
       <button @attr:disabled="removeCompletedIsDisabled" @on:click="removeCompletedTodos()">Remove completed</button>
