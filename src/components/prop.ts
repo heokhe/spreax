@@ -21,7 +21,7 @@ export class Prop<T> extends Subscribable<T> {
 
   setFromAttribute(element: HTMLElement) {
     const value = hasSecretAttribute(element, this.name)
-      ? evaluate(parse(getSecretAttribute(element, this.name)), {})
+      ? evaluate(parse(String(getSecretAttribute(element, this.name))), {})
       : element.getAttribute(this.name);
     this.changeValue(value);
   }
