@@ -1,6 +1,6 @@
 import { DirectiveHandler } from '../handler';
 import { DirectiveMatch } from '../matches';
-import { Wrapper } from '../../wrappers/element';
+import { Wrapper, wrap } from '../../wrappers/element';
 import { parse, ParseResult } from '../../parser/parser';
 import { derived, DerivedVariable as Derived } from '../../core/derived';
 import { createElementTree } from '../../dom';
@@ -62,7 +62,7 @@ export class ForHandler<T, E extends HTMLElement = HTMLElement> extends Directiv
       () => this.array[index],
       value => this.set(this.getParseResultForItem(index), value)
     );
-    const indexVar = this.hasIndex ? derived(() => index as any) : undefined;
+    const indexVar = this.hasIndex ? derived(() => index) : undefined;
     return [itemVar, indexVar];
   }
 
@@ -71,7 +71,7 @@ export class ForHandler<T, E extends HTMLElement = HTMLElement> extends Directiv
     const rootEl = this.clone();
     this.comment.before(rootEl);
     for (const el of createElementTree(rootEl)) {
-      const wrapper = new Wrapper<T>(el);
+      const wrapper = wrap<T>(el);
       if (el === rootEl)
         this.wrappers.push(wrapper);
       this.addToItemContext(wrapper, itemVar, indexVar);
@@ -125,6 +125,7 @@ export class ForHandler<T, E extends HTMLElement = HTMLElement> extends Directiv
       else if (n < p)
         this.destroyItems(n, p);
     } else {
+      // eslint-disable-next-line no-console
       console.warn(`@for expected an array, but got ${array}`);
     }
   }

@@ -1,6 +1,7 @@
 import { Subscriber } from '../core/subscriber';
 import { TextNodeWrapper } from './text-node';
 import { elementExistsInDOM } from '../dom';
+import { memoize } from '../helpers';
 
 export class Wrapper<T, E extends HTMLElement = HTMLElement> extends Subscriber<T> {
   el: E;
@@ -31,3 +32,5 @@ export class Wrapper<T, E extends HTMLElement = HTMLElement> extends Subscriber<
     return elementExistsInDOM(this.el);
   }
 }
+
+export const wrap = memoize(<T>(el: HTMLElement) => new Wrapper<T>(el));

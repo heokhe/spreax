@@ -1,6 +1,6 @@
 import { Variables, autoComputeAllDerivedVars } from './core/variables';
-import { createElementTree } from './dom';
-import { Wrapper } from './wrappers/element';
+import { createElementTree, isComponent } from './dom';
+import { Wrapper, wrap } from './wrappers/element';
 import { TextNodeWrapper } from './wrappers/text-node';
 import { ForHandler } from './directives/handlers/for';
 import { DirectiveHandler } from './directives/handler';
@@ -39,23 +39,30 @@ export class Spreax<T, C, E extends HTMLElement> {
 
   private setupElement<U>(rootEl: HTMLElement, context: Variables<U>) {
     for (const el of createElementTree(rootEl))
-      this.setupWrapper(new Wrapper<U>(el), context);
-    for (const componentInstance of createElementTree(rootEl, true)) {
-      const componentName = componentInstance.tagName.toLowerCase();
-      const component = this.components[componentName as keyof C];
-      if (component) {
-        component.setNameAndCallback(componentName, (componentRoot, componentContext) => {
-          this.setupElement(componentRoot, componentContext);
-        });
-        component.registerIfNotRegistered();
-      }
+      this.setupWrapper(wrap<U>(el), context);
+    for (const componentInstance of createElementTree(rootEl, true))
+      this.setupComponent(componentInstance);
+  }
+
+  private setupComponent(componentInstance: HTMLElement) {
+    const componentName = componentInstance.tagName.toLowerCase();
+    const component = this.components[componentName as keyof C];
+    if (component) {
+      component.setNameAndCallback(componentName, (componentRoot, componentContext) => {
+        this.setupElement(componentRoot, componentContext);
+      });
+      component.registerIfNotRegistered();
     }
   }
 
-  private getDirectiveHandlers<U>(): DirectiveHandler<U>[] {
+  private getDirectiveHandlers<U>(context: Variables<U>): DirectiveHandler<U>[] {
     return [
       new HtmlHandler<U>(),
-      new ForHandler<U>(this.setupWrapper.bind(this)),
+      new ForHandler<U>(wrapper => {
+        this.setupWrapper(wrapper, context);
+        if (isComponent(wrapper.el))
+          this.setupComponent(wrapper.el);
+      }),
       new IfHandler<U>(),
       new OnHandler<U>(),
       new AttrHandler<U>(),
@@ -66,7 +73,7 @@ export class Spreax<T, C, E extends HTMLElement> {
   }
 
   private setupWrapper<U>(wrapper: Wrapper<U>, context: Variables<U>) {
-    for (const handler of this.getDirectiveHandlers<U>())
+    for (const handler of this.getDirectiveHandlers(context))
       handler.start(wrapper, context);
     if (!wrapper.el.hasAttribute('@for'))
       for (const node of wrapper.nodes)
