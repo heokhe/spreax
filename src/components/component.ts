@@ -1,6 +1,7 @@
 import { Variables } from '../core/variables';
 import { createTemplateElement } from './create-template';
 import { createClass } from './create-class';
+import { pascalToKebab } from './case';
 
 export type ComponentTemplate = HTMLTemplateElement | string | Promise<string>;
 export type ComponentSetupArg = {
@@ -44,8 +45,9 @@ export class Component<T> {
   }
 
   registerIfNotRegistered() {
-    if (!customElements.get(this.name))
-      customElements.define(this.name, this.getClass());
+    const name = pascalToKebab(this.name);
+    if (!customElements.get(name))
+      customElements.define(name, this.getClass());
   }
 }
 

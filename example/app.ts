@@ -40,8 +40,8 @@ const app = new Spreax(
     toggleTodo
   },
   {
-    'add-todo': AddTodo,
-    'todo-item': TodoItem
+    AddTodo,
+    TodoItem
   }
 );
 

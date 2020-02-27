@@ -12,6 +12,7 @@ import { CssHandler } from './directives/handlers/css';
 import { ClassHandler } from './directives/handlers/class';
 import { HtmlHandler } from './directives/handlers/html';
 import { Component } from './components/component';
+import { kebabToPascal } from './components/case';
 
 export class Spreax<T, C, E extends HTMLElement> {
   readonly el: E;
@@ -45,7 +46,7 @@ export class Spreax<T, C, E extends HTMLElement> {
   }
 
   private setupComponent(componentInstance: HTMLElement) {
-    const componentName = componentInstance.tagName.toLowerCase();
+    const componentName = kebabToPascal(componentInstance.tagName.toLowerCase());
     const component = this.components[componentName as keyof C];
     if (component) {
       component.setNameAndCallback(componentName, (componentRoot, componentContext) => {
