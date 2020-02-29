@@ -39,9 +39,11 @@ export class Spreax<T, C, E extends HTMLElement> {
   }
 
   private setupElement<U>(rootEl: HTMLElement, context: Variables<U>) {
-    for (const el of createElementTree(rootEl))
+    const elements = createElementTree(rootEl),
+      components = elements.filter(isComponent);
+    for (const el of elements)
       this.setupWrapper(wrap<U>(el), context);
-    for (const componentInstance of createElementTree(rootEl, true))
+    for (const componentInstance of components)
       this.setupComponent(componentInstance);
   }
 
